@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soulbound.Views.LogInPage"
+             Title="LogInPage"
+             BackgroundColor="#7d4c0b">
+    <Grid Padding="30" >
+        <!-- Основное содержимое по центру -->
+        <VerticalStackLayout
+            VerticalOptions="CenterAndExpand"
+            HorizontalOptions="Center"
+            Spacing="25">
+
+            <!-- Заголовок -->
+            <Label
+                Text="WELCOME TO SOULBOUND"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#3b2406"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center" />
+
+            <!-- Сообщение пользователю -->
+            <Label
+                x:Name="MessageLabel"
+                Text="{Binding MessageForUser}"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                FontSize="20"
+                TextColor="Black" />
+
+            <!-- Поле ввода -->
+            <Entry
+                Text="{Binding UserInput}"
+                Placeholder="Type something..."
+                WidthRequest="250"
+                HorizontalOptions="Center" />
+
+            <Button
+                Text="Log In"
+                WidthRequest="200"
+                HeightRequest="50"
+                BackgroundColor="#3b2406"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                IsVisible="{Binding LogInButton}"
+                HorizontalOptions="Center" />
+
+
+        </VerticalStackLayout>
+
+        
+    </Grid>
+</ContentPage>
