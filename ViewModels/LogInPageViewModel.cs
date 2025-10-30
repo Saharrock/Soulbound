@@ -8,7 +8,7 @@ namespace Soulbound.ViewModels
 {
     internal class LogInPageViewModel : ViewModelBase
     {
-        // get and set for MessageForEldan
+        #region get set
         private string messageForUser;
         public string MessageForUser
         {
@@ -29,13 +29,13 @@ namespace Soulbound.ViewModels
         }
 
         // get and set for Button
-        public bool logInButton;
-        public bool LogInButton
+        private bool isLoginEnable;
+        public bool IsLoginEnable
         {
-            get { return logInButton; }
+            get { return isLoginEnable; }
             set
             {
-                logInButton = value;
+                isLoginEnable = value;
                 OnPropertyChanged();
             }
         }
@@ -51,17 +51,18 @@ namespace Soulbound.ViewModels
                 if (userInput != null && userInput.Length < 5)
                 {
                     MessageForUser = "The field has less then 5 characters";
-                    logInButton = false;
+                    IsLoginEnable = false;
 
                 }
                 else
                 {
                     MessageForUser = "You are welcome)";
-                    logInButton = true;
+                    IsLoginEnable = true;
                 }
                 OnPropertyChanged();
             }
         }
+        #endregion
 
         // constructor
         public LogInPageViewModel()

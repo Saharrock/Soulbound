@@ -1,8 +1,8 @@
 namespace Soulbound.ViewModels;
 
-public partial class NewPage1 : ContentPage
+public partial class MainPage : ContentPage
 {
-	public NewPage1()
+	public MainPage()
 	{
 		InitializeComponent();
 	}

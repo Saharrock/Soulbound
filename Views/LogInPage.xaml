@@ -3,53 +3,90 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.LogInPage"
              Title="LogInPage"
-             BackgroundColor="#7d4c0b">
-    <Grid Padding="30" >
+             BackgroundColor="#d1743b">
+    <Grid Padding="30">
         <!-- Основное содержимое по центру -->
         <VerticalStackLayout
-            VerticalOptions="CenterAndExpand"
-            HorizontalOptions="Center"
-            Spacing="25">
+        VerticalOptions="CenterAndExpand"
+        HorizontalOptions="Center"
+        Spacing="25">
 
             <!-- Заголовок -->
             <Label
-                Text="WELCOME TO SOULBOUND"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="#3b2406"
-                HorizontalOptions="Center"
-                HorizontalTextAlignment="Center" />
+            Text="WELCOME TO SOULBOUND"
+            FontSize="28"
+            FontAttributes="Bold"
+            TextColor="#853c0f"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center"
+                
+                    />
 
             <!-- Сообщение пользователю -->
             <Label
-                x:Name="MessageLabel"
-                Text="{Binding MessageForUser}"
-                HorizontalOptions="Center"
-                HorizontalTextAlignment="Center"
-                FontSize="20"
-                TextColor="Black" />
+            Text="{Binding MessageForUser}"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center"
+            FontSize="20"
+            TextColor="#853c0f" />
 
-            <!-- Поле ввода -->
-            <Entry
+            <!-- Поле Username -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                Text="Username:"
+                FontAttributes="Bold"
+                FontSize="16"
+                TextColor="#853c0f"
+                HorizontalOptions="Start" />
+                <Entry
                 Text="{Binding UserInput}"
-                Placeholder="Type something..."
+                Placeholder="Enter your username..."
                 WidthRequest="250"
                 HorizontalOptions="Center" />
+            </VerticalStackLayout>
 
-            <Button
+            <!-- Поле Password -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                Text="Password:"
+                FontAttributes="Bold"
+                FontSize="16"
+                TextColor="#853c0f"
+                HorizontalOptions="Start" />
+                <Entry
+                Text="{Binding UserPassword}"
+                Placeholder="Enter your password..."
+                IsPassword="True"
+                WidthRequest="250"
+                HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Кнопки: Log In и Registration -->
+            <HorizontalStackLayout
+            Spacing="20"
+            HorizontalOptions="Center">
+
+                <Button
                 Text="Log In"
-                WidthRequest="200"
+                WidthRequest="120"
                 HeightRequest="50"
-                BackgroundColor="#3b2406"
+                BackgroundColor="#853c0f"
                 TextColor="White"
                 FontAttributes="Bold"
                 CornerRadius="10"
-                IsVisible="{Binding LogInButton}"
-                HorizontalOptions="Center" />
+                IsEnabled="{Binding IsLoginEnable}" />
 
+                <Button
+                Text="Registration"
+                WidthRequest="120"
+                HeightRequest="50"
+                BackgroundColor="#853c0f"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                Command="{Binding IsRegistrationEnable}" />
+            </HorizontalStackLayout>
 
         </VerticalStackLayout>
-
-        
     </Grid>
 </ContentPage>
