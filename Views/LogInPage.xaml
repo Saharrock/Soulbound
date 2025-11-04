@@ -18,9 +18,7 @@
             FontAttributes="Bold"
             TextColor="#853c0f"
             HorizontalOptions="Center"
-            HorizontalTextAlignment="Center"
-                
-                    />
+            HorizontalTextAlignment="Center" />
 
             <!-- Сообщение пользователю -->
             <Label
@@ -38,11 +36,26 @@
                 FontSize="16"
                 TextColor="#853c0f"
                 HorizontalOptions="Start" />
-                <Entry
-                Text="{Binding UserInput}"
-                Placeholder="Enter your username..."
-                WidthRequest="250"
-                HorizontalOptions="Center" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                    Text="{Binding UserInput}"
+                    Placeholder="Enter your username..."
+                    WidthRequest="250"
+                    HorizontalOptions="Center" />
+
+                    <!-- Маленькая кнопка сброса -->
+                    <Button
+                    Text="✖"
+                     Command="{Binding ResetUsernameCommand}"
+                    FontSize="12"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    BackgroundColor="#eee"
+                    TextColor="#853c0f"
+                    CornerRadius="15"
+                    Margin="5,0,0,0" />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <!-- Поле Password -->
@@ -53,12 +66,27 @@
                 FontSize="16"
                 TextColor="#853c0f"
                 HorizontalOptions="Start" />
-                <Entry
-                Text="{Binding UserPassword}"
-                Placeholder="Enter your password..."
-                IsPassword="True"
-                WidthRequest="250"
-                HorizontalOptions="Center" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                    Text="{Binding UserPassword}"
+                    Placeholder="Enter your password..."
+                    IsPassword="True"
+                    WidthRequest="250"
+                    HorizontalOptions="Center" />
+
+                    <!-- Маленькая кнопка сброса -->
+                    <Button
+                    Text="✖"
+                    Command="{Binding ResetPasswordCommand}"
+                    FontSize="12"
+                    WidthRequest="30"
+                    HeightRequest="30"
+                    BackgroundColor="#eee"
+                    TextColor="#853c0f"
+                    CornerRadius="15"
+                    Margin="5,0,0,0" />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <!-- Кнопки: Log In и Registration -->
@@ -86,7 +114,21 @@
                 CornerRadius="10"
                 Command="{Binding IsRegistrationEnable}" />
             </HorizontalStackLayout>
-
         </VerticalStackLayout>
+
+        <!-- Кнопка перехода на другую страницу (внизу справа) -->
+        <Button
+        Text="Go to Another Page"
+        Command="{Binding GotoAnotherPageCommand}"
+        WidthRequest="160"
+        HeightRequest="45"
+        BackgroundColor="#853c0f"
+        TextColor="White"
+        FontAttributes="Bold"
+        CornerRadius="10"
+        HorizontalOptions="End"
+        VerticalOptions="End"
+        Margin="0,0,10,10" />
     </Grid>
+
 </ContentPage>
