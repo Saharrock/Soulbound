@@ -7,9 +7,26 @@
     Shell.FlyoutBehavior="Flyout"
     Title="Soulbound">
 
+
+    <ShellContent
+        Title="Welcome"
+        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
+        Route="WelcomePage" />  
+
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        ContentTemplate="{DataTemplate local:Views.LogInPage}"
+        Route="LoginPage" />
+
+    <ShellContent
+        Title="Registration"
+        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
+        Route="RegistrationPage" />
+
+    <ShellContent
+        Title="Welcome"
+        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
+        Route="WelcomePage" />
+
 
 </Shell>

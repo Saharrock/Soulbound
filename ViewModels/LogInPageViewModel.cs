@@ -109,9 +109,7 @@ namespace Soulbound.ViewModels
         }
         private async Task GotoAnotherPage()
         {
-            MainPage mp = new MainPage();
-            await Application.Current.MainPage.Navigation.PushAsync(mp);
-
+            await Shell.Current.GoToAsync("//RegistrationPage");
         }
         #endregion
     }

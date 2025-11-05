@@ -11,7 +11,7 @@ namespace Soulbound
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new LogInPage());
+            return new Window(new AppShell());
         }
     }
 }
