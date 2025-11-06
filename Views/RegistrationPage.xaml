@@ -2,11 +2,177 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.RegistrationPage"
-             Title="RegistrationPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="RegistrationPage"
+             BackgroundColor="#d1743b">
+    
+    <Grid Padding="30">
+        <!-- Основное содержимое по центру -->
+        <VerticalStackLayout
+            VerticalOptions="CenterAndExpand"
+            HorizontalOptions="Center"
+            Spacing="25">
+
+            <!-- Заголовок -->
+            <Label
+                Text="REGISTRATION"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#853c0f"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center" />
+
+            <!-- Сообщение пользователю -->
+            <Label
+                Text="{Binding MessageForUser}"
+                HorizontalOptions="Center"
+                HorizontalTextAlignment="Center"
+                FontSize="20"
+                TextColor="#853c0f" />
+
+            <!-- Поле Username -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                    Text="Username:"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    TextColor="#853c0f"
+                    HorizontalOptions="Start" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                        Text="{Binding Username}"
+                        Placeholder="Enter your username..."
+                        WidthRequest="250"
+                        HorizontalOptions="Center" />
+
+                    <!-- Маленькая кнопка сброса -->
+                    <Button
+                        Text="✖"
+                        Command="{Binding ResetUsernameCommand}"
+                        FontSize="12"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        BackgroundColor="#eee"
+                        TextColor="#853c0f"
+                        CornerRadius="15"
+                        Margin="5,0,0,0" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Поле Email -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                    Text="Email:"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    TextColor="#853c0f"
+                    HorizontalOptions="Start" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                        Text="{Binding Email}"
+                        Placeholder="Enter your email..."
+                        WidthRequest="250"
+                        HorizontalOptions="Center" />
+
+                    <Button
+                        Text="✖"
+                        Command="{Binding ResetEmailCommand}"
+                        FontSize="12"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        BackgroundColor="#eee"
+                        TextColor="#853c0f"
+                        CornerRadius="15"
+                        Margin="5,0,0,0" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Поле Password -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                    Text="Password:"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    TextColor="#853c0f"
+                    HorizontalOptions="Start" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                        Text="{Binding Password}"
+                        Placeholder="Enter your password..."
+                        IsPassword="True"
+                        WidthRequest="250"
+                        HorizontalOptions="Center" />
+
+                    <Button
+                        Text="✖"
+                        Command="{Binding ResetPasswordCommand}"
+                        FontSize="12"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        BackgroundColor="#eee"
+                        TextColor="#853c0f"
+                        CornerRadius="15"
+                        Margin="5,0,0,0" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Повтор пароля -->
+            <VerticalStackLayout Spacing="5">
+                <Label
+                    Text="Confirm Password:"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    TextColor="#853c0f"
+                    HorizontalOptions="Start" />
+
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <Entry
+                        Text="{Binding ConfirmPassword}"
+                        Placeholder="Repeat your password..."
+                        IsPassword="True"
+                        WidthRequest="250"
+                        HorizontalOptions="Center" />
+
+                    <Button
+                        Text="✖"
+                        Command="{Binding ResetConfirmPasswordCommand}"
+                        FontSize="12"
+                        WidthRequest="30"
+                        HeightRequest="30"
+                        BackgroundColor="#eee"
+                        TextColor="#853c0f"
+                        CornerRadius="15"
+                        Margin="5,0,0,0" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Кнопки -->
+            <HorizontalStackLayout
+                Spacing="20"
+                HorizontalOptions="Center">
+
+                <Button
+                    Text="Register"
+                    WidthRequest="120"
+                    HeightRequest="50"
+                    BackgroundColor="#853c0f"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    Command="{Binding RegisterCommand}" />
+
+                <Button
+                    Text="Back to Log In"
+                    WidthRequest="120"
+                    HeightRequest="50"
+                    BackgroundColor="#853c0f"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    Command="{Binding GoToLoginCommand}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

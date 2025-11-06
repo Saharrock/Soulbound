@@ -3,30 +3,25 @@
     x:Class="Soulbound.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:Soulbound"
+    xmlns:local="clr-namespace:Soulbound.Views"
     Shell.FlyoutBehavior="Flyout"
     Title="Soulbound">
 
 
     <ShellContent
         Title="Welcome"
-        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
+        ContentTemplate="{DataTemplate local:WelcomePage}"
         Route="WelcomePage" />  
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:Views.LogInPage}"
-        Route="LoginPage" />
+        Title="LogIn"
+        ContentTemplate="{DataTemplate local:LogInPage}"
+        Route="LogInPage" />
 
     <ShellContent
         Title="Registration"
-        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
+        ContentTemplate="{DataTemplate local:RegistrationPage}"
         Route="RegistrationPage" />
-
-    <ShellContent
-        Title="Welcome"
-        ContentTemplate="{DataTemplate local:Views.RegistrationPage}"
-        Route="WelcomePage" />
 
 
 </Shell>

@@ -42,7 +42,7 @@ namespace Soulbound.ViewModels
         }
 
         // get and set for UserInput
-        public string userInput;
+        private string userInput;
         public string UserInput
         {
             get { return userInput; }
@@ -64,7 +64,7 @@ namespace Soulbound.ViewModels
             }
         }
 
-        public string userPassword;
+        private string userPassword;
         public string UserPassword
         {
             get { return userPassword; }
