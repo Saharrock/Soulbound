@@ -16,6 +16,7 @@ namespace Soulbound.ViewModels
         #region Commands
         public ICommand GoToLoginCommand { get; set; }
         public ICommand GoToRegistrationCommand { get; set; }
+        public ICommand GoToAsGuestCommand { get; set; }
         #endregion
 
         #region Constructor
@@ -24,6 +25,7 @@ namespace Soulbound.ViewModels
 
             GoToLoginCommand = new Command(async () => await GoToLogin());
             GoToRegistrationCommand = new Command(async () => await GoToRegistration());
+            GoToAsGuestCommand = new Command(async () => await GoToAsGuest());
         }
         #endregion
 
@@ -36,6 +38,11 @@ namespace Soulbound.ViewModels
         private async Task GoToRegistration()
         {
             await Shell.Current.GoToAsync("//RegistrationPage");
+        }
+
+        private async Task GoToAsGuest()
+        {
+            await Shell.Current.GoToAsync("//MainRoomPage");
         }
         #endregion
 

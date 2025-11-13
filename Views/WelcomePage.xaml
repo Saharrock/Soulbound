@@ -8,25 +8,30 @@
 
         <!-- Основное содержимое по центру -->
         <VerticalStackLayout
-            VerticalOptions="CenterAndExpand"
-            HorizontalOptions="Center"
-            Spacing="40">
+        VerticalOptions="CenterAndExpand"
+        HorizontalOptions="Center"
+        Spacing="40">
 
             <!-- Заголовок -->
             <Label
-                Text="WELCOME TO SOULBOUND"
-                FontSize="35"
-                FontAttributes="Bold"
-                TextColor="#853c0f"
-                HorizontalOptions="Center"
-                HorizontalTextAlignment="Center" />
+            Text="WELCOME TO SOULBOUND"
+            FontSize="35"
+            FontAttributes="Bold"
+            TextColor="#853c0f"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center" />
 
             <!-- Кнопки -->
-            <HorizontalStackLayout
+            <VerticalStackLayout
+            Spacing="15"
+            HorizontalOptions="Center">
+
+                <!-- Log In и Registration -->
+                <HorizontalStackLayout
                 Spacing="25"
                 HorizontalOptions="Center">
 
-                <Button
+                    <Button
                     Text="Log In"
                     WidthRequest="130"
                     HeightRequest="50"
@@ -36,7 +41,7 @@
                     CornerRadius="10"
                     Command="{Binding GoToLoginCommand}" />
 
-                <Button
+                    <Button
                     Text="Registration"
                     WidthRequest="130"
                     HeightRequest="50"
@@ -45,7 +50,20 @@
                     FontAttributes="Bold"
                     CornerRadius="10"
                     Command="{Binding GoToRegistrationCommand}" />
-            </HorizontalStackLayout>
+                </HorizontalStackLayout>
+
+                <!-- Кнопка входа как гость -->
+                <Button
+                Text="As Guest"
+                WidthRequest="110"
+                HeightRequest="40"
+                BackgroundColor="#a86b3c"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="8"
+                Opacity="0.9"
+                Command="{Binding GoToAsGuestCommand}" />
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </Grid>

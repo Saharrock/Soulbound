@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soulbound.Views.MainRoomPage"
+             Title="MainRoomPage">
+    <Grid Padding="30" ColumnDefinitions="*,0.2*">
+        <!-- Левая часть (контент) -->
+        <VerticalStackLayout
+        Grid.Column="0"
+        VerticalOptions="CenterAndExpand"
+        HorizontalOptions="Center"
+        Spacing="40">
+
+            <!-- Заголовок -->
+            <Label
+            Text="SOULBOUND"
+            FontSize="40"
+            FontAttributes="Bold"
+            TextColor="#853c0f"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center" />
+
+            <!-- Подзаголовок -->
+            <Label
+            Text="Your journey starts here"
+            FontSize="18"
+            TextColor="#a86b3c"
+            HorizontalOptions="Center"
+            HorizontalTextAlignment="Center" />
+
+            <!-- Кнопки -->
+            <VerticalStackLayout
+            Spacing="15"
+            HorizontalOptions="Center">
+
+                <Button
+                Text="Play"
+                WidthRequest="150"
+                HeightRequest="55"
+                BackgroundColor="#853c0f"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                Command="{Binding GoToPlayCommand}" />
+
+                <Button
+                Text="Profile"
+                WidthRequest="150"
+                HeightRequest="55"
+                BackgroundColor="#853c0f"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                Command="{Binding GoToProfileCommand}" />
+
+                <Button
+                Text="Settings"
+                WidthRequest="150"
+                HeightRequest="55"
+                BackgroundColor="#a86b3c"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="10"
+                Opacity="0.9"
+                Command="{Binding GoToSettingsCommand}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+
+        <!-- Правая часть (изображение) -->
+        <Grid Grid.Column="1"
+          HorizontalOptions="End"
+          VerticalOptions="Center">
+            <Image
+            Source="joebiden.png"
+            Aspect="AspectFit"
+            WidthRequest="300"
+            HeightRequest="400"
+            Opacity="0.95" />
+        </Grid>
+    </Grid>
+    
+</ContentPage>
