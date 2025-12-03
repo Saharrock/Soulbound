@@ -90,7 +90,7 @@ namespace Soulbound.ViewModels
             ResetUsernameCommand = new Command(() => ResetField("Username"));
             ResetEmailCommand = new Command(() => ResetField("Email"));
             ResetPasswordCommand = new Command(() => ResetField("Password"));
-            ResetConfirmPasswordCommand = new Command(() => ResetField("ConfirmPassword"));
+            ResetConfirmPasswordCommand = new Command(() => ResetField("ConfirmPassword")); //Not My Code, But this is what i want to do!
 
             RegisterCommand = new Command(async () => await Register());
             GoToLoginCommand = new Command(async () => await GoToLogin());

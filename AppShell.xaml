@@ -8,25 +8,27 @@
     Title="Soulbound">
 
 
-    <ShellContent
-        Title="Welcome"
-        ContentTemplate="{DataTemplate local:WelcomePage}"
-        Route="WelcomePage" />  
+    <FlyoutItem>
+        <ShellContent
+    Title="Welcome"
+    ContentTemplate="{DataTemplate local:WelcomePage}"
+    Route="WelcomePage" />
 
-    <ShellContent
-        Title="LogIn"
-        ContentTemplate="{DataTemplate local:LogInPage}"
-        Route="LogInPage" />
+        <ShellContent
+    Title="LogIn"
+    ContentTemplate="{DataTemplate local:LogInPage}"
+    Route="LogInPage" />
 
-    <ShellContent
-        Title="Registration"
-        ContentTemplate="{DataTemplate local:RegistrationPage}"
-        Route="RegistrationPage" />
+        <ShellContent
+    Title="Registration"
+    ContentTemplate="{DataTemplate local:RegistrationPage}"
+    Route="RegistrationPage" />
 
-    <ShellContent
-    Title="MainRoom"
-    ContentTemplate="{DataTemplate local:MainRoomPage}"
-    Route="MainRoomPage" />
+        <ShellContent
+Title="MainRoom"
+ContentTemplate="{DataTemplate local:MainRoomPage}"
+Route="MainRoomPage" />
+    </FlyoutItem>
 
 
 </Shell>
