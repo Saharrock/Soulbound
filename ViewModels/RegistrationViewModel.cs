@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Soulbound.ViewModels
 {
-    internal class RegistrationPageViewModel : ViewModelBase
+    internal class RegistrationViewModel : ViewModelBase
     {
         #region Properties
         private string messageForUser;
@@ -85,7 +85,7 @@ namespace Soulbound.ViewModels
         #endregion
 
         #region Constructor
-        public RegistrationPageViewModel()
+        public RegistrationViewModel()
         {
             ResetUsernameCommand = new Command(() => ResetField("Username"));
             ResetEmailCommand = new Command(() => ResetField("Email"));

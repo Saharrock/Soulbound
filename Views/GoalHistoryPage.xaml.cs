@@ -7,6 +7,6 @@ public partial class GoalHistoryPage : ContentPage
 	public GoalHistoryPage()
 	{
 		InitializeComponent();
-        BindingContext = new GoalHistoryPageViewModel();
+        BindingContext = new GoalHistoryViewModel();
     }
 }

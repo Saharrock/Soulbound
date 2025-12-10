@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Soulbound.ViewModels
 {
-    class NewGoalPageViewModel
+    class ScheduleViewModel
     {
     }
 }

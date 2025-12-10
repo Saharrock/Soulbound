@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Soulbound.ViewModels
 {
-    internal class WelcomePageViewModel : ViewModelBase
+    internal class WelcomeViewModel : ViewModelBase
     {
         #region get set
 
@@ -20,7 +20,7 @@ namespace Soulbound.ViewModels
         #endregion
 
         #region Constructor
-        public WelcomePageViewModel()
+        public WelcomeViewModel()
         {
 
             GoToLoginCommand = new Command(async () => await GoToLogin());
@@ -48,16 +48,23 @@ namespace Soulbound.ViewModels
 
         /*
          #region get set
-         #endregion
+
+        #endregion
+
 
         #region Commands
-         #endregion
+
+        #endregion
+
 
         #region Constructor
-         #end region
+
+        # endregion
+
 
         #region Methods
-         #endregion
-         * */
+
+        #endregion
+          */
     }
 }

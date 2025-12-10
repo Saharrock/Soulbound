@@ -25,9 +25,34 @@
     Route="RegistrationPage" />
 
         <ShellContent
-Title="MainRoom"
-ContentTemplate="{DataTemplate local:MainRoomPage}"
-Route="MainRoomPage" />
+    Title="MainRoom"
+    ContentTemplate="{DataTemplate local:MainRoomPage}"
+    Route="MainRoomPage" />
+
+        <ShellContent
+    Title="Entrance"
+    ContentTemplate="{DataTemplate local:EntranceMenuPage}"
+    Route="EntrancePage" />
+
+        <ShellContent
+    Title="GoalHistory"
+    ContentTemplate="{DataTemplate local:GoalHistoryPage}"
+    Route="GoalHistoryPage" />
+
+        <ShellContent
+    Title="Schedule"
+    ContentTemplate="{DataTemplate local:SchedulePage}"
+    Route="SchedulePage" />
+
+        <ShellContent
+    Title="CreateGoal"
+    ContentTemplate="{DataTemplate local:CreateGoalPage}"
+    Route="CreateGoalPage" />
+
+        <ShellContent
+    Title="Statistics"
+    ContentTemplate="{DataTemplate local:StatisticsPage}"
+    Route="StatisticsPage" />
     </FlyoutItem>
 
 

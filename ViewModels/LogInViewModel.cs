@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Soulbound.ViewModels
 {
-    internal class LogInPageViewModel : ViewModelBase
+    internal class LogInViewModel : ViewModelBase
     {
         #region get set
         private string messageForUser;
@@ -84,7 +84,7 @@ namespace Soulbound.ViewModels
         #endregion
 
         #region constructor
-        public LogInPageViewModel()
+        public LogInViewModel()
         {
             // Defining the Command for a non async Function
             ResetUsernameCommand = new Command(ResetUserField);

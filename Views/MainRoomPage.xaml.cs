@@ -6,6 +6,6 @@ public partial class MainRoomPage : ContentPage
 	public MainRoomPage()
 	{
 		InitializeComponent();
-        BindingContext = new MainRoomPageViewModel();
+        BindingContext = new MainRoomViewModel();
     }
 }
