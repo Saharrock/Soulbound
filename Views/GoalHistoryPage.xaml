@@ -2,11 +2,29 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.GoalHistoryPage"
+             xmlns:models="clr-namespace:Soulbound.Models"
+             xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
+             BackgroundColor ="#d1743b"
              Title="GoalHistoryPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+    
+    <CollectionView ItemsSource="{Binding Goals}">
+        <CollectionView.EmptyView>
+            <Label HorizontalTextAlignment="Center" Text="No Goals" />
+        </CollectionView.EmptyView>
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="models:Goal">
+                <Border StrokeThickness="1">
+                    <StackLayout Padding="10" BackgroundColor="#853c0f">
+                        <Label FontAttributes="Bold" Text="{Binding Title}" />
+                        <Label Text="{Binding TimeToComplete}" />
+                        <Grid>
+                            <Ellipse Fill="#853c0f" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="30" />
+                            <Label FontSize="12" HorizontalOptions="Center" Text="{Binding Id}" TextColor="#853c0f" VerticalOptions="Center" />
+                        </Grid>
+                        <Button BackgroundColor="#4a1f05" Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:CreateGoalViewModel}, Mode=FindAncestorBindingContext}}" CommandParameter="{Binding .}" HorizontalOptions="Start" Text="☠Remove☠" TextColor="#853c0f" WidthRequest="200" />
+                    </StackLayout>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentPage>

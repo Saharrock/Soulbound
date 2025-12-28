@@ -27,15 +27,41 @@ namespace Soulbound.ViewModels
             }
         }
 
+        public int newGoalTime;
         private string newTimeToComplete;
         public string NewTimeToComplete
         {
             get { return newTimeToComplete; }
             set
             {
-                if (value != null)
+                if (value != null && value.Length == 6 && int.TryParse(value, out int result))
                 {
-                    newTimeToComplete = value;
+
+                    int years = result % 100;
+                    if (years > 10)
+                    {
+                        Console.WriteLine("Funny)");
+                        return;
+                    }
+
+                    result = result / 100;
+                    int month = result % 100;
+                    if (month > 12)
+                    {
+                        Console.WriteLine("months are only 12)");
+                        return;
+                    }
+                    result = result / 100;
+                    int days = result % 100;
+                    if (days > 31)
+                    {
+                        Console.WriteLine("its can't be more than 31 day");
+                        return;
+                    }
+
+                    newGoalTime = years * 8760 + month * 730 + days * 24;
+                    newTimeToComplete = $"{years}Y {month}M {days}D";
+                    
                     OnPropertyChanged();
                 }
             }
@@ -55,7 +81,7 @@ namespace Soulbound.ViewModels
 
 
         #region Commands
-        public ICommand DeleteItemCommand { get; set; }
+
         public ICommand AddGoalCommand { get; set; }
         #endregion
 
@@ -64,22 +90,8 @@ namespace Soulbound.ViewModels
         public CreateGoalViewModel()
         {
             Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
-            DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
             AddGoalCommand = new Command(AddGoal); // Currently this is a sync function , we will change it to async later
 
-        }
-        #endregion
-
-
-        #region Functions
-        public void DeleteItem(object obgGoal)
-        {
-            Goal goalToDelete = (Goal)obgGoal;
-
-            Goals.Remove(goalToDelete); // Remove the iem from the ObservableCollection on THIS PAGE only
-            OnPropertyChanged();
-            // We must also update the servie
-            LocalDataService.GetInstance().RemoveGoal(goalToDelete); // Currently this is a sync function , we will change it to async later
         }
         #endregion
 
@@ -93,6 +105,7 @@ namespace Soulbound.ViewModels
                     Id = randomId.Next(1, 100).ToString(),
                     Title = NewTitle,
                     TimeToComplete = NewTimeToComplete,
+                    GoalTime = newGoalTime,
                     CreatedAt = DateTime.Now,
                 };
                 Goals.Add(newGoal);

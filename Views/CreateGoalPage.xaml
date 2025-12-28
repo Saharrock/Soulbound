@@ -4,58 +4,30 @@
              x:Class="Soulbound.Views.CreateGoalPage"
              xmlns:models="clr-namespace:Soulbound.Models"
              xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
+             BackgroundColor ="#d1743b"
              Title="CreateGoalPage">
-    <VerticalStackLayout>
-        <Label
-    HorizontalOptions="Center"
-    Text="WhatsAppAlek"
-    VerticalOptions="Center" />
-        <CollectionView ItemsSource="{Binding Goals}">
-            <CollectionView.EmptyView>
-                <Label HorizontalTextAlignment="Center" Text="No Goals" />
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Goal">
-                    <Border StrokeThickness="1">
-                        <StackLayout Padding="10" BackgroundColor="LightGray">
-                            <Label FontAttributes="Bold" Text="{Binding Sender}" />
-                            <Label Text="{Binding Title}" />
-                            <Grid>
-                                <Ellipse
-                            Fill="Red"
-                            HeightRequest="30"
-                            HorizontalOptions="Center"
-                            VerticalOptions="Center"
-                            WidthRequest="30" />
-                                <Label
-                            FontSize="12"
-                            HorizontalOptions="Center"
-                            Text="{Binding UnreadMsg}"
-                            TextColor="White"
-                            VerticalOptions="Center" /> 
-                            </Grid>
-                            <Button
-                        BackgroundColor="Red"
-                        Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:CreateGoalViewModel}, Mode=FindAncestorBindingContext}}"
-                        CommandParameter="{Binding .}"
-                        HorizontalOptions="Start"
-                        Text="Remove"
-                        TextColor="White"
-                        WidthRequest="200" />
-                        </StackLayout>
-                    </Border>
 
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-        <Entry Placeholder="Sender" Text="{Binding NewTitle}" />
-        <Entry Placeholder="Message Content" Text="{Binding NewTimeToComplete}" />
-        <Button
-    BackgroundColor="Green"
-    Command="{Binding AddGoalCommand}"
-    HorizontalOptions="Center"
-    Text="Add Message"
-    TextColor="White"
-    WidthRequest="200" />
-    </VerticalStackLayout>
+
+
+    <Grid Padding="20">
+        <VerticalStackLayout
+            VerticalOptions="CenterAndExpand"
+            HorizontalOptions="Center"
+            Spacing="15">
+
+            <Label
+            HorizontalOptions="Center"
+            Text="Add Goal"
+            VerticalOptions="Center" />
+            <Entry Placeholder="Goal title" Text="{Binding NewTitle}" />
+            <Entry Placeholder="Time to complete" Text="{Binding NewTimeToComplete}" />
+            <Button
+BackgroundColor="Green"
+Command="{Binding AddGoalCommand}"
+HorizontalOptions="Center"
+Text="Add Goal"
+TextColor="White"
+WidthRequest="200" />
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

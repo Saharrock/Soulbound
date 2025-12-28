@@ -10,7 +10,8 @@ namespace Soulbound.Models
     {
         public string Id { get; set; } = String.Empty;
         public string Title { get; set; } = String.Empty;     // описание цели
-        public string TimeToComplete { get; set; } = String.Empty;              // например, количество дней
+        public string TimeToComplete { get; set; } = String.Empty;   // например, количество дней
+        public int GoalTime { get; set; }
 
         // Категории
         public bool IsPhysical { get; set; } = false;

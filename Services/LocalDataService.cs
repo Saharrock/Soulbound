@@ -34,7 +34,7 @@ namespace Soulbound.Services
             {
                 Id = "1",
                 Title = "Learn swimming",
-                TimeToComplete = "2d",
+                TimeToComplete = "10Y 5M 24D",
                 IsPhysical = true,
                 IsMental = true
 
