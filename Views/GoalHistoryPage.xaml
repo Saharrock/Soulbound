@@ -21,7 +21,7 @@
                             <Ellipse Fill="#853c0f" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="30" />
                             <Label FontSize="12" HorizontalOptions="Center" Text="{Binding Id}" TextColor="#853c0f" VerticalOptions="Center" />
                         </Grid>
-                        <Button BackgroundColor="#4a1f05" Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:CreateGoalViewModel}, Mode=FindAncestorBindingContext}}" CommandParameter="{Binding .}" HorizontalOptions="Start" Text="☠Remove☠" TextColor="#853c0f" WidthRequest="200" />
+                        <Button BackgroundColor="#4a1f05" Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}" CommandParameter="{Binding .}" HorizontalOptions="Start" Text="☠Remove☠" TextColor="#853c0f" WidthRequest="200" />
                     </StackLayout>
                 </Border>
             </DataTemplate>

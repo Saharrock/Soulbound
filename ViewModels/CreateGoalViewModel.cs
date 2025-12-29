@@ -13,6 +13,22 @@ namespace Soulbound.ViewModels
     internal class CreateGoalViewModel : ViewModelBase
     {
         #region get set
+
+        private string messageForUser;
+        public string MessageForUser
+        {
+            get { return messageForUser; }
+            set
+            {
+                if (value != null)
+                {
+                    messageForUser = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
         private string newTitle;
         public string NewTitle
         {
@@ -27,6 +43,19 @@ namespace Soulbound.ViewModels
             }
         }
 
+
+        private bool isTimeHelpVisible;
+        public bool IsTimeHelpVisible
+        {
+            get { return isTimeHelpVisible; }
+            set
+            {
+                isTimeHelpVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         public int newGoalTime;
         private string newTimeToComplete;
         public string NewTimeToComplete
@@ -40,7 +69,7 @@ namespace Soulbound.ViewModels
                     int years = result % 100;
                     if (years > 10)
                     {
-                        Console.WriteLine("Funny)");
+                        MessageForUser = "Funny";
                         return;
                     }
 
@@ -48,24 +77,25 @@ namespace Soulbound.ViewModels
                     int month = result % 100;
                     if (month > 12)
                     {
-                        Console.WriteLine("months are only 12)");
+                        MessageForUser = "months are only 12 ;)";
                         return;
                     }
                     result = result / 100;
                     int days = result % 100;
                     if (days > 31)
                     {
-                        Console.WriteLine("its can't be more than 31 day");
+                        MessageForUser = "There is no more than 31 day >.<";
                         return;
                     }
 
                     newGoalTime = years * 8760 + month * 730 + days * 24;
                     newTimeToComplete = $"{years}Y {month}M {days}D";
-                    
+
                     OnPropertyChanged();
                 }
             }
         }
+
 
         private ObservableCollection<Goal> goals;
         public ObservableCollection<Goal> Goals
@@ -83,6 +113,7 @@ namespace Soulbound.ViewModels
         #region Commands
 
         public ICommand AddGoalCommand { get; set; }
+        public ICommand ToggleTimeHelpCommand { get; }
         #endregion
 
 
@@ -91,6 +122,10 @@ namespace Soulbound.ViewModels
         {
             Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
             AddGoalCommand = new Command(AddGoal); // Currently this is a sync function , we will change it to async later
+            ToggleTimeHelpCommand = new Command(() =>
+            {
+                IsTimeHelpVisible = !IsTimeHelpVisible;
+            });
 
         }
         #endregion
@@ -111,10 +146,13 @@ namespace Soulbound.ViewModels
                 Goals.Add(newGoal);
                 // We must also update the servie
                 LocalDataService.GetInstance().AddGoal(newGoal); // Currently this is a sync function , we will change it to async later
+                MessageForUser = "Goal successfully created!";
                                                                  //Clean The fields
                 NewTitle = "";
                 NewTimeToComplete = "";
             }
         }
+
+
     }
 }

@@ -8,26 +8,74 @@
              Title="CreateGoalPage">
 
 
+    <VerticalStackLayout Padding="20" Spacing="12">
 
-    <Grid Padding="20">
-        <VerticalStackLayout
-            VerticalOptions="CenterAndExpand"
-            HorizontalOptions="Center"
-            Spacing="15">
+        <Label
+        Text="Create New Goal"
+        FontSize="22"
+        FontAttributes="Bold"
+        HorizontalOptions="Center"
+        TextColor="White"/>
+
+        <Entry
+        Placeholder="Goal title"
+        Text="{Binding NewTitle}"
+        BackgroundColor="#a85928"
+        TextColor="White"/>
+
+        <!-- Time + help -->
+        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+            <Entry
+            Placeholder="Time to complete (DDMMYY)"
+            Text="{Binding NewTimeToComplete}"
+            BackgroundColor="#a85928"
+            TextColor="White"/>
+
+            <Frame
+            Padding="0"
+            Margin="8,0,0,0"
+            WidthRequest="28"
+            HeightRequest="28"
+            BackgroundColor="#7d3e18">
+
+                <Button
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Text="?"
+                TextColor="White"
+                Command="{Binding ToggleTimeHelpCommand}" />
+            </Frame>
+        </Grid>
+
+        <!-- Help card -->
+        <Frame
+        IsVisible="{Binding IsTimeHelpVisible}"
+        Padding="10"
+        BackgroundColor="#7d3e18"
+        CornerRadius="10"
+        HasShadow="False">
 
             <Label
-            HorizontalOptions="Center"
-            Text="Add Goal"
-            VerticalOptions="Center" />
-            <Entry Placeholder="Goal title" Text="{Binding NewTitle}" />
-            <Entry Placeholder="Time to complete" Text="{Binding NewTimeToComplete}" />
-            <Button
-BackgroundColor="Green"
-Command="{Binding AddGoalCommand}"
-HorizontalOptions="Center"
-Text="Add Goal"
-TextColor="White"
-WidthRequest="200" />
-        </VerticalStackLayout>
-    </Grid>
+            Text="Format:( DDMMYY ) Example: 010125 → 1 day, 1 month, 25 years"
+            FontSize="12"
+            TextColor="White"/>
+        </Frame>
+
+        <!-- User message -->
+        <Label
+        Text="{Binding MessageForUser}"
+        FontSize="15"
+        TextColor="#FFD580"
+        HorizontalOptions="Center"/>
+
+        <Button
+        Text="Add Goal"
+        Command="{Binding AddGoalCommand}"
+        BackgroundColor="Green"
+        TextColor="White"
+        WidthRequest="200"
+        HorizontalOptions="Center"/>
+
+    </VerticalStackLayout>
+
 </ContentPage>
