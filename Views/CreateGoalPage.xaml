@@ -4,78 +4,144 @@
              x:Class="Soulbound.Views.CreateGoalPage"
              xmlns:models="clr-namespace:Soulbound.Models"
              xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
-             BackgroundColor ="#d1743b"
+             BackgroundColor ="#6c2d2c"
              Title="CreateGoalPage">
 
 
-    <VerticalStackLayout Padding="20" Spacing="12">
+    <VerticalStackLayout
+    HorizontalOptions="Center"
+    VerticalOptions="Center"
+    Padding="20">
 
-        <Label
-        Text="Create New Goal"
-        FontSize="22"
-        FontAttributes="Bold"
-        HorizontalOptions="Center"
-        TextColor="White"/>
-
-        <Entry
-        Placeholder="Goal title"
-        Text="{Binding NewTitle}"
-        BackgroundColor="#a85928"
-        TextColor="White"/>
-
-        <!-- Time + help -->
-        <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
-            <Entry
-            Placeholder="Time to complete (DDMMYY)"
-            Text="{Binding NewTimeToComplete}"
-            BackgroundColor="#a85928"
-            TextColor="White"/>
-
-            <Frame
-            Padding="0"
-            Margin="8,0,0,0"
-            WidthRequest="28"
-            HeightRequest="28"
-            BackgroundColor="#7d3e18">
-
-                <Button
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                Text="?"
-                TextColor="White"
-                Command="{Binding ToggleTimeHelpCommand}" />
-            </Frame>
-        </Grid>
-
-        <!-- Help card -->
+        <!-- Card -->
         <Frame
-        IsVisible="{Binding IsTimeHelpVisible}"
-        Padding="10"
-        BackgroundColor="#7d3e18"
-        CornerRadius="10"
-        HasShadow="False">
+        MaximumWidthRequest="420"
+        Padding="24"
+        CornerRadius="20"
+        BorderColor="#42313a"
+        BackgroundColor="#9f4636"
+        HasShadow="True">
 
-            <Label
-            Text="Format:( DDMMYY ) Example: 010125 → 1 day, 1 month, 25 years"
-            FontSize="12"
-            TextColor="White"/>
+            <VerticalStackLayout Spacing="14">
+
+                <!-- Title -->
+                <Label
+                Text="Create New Goal"
+                FontSize="22"
+                FontAttributes="Bold"
+                HorizontalOptions="Center"
+                TextColor="White"/>
+
+                <!-- Goal title -->
+                <Entry
+                Placeholder="Goal title"
+                Text="{Binding NewTitle}"
+                BackgroundColor="#f9dcc1"
+                TextColor="White"
+                HeightRequest="45"
+                />
+
+                <!-- Time + help -->
+                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                    <Entry
+                    Placeholder="Time to complete (DDMMYY)"
+                    Text="{Binding NewTimeToComplete}"
+                    BackgroundColor="#f9dcc1"
+                    TextColor="White"
+                    HeightRequest="45"
+                    />
+
+                    <Button
+                    Text="?"
+                    WidthRequest="40"
+                    HeightRequest="40"
+                    Margin="8,0,0,0"
+                    BackgroundColor="#a43820"
+                    TextColor="White"
+                    CornerRadius="20"
+                    Command="{Binding ToggleTimeHelpCommand}"/>
+                </Grid>
+
+                <!-- Help -->
+                <Frame
+                IsVisible="{Binding IsTimeHelpVisible}"
+                Padding="10"
+                BackgroundColor="#ba5536"
+                CornerRadius="12"
+                HasShadow="False">
+
+                    <Label
+                    Text="Format: DDMMYY (Example: 010125 → 1 day, 1 month, 25 years)"
+                    FontSize="12"
+                    TextColor="White"/>
+                </Frame>
+
+                <!-- Goal type -->
+                <Label
+                Text="Goal type"
+                TextColor="White"
+                FontAttributes="Bold"
+                Margin="0,10,0,0"/>
+
+                <HorizontalStackLayout
+                HorizontalOptions="Center"
+                Spacing="18">
+
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <CheckBox
+                    IsChecked="{Binding IsPhysical}"
+                    Color="Red" />
+                        <Label
+                    Text="Physical"
+                    FontSize="12"
+                    TextColor="White"
+                    HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+
+                    <!-- MENTAL -->
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <CheckBox
+                    IsChecked="{Binding IsMental}"
+                    Color="Purple" />
+                        <Label
+                    Text="Mental"
+                    FontSize="12"
+                    TextColor="White"
+                    HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+
+                    <!-- INTELLECTUAL -->
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <CheckBox
+                    IsChecked="{Binding IsIntellectual}"
+                    Color="Blue" />
+                        <Label
+                    Text="Intellectual"
+                    FontSize="12"
+                    TextColor="White"
+                    HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+
+                <!-- Message -->
+                <Label
+                Text="{Binding MessageForUser}"
+                FontSize="14"
+                TextColor="#FFD580"
+                HorizontalOptions="Center"/>
+
+                <!-- Button -->
+                <Button
+                Text="Add Goal"
+                Command="{Binding AddGoalCommand}"
+                BackgroundColor="Green"
+                TextColor="White"
+                HeightRequest="45"
+                CornerRadius="14"
+                HorizontalOptions="Center"
+                WidthRequest="180"/>
+
+            </VerticalStackLayout>
         </Frame>
-
-        <!-- User message -->
-        <Label
-        Text="{Binding MessageForUser}"
-        FontSize="15"
-        TextColor="#FFD580"
-        HorizontalOptions="Center"/>
-
-        <Button
-        Text="Add Goal"
-        Command="{Binding AddGoalCommand}"
-        BackgroundColor="Green"
-        TextColor="White"
-        WidthRequest="200"
-        HorizontalOptions="Center"/>
-
     </VerticalStackLayout>
-
 </ContentPage>

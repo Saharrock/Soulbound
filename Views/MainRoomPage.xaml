@@ -14,7 +14,7 @@
         Margin="0,0,40,0">
 
             <Frame
-            BackgroundColor="#ad5621"
+            BackgroundColor="#9f4636"
             CornerRadius="25"
             WidthRequest="380"
             HeightRequest="620"
