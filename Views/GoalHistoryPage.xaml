@@ -17,6 +17,9 @@
                     <StackLayout Padding="10" BackgroundColor="#853c0f">
                         <Label FontAttributes="Bold" Text="{Binding Title}" />
                         <Label Text="{Binding TimeToComplete}" />
+                        <Label Text="{Binding IsPhysical}" />
+                        <Label Text="{Binding IsMental}" />
+                        <Label Text="{Binding IsIntellectual}" />
                         <Grid>
                             <Ellipse Fill="#853c0f" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="30" />
                             <Label FontSize="12" HorizontalOptions="Center" Text="{Binding Id}" TextColor="#853c0f" VerticalOptions="Center" />

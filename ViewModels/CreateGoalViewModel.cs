@@ -96,6 +96,39 @@ namespace Soulbound.ViewModels
             }
         }
 
+        private bool newIsPhysical;
+        public bool NewIsPhysical
+        {
+            get { return newIsPhysical; }
+            set
+            {
+                newIsPhysical = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool newIsMental;
+        public bool NewIsMental
+        {
+            get { return newIsMental; }
+            set
+            {
+                newIsMental = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool newIsIntellectual;
+        public bool NewIsIntellectual
+        {
+            get { return newIsIntellectual; }
+            set
+            {
+                newIsIntellectual = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private ObservableCollection<Goal> goals;
         public ObservableCollection<Goal> Goals
@@ -141,6 +174,9 @@ namespace Soulbound.ViewModels
                     Title = NewTitle,
                     TimeToComplete = NewTimeToComplete,
                     GoalTime = newGoalTime,
+                    IsPhysical = NewIsPhysical,
+                    IsMental = newIsMental,
+                    IsIntellectual = newIsIntellectual,
                     CreatedAt = DateTime.Now,
                 };
                 Goals.Add(newGoal);
