@@ -102,24 +102,17 @@
                 TextColor="White"
                 FontAttributes="Bold"
                 CornerRadius="10"
-                IsEnabled="{Binding IsLoginEnable}" />
-
-                <Button
-                Text="Registration"
-                WidthRequest="120"
-                HeightRequest="50"
-                BackgroundColor="#853c0f"
-                TextColor="White"
-                FontAttributes="Bold"
-                CornerRadius="10"
-                Command="{Binding IsRegistrationEnable}" />
+                IsEnabled="{Binding IsLoginEnable}"
+                Command="{Binding TryLoginCommand}" 
+                />
+  
             </HorizontalStackLayout>
         </VerticalStackLayout>
 
         <!-- Кнопка перехода на другую страницу (внизу справа) -->
         <Button
         Text="Go to Another Page"
-        Command="{Binding GotoAnotherPageCommand}"
+        Command="{Binding GotoRegisterPageCommand}"
         WidthRequest="160"
         HeightRequest="45"
         BackgroundColor="#853c0f"

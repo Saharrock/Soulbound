@@ -27,6 +27,23 @@ namespace Soulbound.Services
         }
         #endregion
 
+
+        public async Task<bool> TryLoginAsync(string userNameString, string passwordString)
+        {
+            if (userNameString == null || passwordString == null)
+            {
+
+                return await Task.FromResult(false);
+            }
+            else
+            {
+                if (userNameString == "eldan" && passwordString == "123")
+                {
+                    return await Task.FromResult(true);
+                }
+            }
+             return await Task.FromResult(false);
+        }
         public List<Goal> goals = new List<Goal>();
         private void CreateFakeData()
         {
@@ -49,9 +66,10 @@ namespace Soulbound.Services
         {
             goals.Remove(msg);
         }
-        public void AddGoal(Goal msg)
+        public async Task<bool> AddGoalAsync(Goal goal)
         {
-            goals.Add(msg);
+            goals.Add(goal);
+            return true;
         }
     }
 

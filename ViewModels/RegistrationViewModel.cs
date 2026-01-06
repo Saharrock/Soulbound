@@ -9,149 +9,140 @@ namespace Soulbound.ViewModels
 {
     internal class RegistrationViewModel : ViewModelBase
     {
-        #region Properties
-        private string messageForUser;
-        public string MessageForUser
+        #region get set        
+
+        private string errorMessage;
+        public string ErrorMessage
         {
-            get => messageForUser;
+            get { return errorMessage; }
             set
             {
                 if (value != null)
                 {
-                    messageForUser = value;
+                    errorMessage = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        public Dictionary<string, string> FieldMessages { get; set; } = new();
-
-        private string username;
-        public string Username
+        private string userInput;
+        public string UserInput
         {
-            get => username;
+            get { return userInput; }
             set
             {
-                username = value;
-                ValidateField("Username", value);
+                userInput = value;
+                if (!string.IsNullOrEmpty(userInput) && 5 > userInput.Length)
+                {
+                    ErrorMessage = "The field has less than 5 characters";
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
                 OnPropertyChanged();
             }
         }
 
-        private string email;
-        public string Email
+        private string emailInput;
+        public string EmailInput
         {
-            get => email;
+            get { return emailInput; }
             set
             {
-                email = value;
-                ValidateField("Email", value);
+                emailInput = value;
+
+                if (!string.IsNullOrEmpty(emailInput) &&
+                    (!emailInput.Contains("@") || !emailInput.Contains(".")))
+                {
+                    ErrorMessage = "Invalid email";
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
                 OnPropertyChanged();
             }
         }
 
-        private string password;
-        public string Password
+        private string passwordInput;
+        public string PasswordInput
         {
-            get => password;
+            get { return passwordInput; }
             set
             {
-                password = value;
-                ValidateField("Password", value);
+                passwordInput = value;
+
+                if (!string.IsNullOrEmpty(passwordInput))
+                {
+                    if (passwordInput.Length < 8)
+                    {
+                        ErrorMessage = "Password must be at least 8 characters";
+                    }
+                    else if (!passwordInput.Any(char.IsUpper))
+                    {
+                        ErrorMessage = "Password must contain at least one uppercase letter";
+                    }
+                    else if (!passwordInput.Any(ch => !char.IsLetterOrDigit(ch)))
+                    {
+                        ErrorMessage = "Password must contain at least one special character";
+                    }
+                    else
+                    {
+                        ErrorMessage = string.Empty; // passed all checks!        
+                    }
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
                 OnPropertyChanged();
             }
         }
 
-        private string confirmPassword;
-        public string ConfirmPassword
+        private string passConfirmInput;
+        public string PassConfirmInput
         {
-            get => confirmPassword;
+            get { return passConfirmInput; }
             set
             {
-                confirmPassword = value;
-                ValidateField("ConfirmPassword", value);
+                passConfirmInput = value;
+                if (!string.IsNullOrEmpty(passConfirmInput))
+                {
+                    if (passwordInput != passConfirmInput)
+                    {
+                        ErrorMessage = "Passwords doesn't match";
+                    }
+                }
+                else
+                {
+                    ErrorMessage = string.Empty;
+                }
+
                 OnPropertyChanged();
+
             }
         }
+
         #endregion
 
         #region Commands
-        public ICommand ResetUsernameCommand { get; set; }
-        public ICommand ResetEmailCommand { get; set; }
-        public ICommand ResetPasswordCommand { get; set; }
-        public ICommand ResetConfirmPasswordCommand { get; set; }
-        public ICommand RegisterCommand { get; set; }
-        public ICommand GoToLoginCommand { get; set; }
+        
         #endregion
 
         #region Constructor
         public RegistrationViewModel()
         {
-            ResetUsernameCommand = new Command(() => ResetField("Username"));
-            ResetEmailCommand = new Command(() => ResetField("Email"));
-            ResetPasswordCommand = new Command(() => ResetField("Password"));
-            ResetConfirmPasswordCommand = new Command(() => ResetField("ConfirmPassword")); //Not My Code, But this is what i want to do!
-
-            RegisterCommand = new Command(async () => await Register());
-            GoToLoginCommand = new Command(async () => await GoToLogin());
+         ;
         }
         #endregion
 
         #region Methods
-        private void ValidateField(string field, string value)
-        {
-            switch (field)
-            {
-                case "Username":
-                    FieldMessages["Username"] = string.IsNullOrWhiteSpace(value)
-                        ? "Required"
-                        : value.Length < 4 ? "Too short" : "";
-                    break;
-                case "Email":
-                    FieldMessages["Email"] = string.IsNullOrWhiteSpace(value)
-                        ? "Required"
-                        : (!value.Contains("@") ? "Invalid" : "");
-                    break;
-                case "Password":
-                    FieldMessages["Password"] = string.IsNullOrWhiteSpace(value)
-                        ? "Required"
-                        : value.Length < 6 ? "Too weak" : "";
-                    break;
-                case "ConfirmPassword":
-                    FieldMessages["ConfirmPassword"] = value != Password
-                        ? "Doesn't match"
-                        : "";
-                    break;
-            }
+        
 
-            OnPropertyChanged(nameof(FieldMessages));
-        }
-
-        private void ResetField(string field)
-        {
-            switch (field)
-            {
-                case "Username": Username = ""; break;
-                case "Email": Email = ""; break;
-                case "Password": Password = ""; break;
-                case "ConfirmPassword": ConfirmPassword = ""; break;
-            }
-
-            FieldMessages[field] = "";
-            OnPropertyChanged(nameof(FieldMessages));
-        }
-
-        private async Task Register()
-        {
-            MessageForUser = "Processing registration...";
-            await Task.Delay(1000);
-            MessageForUser = "Registration complete!";
-        }
-
-        private async Task GoToLogin()
-        {
-            await Shell.Current.GoToAsync("//LogInPage");
-        }
+        
         #endregion
     }
 }

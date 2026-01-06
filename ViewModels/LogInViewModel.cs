@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Soulbound.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -57,7 +58,7 @@ namespace Soulbound.ViewModels
                 }
                 else
                 {
-                    MessageForUser = "You are welcome)";
+                    MessageForUser = "";
                     IsLoginEnable = true;
                 }
                 OnPropertyChanged();
@@ -80,7 +81,8 @@ namespace Soulbound.ViewModels
         #region Commands
         public ICommand ResetUsernameCommand { get; set; }
         public ICommand ResetPasswordCommand { get; set; }
-        public ICommand GotoAnotherPageCommand { get; set; }
+        public ICommand GotoRegisterPageCommand { get; set; }
+        public ICommand TryLoginCommand { get; set; }
         #endregion
 
         #region constructor
@@ -90,11 +92,28 @@ namespace Soulbound.ViewModels
             ResetUsernameCommand = new Command(ResetUserField);
             ResetPasswordCommand = new Command(ResetPasswordField);
             // Defining the Command for an async Function
-            GotoAnotherPageCommand = new Command(async () => await GotoAnotherPage());
+            GotoRegisterPageCommand = new Command(async () => await Shell.Current.GoToAsync("//RegistrationPage"));
+            TryLoginCommand = new Command(async () => await TryLoginAsync());
         }
         #endregion
 
         #region  Methods
+
+        private async Task TryLoginAsync()//
+        {
+            bool successed = await LocalDataService.GetInstance().TryLoginAsync(UserInput, UserPassword);
+            if (successed)
+            {
+             // if ok go to main page
+            } else
+            {
+                await Application.Current.MainPage.DisplayAlert(
+                    "Login Failed",
+                    "Invalid username or password",
+                    "OK"
+                );
+            }
+        }
         private void ResetUserField()
         {
             UserInput = "";
@@ -107,10 +126,7 @@ namespace Soulbound.ViewModels
             UserPassword = "";
             MessageForUser = "";
         }
-        private async Task GotoAnotherPage()
-        {
-            await Shell.Current.GoToAsync("//RegistrationPage");
-        }
+
         #endregion
     }
 }

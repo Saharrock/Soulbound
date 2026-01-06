@@ -33,9 +33,13 @@ namespace Soulbound.ViewModels
         #region Constructor
         public GoalHistoryViewModel()
         {
-            Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
-            DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
+             InitAsync();
+             DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
 
+        }
+        public async Task InitAsync()
+        {
+            Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
         }
         #endregion
 

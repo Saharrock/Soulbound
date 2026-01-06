@@ -154,16 +154,17 @@ namespace Soulbound.ViewModels
         public CreateGoalViewModel()
         {
             Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
-            AddGoalCommand = new Command(AddGoal); // Currently this is a sync function , we will change it to async later
+            AddGoalCommand = new Command(async () => await AddGoalAsync()); // Currently this is a sync function , we will change it to async later
             ToggleTimeHelpCommand = new Command(() =>
             {
                 IsTimeHelpVisible = !IsTimeHelpVisible;
             });
 
         }
+        public 
         #endregion
 
-        public void AddGoal()
+        async Task AddGoalAsync()
         {
             if (NewTitle != null && NewTimeToComplete != null && NewTitle != "" && NewTimeToComplete != "")
             {
@@ -179,10 +180,22 @@ namespace Soulbound.ViewModels
                     IsIntellectual = newIsIntellectual,
                     CreatedAt = DateTime.Now,
                 };
-                Goals.Add(newGoal);
-                // We must also update the servie
-                LocalDataService.GetInstance().AddGoal(newGoal); // Currently this is a sync function , we will change it to async later
-                MessageForUser = "Goal successfully created!";
+               
+                // Lets try to update the DBs
+                bool respond = await LocalDataService.GetInstance().AddGoalAsync(newGoal);
+                if (respond == true)
+                {
+                    Goals.Add(newGoal);
+                }  else
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Failed to add Goal",
+                        "Check odsf sdnk",
+                        "OK"
+                    );
+                }
+
+                    MessageForUser = "Goal successfully created!";
                                                                  //Clean The fields
                 NewTitle = "";
                 NewTimeToComplete = "";
