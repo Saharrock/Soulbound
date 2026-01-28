@@ -51,18 +51,6 @@
                     CornerRadius="10"
                     Command="{Binding GoToRegistrationCommand}" />
                 </HorizontalStackLayout>
-
-                <!-- Кнопка входа как гость -->
-                <Button
-                Text="As Guest"
-                WidthRequest="110"
-                HeightRequest="40"
-                BackgroundColor="#a86b3c"
-                TextColor="White"
-                FontAttributes="Bold"
-                CornerRadius="8"
-                Opacity="0.9"
-                Command="{Binding GoToAsGuestCommand}" />
             </VerticalStackLayout>
 
         </VerticalStackLayout>

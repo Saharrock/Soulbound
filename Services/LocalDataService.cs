@@ -45,15 +45,18 @@ namespace Soulbound.Services
              return await Task.FromResult(false);
         }
         public List<Goal> goals = new List<Goal>();
+
+        private int lastGoalId = 0; // стартовое значен
+
+
         private void CreateFakeData()
         {
             Goal goal1 = new Goal()
             {
-                Id = "1",
+                Id = "0",
                 Title = "Learn swimming",
-                TimeToComplete = "10Y 5M 24D",
+                Description = "I want to learn swimming before my traveling to America",
                 IsPhysical = true,
-                IsMental = true
 
             };
             goals.Add(goal1);
@@ -68,6 +71,8 @@ namespace Soulbound.Services
         }
         public async Task<bool> AddGoalAsync(Goal goal)
         {
+            lastGoalId++; 
+            goal.Id = lastGoalId.ToString(); 
             goals.Add(goal);
             return true;
         }

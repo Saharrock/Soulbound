@@ -2,56 +2,65 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.MainRoomPage"
-             Title="MainRoomPage">
-    <Grid>
+             Title="MainRoomPage"
+             BackgroundColor ="#6c2d2c">
 
-        
+    <Grid Padding="20">
+
+        <!-- Большое название сверху слева -->
+        <Label 
+            Text="SOULBOUND" 
+            FontSize="48" 
+            FontAttributes="Bold" 
+            TextColor="#ffffff" 
+            HorizontalOptions="Start" 
+            VerticalOptions="Start"
+            Margin="20,40,0,0"/>
 
         <!-- Блок справа с фото и барами -->
         <Grid
-        HorizontalOptions="End"
-        VerticalOptions="Center"
-        Margin="0,0,40,0">
+            HorizontalOptions="End"
+            VerticalOptions="Center"
+            Margin="0,0,40,0">
 
             <Frame
-            BackgroundColor="#9f4636"
-            CornerRadius="25"
-            WidthRequest="380"
-            HeightRequest="620"
-            HasShadow="False"
-            BorderColor="#964818"
-            Padding="12">
+                BackgroundColor="#9f4636"
+                CornerRadius="25"
+                WidthRequest="380"
+                HeightRequest="620"
+                HasShadow="False"
+                BorderColor="#42313a"
+                Padding="12">
 
                 <VerticalStackLayout Spacing="14">
 
                     <!-- Фото -->
                     <Image
-                    Source="c:\c#\soulbound\images\animal_courier_radiant_model.webp
-"
+                    Source="c:\c#\soulbound\images\animal_courier_radiant_model.webp"
                     Aspect="AspectFit"
                     HorizontalOptions="Center"
                     HeightRequest="430"/>
 
                     <!-- Красный бар -->
-                    <ProgressBar
-                    Progress="0.8"
-                    ScaleY="4"
-                    BackgroundColor="#5a2a0c"
-                    ProgressColor="#e03c31"/>
+                        <ProgressBar
+                        Progress="0.8"
+                        ScaleY="4"
+                        BackgroundColor="#5a2a0c"
+                        ProgressColor="#e03c31"/>
 
-                    <!-- Синий бар -->
-                    <ProgressBar
-                    Progress="0.6"
-                    ScaleY="4"
-                    BackgroundColor="#2a2f5a"
-                    ProgressColor="#3c6fe0"/>
+                        <!-- Синий бар -->
+                        <ProgressBar
+                        Progress="0.6"
+                        ScaleY="4"
+                        BackgroundColor="#2a2f5a"
+                        ProgressColor="#3c6fe0"/>
 
-                    <!-- Фиолетовый бар -->
-                    <ProgressBar
-                    Progress="0.5"
-                    ScaleY="4"
-                    BackgroundColor="#3a1f4a"
-                    ProgressColor="#9b4de0"/>
+                        <!-- Фиолетовый бар -->
+                        <ProgressBar
+                        Progress="0.5"
+                        ScaleY="4"
+                        BackgroundColor="#3a1f4a"
+                        ProgressColor="#9b4de0"/>
 
                 </VerticalStackLayout>
 

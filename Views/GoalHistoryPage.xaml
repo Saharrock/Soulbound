@@ -4,7 +4,7 @@
              x:Class="Soulbound.Views.GoalHistoryPage"
              xmlns:models="clr-namespace:Soulbound.Models"
              xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
-             BackgroundColor ="#d1743b"
+             BackgroundColor ="#6c2d2c"
              Title="GoalHistoryPage">
     
     <CollectionView ItemsSource="{Binding Goals}">
@@ -14,15 +14,47 @@
         <CollectionView.ItemTemplate>
             <DataTemplate x:DataType="models:Goal">
                 <Border StrokeThickness="1">
-                    <StackLayout Padding="10" BackgroundColor="#853c0f">
-                        <Label FontAttributes="Bold" Text="{Binding Title}" />
-                        <Label Text="{Binding TimeToComplete}" />
-                       
+                    <StackLayout Padding="10" BackgroundColor="#9f4636">
+                        <!-- Даты сверху -->
                         <Grid>
-                            <Ellipse Fill="#853c0f" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="30" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Дата создания -->
+                            <Label 
+                            Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}"
+                            TextColor="Green"
+                            FontSize="12"
+                            Grid.Column="0"
+                            HorizontalOptions="Start" />
+
+                            <!-- Дата окончания -->
+                            <Label 
+                            Text="{Binding EndDate, StringFormat='Ends: {0:dd/MM/yyyy}'}"
+                            TextColor="Red"
+                            FontSize="12"
+                            Grid.Column="1"
+                            HorizontalOptions="End" />
+                        </Grid>
+
+                        <Label FontAttributes="Bold" Text="{Binding Title}" />
+                        <Label FontAttributes="Bold" Text="{Binding Description}" />
+                        
+                        <Label FontAttributes="Bold" Text="{Binding GoalTime}" />
+
+                        <HorizontalStackLayout Spacing="6">
+                            <BoxView Color="Red" WidthRequest="30" HeightRequest="30" IsVisible="{Binding IsPhysical}" />
+                            <BoxView Color="Purple" WidthRequest="30" HeightRequest="30" IsVisible="{Binding IsMental}" />
+                            <BoxView Color="Blue" WidthRequest="30" HeightRequest="30" IsVisible="{Binding IsIntellectual}" />
+                        </HorizontalStackLayout>
+
+                        <Grid>
+                            <Ellipse Fill="#42313a" HeightRequest="30" HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="30" />
                             <Label FontSize="12" HorizontalOptions="Center" Text="{Binding Id}" TextColor="#853c0f" VerticalOptions="Center" />
                         </Grid>
-                        <Button BackgroundColor="#4a1f05" Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}" CommandParameter="{Binding .}" HorizontalOptions="Start" Text="☠Remove☠" TextColor="#853c0f" WidthRequest="200" />
+                        <Button BackgroundColor="#42313a" Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}" CommandParameter="{Binding .}" HorizontalOptions="Start" Text="Remove" TextColor="#853c0f" WidthRequest="200" />
                     </StackLayout>
                 </Border>
             </DataTemplate>

@@ -34,47 +34,28 @@
 
                 <!-- Goal title -->
                 <Entry
-                Placeholder="Goal title"
+                Placeholder="Title"
                 Text="{Binding NewTitle}"
                 BackgroundColor="#f9dcc1"
-                TextColor="White"
+                TextColor="Black"
                 HeightRequest="45"
                 />
 
-                <!-- Time + help -->
                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                     <Entry
-                    Placeholder="Time to complete (DDMMYY)"
-                    Text="{Binding NewTimeToComplete}"
+                    Placeholder="Description"
+                    Text="{Binding NewDescription}"
                     BackgroundColor="#f9dcc1"
-                    TextColor="White"
+                    TextColor="Black"
                     HeightRequest="45"
                     />
-
-                    <Button
-                    Text="?"
-                    WidthRequest="40"
-                    HeightRequest="40"
-                    Margin="8,0,0,0"
-                    BackgroundColor="#a43820"
-                    TextColor="White"
-                    CornerRadius="20"
-                    Command="{Binding ToggleTimeHelpCommand}"/>
                 </Grid>
+                <DatePicker
+                Date="{Binding SelectedDate}"
+                MinimumDate="{Binding TodayDate}"
+                MaximumDate="2035-12-31"/>
 
-                <!-- Help -->
-                <Frame
-                IsVisible="{Binding IsTimeHelpVisible}"
-                Padding="10"
-                BackgroundColor="#ba5536"
-                CornerRadius="12"
-                HasShadow="False">
 
-                    <Label
-                    Text="Format: DDMMYY (Example: 010125 → 1 day, 1 month, 25 years)"
-                    FontSize="12"
-                    TextColor="White"/>
-                </Frame>
 
                 <!-- Goal type -->
                 <Label
@@ -129,6 +110,7 @@
                 FontSize="14"
                 TextColor="#FFD580"
                 HorizontalOptions="Center"/>
+                
 
                 <!-- Button -->
                 <Button

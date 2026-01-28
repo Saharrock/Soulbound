@@ -8,10 +8,11 @@ namespace Soulbound.Models
 {
     class Goal
     {
-        public string Id { get; set; } = String.Empty;
-        public string Title { get; set; } = String.Empty;     // описание цели
-        public string TimeToComplete { get; set; } = String.Empty;   // например, количество дней
-        public int GoalTime { get; set; }
+        public string Id { get; set; } = String.Empty; //number of goal
+        public string Title { get; set; } = String.Empty;     // Goal Name
+        public string Description { get; set; } = String.Empty; //Goal description
+        public int GoalTime { get; set; } //Time of goal ending  in hours
+        public DateTime EndDate { get; set; } = DateTime.Now;
 
         // Категории
         public bool IsPhysical { get; set; } = false;
@@ -19,10 +20,10 @@ namespace Soulbound.Models
         public bool IsIntellectual { get; set; } = false;
 
         //Выполнена или нет
-        public bool IsCompleted { get; set; } = false;
+        public bool IsCompleted { get; set; } = false; //Goal status
 
         // Дополнительно можно добавить дату создания или статус выполнения
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.Now; //Date of goal ending
     }
 
 }

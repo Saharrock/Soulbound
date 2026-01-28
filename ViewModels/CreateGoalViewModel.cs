@@ -43,58 +43,33 @@ namespace Soulbound.ViewModels
             }
         }
 
-
-        private bool isTimeHelpVisible;
-        public bool IsTimeHelpVisible
+        private string newDescription;
+        public string NewDescription
         {
-            get { return isTimeHelpVisible; }
+            get { return newDescription; }
             set
             {
-                isTimeHelpVisible = value;
-                OnPropertyChanged();
-            }
-        }
-
-
-        public int newGoalTime;
-        private string newTimeToComplete;
-        public string NewTimeToComplete
-        {
-            get { return newTimeToComplete; }
-            set
-            {
-                if (value != null && value.Length == 6 && int.TryParse(value, out int result))
+                if (value != null)
                 {
-
-                    int years = result % 100;
-                    if (years > 10)
-                    {
-                        MessageForUser = "Funny";
-                        return;
-                    }
-
-                    result = result / 100;
-                    int month = result % 100;
-                    if (month > 12)
-                    {
-                        MessageForUser = "months are only 12 ;)";
-                        return;
-                    }
-                    result = result / 100;
-                    int days = result % 100;
-                    if (days > 31)
-                    {
-                        MessageForUser = "There is no more than 31 day >.<";
-                        return;
-                    }
-
-                    newGoalTime = years * 8760 + month * 730 + days * 24;
-                    newTimeToComplete = $"{years}Y {month}M {days}D";
-
+                    
+                    newDescription = value;
                     OnPropertyChanged();
                 }
             }
         }
+
+        public DateTime TodayDate => DateTime.Today.AddDays(1);
+        private DateTime selectedDate = DateTime.Now;
+        public DateTime SelectedDate
+        {
+            get => selectedDate;
+            set
+            {
+                selectedDate = value;
+                OnPropertyChanged();
+            }
+        }
+
 
         private bool newIsPhysical;
         public bool NewIsPhysical
@@ -146,7 +121,6 @@ namespace Soulbound.ViewModels
         #region Commands
 
         public ICommand AddGoalCommand { get; set; }
-        public ICommand ToggleTimeHelpCommand { get; }
         #endregion
 
 
@@ -155,27 +129,28 @@ namespace Soulbound.ViewModels
         {
             Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
             AddGoalCommand = new Command(async () => await AddGoalAsync()); // Currently this is a sync function , we will change it to async later
-            ToggleTimeHelpCommand = new Command(() =>
-            {
-                IsTimeHelpVisible = !IsTimeHelpVisible;
-            });
 
         }
-        public 
         #endregion
+
+        private async Task ClearMessageAfterDelayAsync()
+        {
+            await Task.Delay(3000);
+            MessageForUser = "";
+        }
 
         async Task AddGoalAsync()
         {
-            if (NewTitle != null && NewTimeToComplete != null && NewTitle != "" && NewTimeToComplete != "")
+            if (NewTitle != null && NewDescription != null && NewTitle != "" && NewDescription != "")
             {
                 Random randomId = new Random();
                 Goal newGoal = new Goal()
                 {
-                    Id = randomId.Next(1, 100).ToString(),
-                    Title = NewTitle,
-                    TimeToComplete = NewTimeToComplete,
-                    GoalTime = newGoalTime,
-                    IsPhysical = NewIsPhysical,
+                    Title = newTitle,
+                    Description = newDescription,
+                    GoalTime = (SelectedDate - DateTime.Now).Days * 24,
+                    EndDate = selectedDate,
+                    IsPhysical = newIsPhysical,
                     IsMental = newIsMental,
                     IsIntellectual = newIsIntellectual,
                     CreatedAt = DateTime.Now,
@@ -194,11 +169,15 @@ namespace Soulbound.ViewModels
                         "OK"
                     );
                 }
-
                     MessageForUser = "Goal successfully created!";
-                                                                 //Clean The fields
+                _ = ClearMessageAfterDelayAsync();
+                //Clean The fields
                 NewTitle = "";
-                NewTimeToComplete = "";
+                NewDescription = "";
+                NewIsPhysical = false;
+                NewIsMental = false;
+                NewIsIntellectual = false;
+                SelectedDate = DateTime.Today.AddDays(1);
             }
         }
 

@@ -41,6 +41,7 @@
                     <Entry
                     Text="{Binding UserInput}"
                     Placeholder="Enter your username..."
+                    TextColor="Black"
                     WidthRequest="250"
                     HorizontalOptions="Center" />
 
@@ -70,6 +71,7 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Entry
                     Text="{Binding UserPassword}"
+                    TextColor="Black"
                     Placeholder="Enter your password..."
                     IsPassword="True"
                     WidthRequest="250"

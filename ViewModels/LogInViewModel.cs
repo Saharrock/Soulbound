@@ -104,7 +104,7 @@ namespace Soulbound.ViewModels
             bool successed = await LocalDataService.GetInstance().TryLoginAsync(UserInput, UserPassword);
             if (successed)
             {
-             // if ok go to main page
+                await Shell.Current.GoToAsync("//MainRoomPage");
             } else
             {
                 await Application.Current.MainPage.DisplayAlert(
