@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Soulbound.Services
                     return await Task.FromResult(true);
                 }
             }
-             return await Task.FromResult(false);
+            return await Task.FromResult(false);
         }
         public List<Goal> goals = new List<Goal>();
 
@@ -65,18 +66,52 @@ namespace Soulbound.Services
         {
             return goals;
         }
-        public void RemoveGoal(Goal msg)
+
+        public List<Goal> GetActiveGoals()
         {
-            goals.Remove(msg);
+            return ActiveGoals;
         }
+
+        public List<Goal> GetFinishedGoals()
+        {
+            return FinishedGoals;
+        }
+        public void RemoveGoal(Goal goal)
+        {
+            goals.Remove(goal);
+        }
+
+        public void RemoveActiveGoal(Goal goal)
+        {
+            ActiveGoals.Remove(goal);
+        }
+        public List<Goal> ActiveGoals { get; set; } = new List<Goal>();
+        public List<Goal> FinishedGoals { get; set; } = new List<Goal>();
+
         public async Task<bool> AddGoalAsync(Goal goal)
         {
-            lastGoalId++; 
-            goal.Id = lastGoalId.ToString(); 
-            goals.Add(goal);
+            lastGoalId++;
+            goal.Id = lastGoalId.ToString();
+            goals.Add(goal); // общий список
+
+            // Добавляем в правильный список
+            if (goal.IsCompleted)
+            {
+                FinishedGoals.Add(goal);             
+            }
+            else
+            {
+                ActiveGoals.Add(goal);
+            }
+
+
             return true;
         }
+
+
     }
+
+
 
 
 }

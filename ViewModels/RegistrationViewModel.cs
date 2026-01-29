@@ -135,7 +135,7 @@ namespace Soulbound.ViewModels
         #region Constructor
         public RegistrationViewModel()
         {
-         ;
+         
         }
         #endregion
 
