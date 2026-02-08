@@ -69,7 +69,15 @@ namespace Soulbound.Services
 
         public List<Goal> GetActiveGoals()
         {
-            return ActiveGoals;
+            List<Goal> activeGoals = new List<Goal>();
+            foreach (Goal g in goals)
+            {
+                if (!g.IsCompleted)
+                {
+                    activeGoals.Add(g);
+                }     
+            }
+            return activeGoals;
         }
 
         public List<Goal> GetFinishedGoals()
@@ -93,24 +101,18 @@ namespace Soulbound.Services
             lastGoalId++;
             goal.Id = lastGoalId.ToString();
             goals.Add(goal); // общий список
-
-            // Добавляем в правильный список
-            if (goal.IsCompleted)
-            {
-                FinishedGoals.Add(goal);             
-            }
-            else
-            {
-                ActiveGoals.Add(goal);
-            }
-
-
+            goal.IsCompleted = false;
+            ActiveGoals.Add(goal);
             return true;
         }
 
-
+        public async Task<bool> MakeGoalComplete(Goal goalToComplete)
+        {
+            ActiveGoals.Remove(goalToComplete);
+            FinishedGoals.Add(goalToComplete);
+            return true;
+        }
     }
-
 
 
 

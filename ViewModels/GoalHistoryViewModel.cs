@@ -57,7 +57,7 @@ namespace Soulbound.ViewModels
         public GoalHistoryViewModel()
         {
             InitAsync();
-            CompleteGoalCommand = new Command((item) => CompleteGoal(item));
+            CompleteGoalCommand = new Command<object>(async (g) => await CompleteGoalAsync(g));
             DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
 
         }
@@ -72,14 +72,19 @@ namespace Soulbound.ViewModels
 
         #region Functions
 
-        public void CompleteGoal(object objGoal)
+        public async Task CompleteGoalAsync(object objGoal)
         {
             if (objGoal is not Goal goalToComplete)
                 return;
 
+            bool succeed = await LocalDataService.GetInstance().MakeGoalComplete(goalToComplete);
             // Устанавливаем цель как выполненную
-            goalToComplete.IsCompleted = true;
-            OnPropertyChanged();
+            if (succeed)
+            {
+                goalToComplete.IsCompleted = true;
+            }
+            
+           
 
             // Переносим из Active в Finished
             if (ActiveGoals.Contains(goalToComplete))
