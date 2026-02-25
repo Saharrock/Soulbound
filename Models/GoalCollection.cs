@@ -25,6 +25,7 @@ namespace Soulbound.Models
             ActiveGoals.Remove(goal);
             FinishedGoals.Remove(goal);
         }
+        //to do goal packs
     }
 }
 
