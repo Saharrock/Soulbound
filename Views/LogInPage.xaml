@@ -28,10 +28,10 @@
             FontSize="20"
             TextColor="#853c0f" />
 
-            <!-- Поле Username -->
+            <!-- Поле Email -->
             <VerticalStackLayout Spacing="5">
                 <Label
-                Text="Username:"
+                Text="Email:"
                 FontAttributes="Bold"
                 FontSize="16"
                 TextColor="#853c0f"
@@ -40,7 +40,7 @@
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Entry
                     Text="{Binding UserInput}"
-                    Placeholder="Enter your username..."
+                    Placeholder="Enter your email..."
                     TextColor="Black"
                     WidthRequest="250"
                     HorizontalOptions="Center" />

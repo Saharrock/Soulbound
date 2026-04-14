@@ -72,6 +72,18 @@ namespace Soulbound.ViewModels
             set
             {
                 userPassword = value;
+                if (string.IsNullOrWhiteSpace(userPassword))
+                {
+                    IsLoginEnable = false;
+                }
+                else if (string.IsNullOrWhiteSpace(UserInput) || UserInput.Length < 5)
+                {
+                    IsLoginEnable = false;
+                }
+                else
+                {
+                    IsLoginEnable = true;
+                }
                 OnPropertyChanged();
             }
             
@@ -93,28 +105,27 @@ namespace Soulbound.ViewModels
             ResetPasswordCommand = new Command(ResetPasswordField);
             // Defining the Command for an async Function
             GotoRegisterPageCommand = new Command(async () => await Shell.Current.GoToAsync("//RegistrationPage"));
-            //TryLoginCommand = new Command(async () => await TryLoginAsync());
+            TryLoginCommand = new Command(async () => await TryLoginAsync());
             AppService AppService = AppService.GetInstance();
+            IsLoginEnable = false;
         }
         #endregion
 
         #region  Methods
 
-        //private async Task TryLoginAsync()//
-        //{
-        //    bool successed = await LocalDataService.GetInstance().TryLoginAsync(UserInput, UserPassword);
-        //    if (successed)
-        //    {
-        //        await Shell.Current.GoToAsync("//MainRoomPage");
-        //    } else
-        //    {
-        //        await Application.Current.MainPage.DisplayAlert(
-        //            "Login Failed",
-        //            "Invalid username or password",
-        //            "OK"
-        //        );
-        //    }
-        //}
+        private async Task TryLoginAsync()
+        {
+            bool successed = await AppService.GetInstance().TryLogin(UserInput?.Trim(), UserPassword);
+            if (successed)
+            {
+                MessageForUser = "";
+                await Shell.Current.GoToAsync("//MainRoomPage");
+            }
+            else
+            {
+                MessageForUser = "Login failed. Check email and password.";
+            }
+        }
         private void ResetUserField()
         {
             UserInput = "";

@@ -68,49 +68,60 @@ namespace Soulbound.Services
                   });
             }
 
-            //public async Task<bool> TryRegister(string userNameString, string passwordString, string fullName)
-            //{
-            //    try
-            //    {
-            //        // 1: Create a user in Firebase with an Email and Password.
-            //        var respond = await auth.CreateUserWithEmailAndPasswordAsync(userNameString, passwordString);
-            //        // 2: User was created and also user is also Logged in
-            //        // 3: We Store the Uid of the user
-            //        fullDetaillsLoggedInUser = new AuthUser()
-            //        {
-            //            Email = respond.User.Info.Email,
-            //            Id = respond.User.Uid,
-            //            FullName = fullName
-            //        };
-            //        // 3: We can continue and add more details about the user but this time in the firebase Database
-            //        // Example: saving the full name
-            //        await client
-            //            .Child("users")
-            //            .Child(fullDetaillsLoggedInUser.Id)
-            //            .PutAsync(new
-            //            {
-            //                fullName = fullName
-            //            });
+            public async Task<bool> TryRegister(string userNameString, string emailString, string passwordString)
+            {
+                if (string.IsNullOrWhiteSpace(userNameString) ||
+                    string.IsNullOrWhiteSpace(emailString) ||
+                    string.IsNullOrWhiteSpace(passwordString))
+                {
+                    return false;
+                }
 
-            //        return true;
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        await Application.Current.MainPage.DisplayAlert(
-            //            "Error",
-            //            ex.Message,
-            //            "OK"
-            //        );
+                if (auth == null || client == null)
+                {
+                    Init();
+                }
 
-            //        return false;
-            //    }
-            //}
+                try
+                {
+                    var response = await auth.CreateUserWithEmailAndPasswordAsync(emailString, passwordString);
+                    loginAuthUser = response.AuthCredential;
+
+                    fullDetaillsLoggedInUser = new AuthUser()
+                    {
+                        Email = response.User.Info.Email,
+                        Id = response.User.Uid,
+                        UserName = userNameString
+                    };
+
+                    await client
+                        .Child("users")
+                        .Child(fullDetaillsLoggedInUser.Id)
+                        .PutAsync(new
+                        {
+                            userName = userNameString,
+                            email = emailString
+                        });
+
+                    return true;
+                }
+                catch (FirebaseAuthException ex)
+                {
+                    Debug.WriteLine($"Registration failed: {ex.Message}");
+                    return false;
+                }
+            }
 
             public async Task<bool> TryLogin(string userNameString, string passwordString)
             {
-                if (userNameString == null || passwordString == null)
+                if (string.IsNullOrWhiteSpace(userNameString) || string.IsNullOrWhiteSpace(passwordString))
                 {
                     return false;
+                }
+
+                if (auth == null || client == null)
+                {
+                    Init();
                 }
                 try
                 {
@@ -123,15 +134,11 @@ namespace Soulbound.Services
                         .Child(uid)
                         .Child("userName")
                         .OnceSingleAsync<string>();
-                    string userPassword = await client.Child("users").Child(uid).Child("userPassword").OnceSingleAsync<string>();
-
-                    Debug.WriteLine($"{userPassword} - Password");
                     fullDetaillsLoggedInUser = new AuthUser()
                     {
                         Email = auth.User.Info.Email,
                         Id = uid,
-                        UserName = fullName,
-                        Password = userPassword
+                        UserName = string.IsNullOrWhiteSpace(fullName) ? auth.User.Info.Email : fullName
                     };
                     // Authentication successful 
                     // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
@@ -146,7 +153,7 @@ namespace Soulbound.Services
                 }
                 catch (FirebaseAuthException ex)
                 {
-                Debug.WriteLine("Sraka" );
+                    Debug.WriteLine($"Login failed: {ex.Message}");
                     // Authentication failed
                     return false;
                 }
@@ -175,7 +182,7 @@ namespace Soulbound.Services
             async void StartFireBase()
             {
                 Init();
-                await TryLogin("pasha@gmail.com", "123456");
+                await Task.CompletedTask;
 
             }
 

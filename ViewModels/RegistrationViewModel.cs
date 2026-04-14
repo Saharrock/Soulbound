@@ -4,145 +4,161 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
     internal class RegistrationViewModel : ViewModelBase
     {
-        #region get set        
+        private readonly AppService appService;
+        private string username = string.Empty;
+        private string email = string.Empty;
+        private string password = string.Empty;
+        private string confirmPassword = string.Empty;
+        private string messageForUser = string.Empty;
 
-        private string errorMessage;
-        public string ErrorMessage
+        public string Username
         {
-            get { return errorMessage; }
+            get => username;
             set
             {
-                if (value != null)
-                {
-                    errorMessage = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        private string userInput;
-        public string UserInput
-        {
-            get { return userInput; }
-            set
-            {
-                userInput = value;
-                if (!string.IsNullOrEmpty(userInput) && 5 > userInput.Length)
-                {
-                    ErrorMessage = "The field has less than 5 characters";
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
+                username = value ?? string.Empty;
+                ValidateAllFields();
                 OnPropertyChanged();
             }
         }
 
-        private string emailInput;
-        public string EmailInput
+        public string Email
         {
-            get { return emailInput; }
+            get => email;
             set
             {
-                emailInput = value;
-
-                if (!string.IsNullOrEmpty(emailInput) &&
-                    (!emailInput.Contains("@") || !emailInput.Contains(".")))
-                {
-                    ErrorMessage = "Invalid email";
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
-
+                email = value ?? string.Empty;
+                ValidateAllFields();
                 OnPropertyChanged();
             }
         }
 
-        private string passwordInput;
-        public string PasswordInput
+        public string Password
         {
-            get { return passwordInput; }
+            get => password;
             set
             {
-                passwordInput = value;
-
-                if (!string.IsNullOrEmpty(passwordInput))
-                {
-                    if (passwordInput.Length < 8)
-                    {
-                        ErrorMessage = "Password must be at least 8 characters";
-                    }
-                    else if (!passwordInput.Any(char.IsUpper))
-                    {
-                        ErrorMessage = "Password must contain at least one uppercase letter";
-                    }
-                    else if (!passwordInput.Any(ch => !char.IsLetterOrDigit(ch)))
-                    {
-                        ErrorMessage = "Password must contain at least one special character";
-                    }
-                    else
-                    {
-                        ErrorMessage = string.Empty; // passed all checks!        
-                    }
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
-
+                password = value ?? string.Empty;
+                ValidateAllFields();
                 OnPropertyChanged();
             }
         }
 
-        private string passConfirmInput;
-        public string PassConfirmInput
+        public string ConfirmPassword
         {
-            get { return passConfirmInput; }
+            get => confirmPassword;
             set
             {
-                passConfirmInput = value;
-                if (!string.IsNullOrEmpty(passConfirmInput))
-                {
-                    if (passwordInput != passConfirmInput)
-                    {
-                        ErrorMessage = "Passwords doesn't match";
-                    }
-                }
-                else
-                {
-                    ErrorMessage = string.Empty;
-                }
-
+                confirmPassword = value ?? string.Empty;
+                ValidateAllFields();
                 OnPropertyChanged();
-
             }
         }
 
-        #endregion
+        public string MessageForUser
+        {
+            get => messageForUser;
+            set
+            {
+                messageForUser = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
 
-        #region Commands
-        
-        #endregion
+        public Dictionary<string, string> FieldMessages { get; } = new()
+        {
+            ["Username"] = string.Empty,
+            ["Email"] = string.Empty,
+            ["Password"] = string.Empty,
+            ["ConfirmPassword"] = string.Empty
+        };
 
-        #region Constructor
+        public ICommand ResetUsernameCommand { get; }
+        public ICommand ResetEmailCommand { get; }
+        public ICommand ResetPasswordCommand { get; }
+        public ICommand ResetConfirmPasswordCommand { get; }
+        public ICommand RegisterCommand { get; }
+        public ICommand GoToLoginCommand { get; }
+
         public RegistrationViewModel()
         {
-         
+            appService = AppService.GetInstance();
+            ResetUsernameCommand = new Command(() => Username = string.Empty);
+            ResetEmailCommand = new Command(() => Email = string.Empty);
+            ResetPasswordCommand = new Command(() => Password = string.Empty);
+            ResetConfirmPasswordCommand = new Command(() => ConfirmPassword = string.Empty);
+            RegisterCommand = new Command(async () => await RegisterAsync());
+            GoToLoginCommand = new Command(async () => await Shell.Current.GoToAsync("//LogInPage"));
+            ValidateAllFields();
         }
-        #endregion
 
-        #region Methods
-        
+        private bool ValidateAllFields()
+        {
+            FieldMessages["Username"] = string.IsNullOrWhiteSpace(Username) || Username.Length >= 5
+                ? string.Empty
+                : "Username must contain at least 5 characters";
 
-        
-        #endregion
+            FieldMessages["Email"] = string.IsNullOrWhiteSpace(Email) || (Email.Contains("@") && Email.Contains("."))
+                ? string.Empty
+                : "Invalid email";
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                FieldMessages["Password"] = "Password is required";
+            }
+            else if (Password.Length < 8)
+            {
+                FieldMessages["Password"] = "Password must be at least 8 characters";
+            }
+            else if (!Password.Any(char.IsUpper))
+            {
+                FieldMessages["Password"] = "Password must contain at least one uppercase letter";
+            }
+            else if (!Password.Any(ch => !char.IsLetterOrDigit(ch)))
+            {
+                FieldMessages["Password"] = "Password must contain at least one special character";
+            }
+            else
+            {
+                FieldMessages["Password"] = string.Empty;
+            }
+
+            FieldMessages["ConfirmPassword"] = string.IsNullOrWhiteSpace(ConfirmPassword) || ConfirmPassword == Password
+                ? string.Empty
+                : "Passwords do not match";
+
+            OnPropertyChanged(nameof(FieldMessages));
+
+            return FieldMessages.Values.All(string.IsNullOrEmpty) &&
+                   !string.IsNullOrWhiteSpace(Username) &&
+                   !string.IsNullOrWhiteSpace(Email) &&
+                   !string.IsNullOrWhiteSpace(Password) &&
+                   !string.IsNullOrWhiteSpace(ConfirmPassword);
+        }
+
+        private async Task RegisterAsync()
+        {
+            MessageForUser = string.Empty;
+            if (!ValidateAllFields())
+            {
+                MessageForUser = "Please fix the highlighted fields";
+                return;
+            }
+
+            bool success = await appService.TryRegister(Username.Trim(), Email.Trim(), Password);
+            if (!success)
+            {
+                MessageForUser = "Registration failed. Check email/password format or existing account.";
+                return;
+            }
+
+            await Shell.Current.GoToAsync("//MainRoomPage");
+        }
     }
 }

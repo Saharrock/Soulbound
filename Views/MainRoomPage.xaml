@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Soulbound.Models"
              x:Class="Soulbound.Views.MainRoomPage"
              Title="MainRoomPage"
              BackgroundColor ="#6c2d2c">
 
-    <Grid Padding="20">
+    <Grid Padding="20" ColumnDefinitions="1.2*,1*" ColumnSpacing="20">
 
         <!-- Большое название сверху слева -->
         <Label 
@@ -17,16 +18,77 @@
             VerticalOptions="Start"
             Margin="20,40,0,0"/>
 
-        <!-- Блок справа с фото и барами -->
+        <Frame
+            Grid.Column="0"
+            BackgroundColor="#9f4636"
+            CornerRadius="25"
+            HasShadow="False"
+            BorderColor="#42313a"
+            Padding="20"
+            Margin="20,130,0,20">
+            <VerticalStackLayout Spacing="14">
+                <Label
+                    Text="Your Progress"
+                    FontAttributes="Bold"
+                    FontSize="28"
+                    TextColor="White"/>
+
+                <Label
+                    Text="Active goals"
+                    FontSize="16"
+                    TextColor="#f5d2b8"/>
+                <Label
+                    Text="{Binding ActiveGoalsCount}"
+                    FontSize="40"
+                    FontAttributes="Bold"
+                    TextColor="White"/>
+
+                <Label
+                    Text="Nearest deadline"
+                    FontSize="16"
+                    TextColor="#f5d2b8"
+                    Margin="0,8,0,0"/>
+                <Label
+                    Text="{Binding NearestDeadlineText}"
+                    FontSize="18"
+                    TextColor="White"/>
+
+                <Label
+                    Text="Goals for today"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="#f5d2b8"
+                    Margin="0,10,0,0"/>
+
+                <CollectionView ItemsSource="{Binding TodayGoals}" HeightRequest="260">
+                    <CollectionView.EmptyView>
+                        <Label Text="No goals planned for today" TextColor="White"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Goal">
+                            <Frame BackgroundColor="#7d3a31" CornerRadius="12" Padding="10" HasShadow="False" Margin="0,0,0,8">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Title}" TextColor="White" FontAttributes="Bold"/>
+                                    <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="#f5d2b8" FontSize="12"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Блок справа с фото зверька и шкалами -->
         <Grid
+            Grid.Column="1"
             HorizontalOptions="End"
             VerticalOptions="Center"
-            Margin="0,0,40,0">
+            Margin="0,0,20,0">
 
             <Frame
                 BackgroundColor="#9f4636"
                 CornerRadius="25"
-                WidthRequest="380"
+                WidthRequest="420"
                 HeightRequest="620"
                 HasShadow="False"
                 BorderColor="#42313a"
@@ -34,14 +96,28 @@
 
                 <VerticalStackLayout Spacing="14">
 
-                    <!-- Фото -->
-                    <Image
-                    Source="c:\c#\soulbound\images\animal_courier_radiant_model.webp"
-                    Aspect="AspectFit"
-                    HorizontalOptions="Center"
-                    HeightRequest="430"/>
+                    <Label
+                        Text="Your Pet Avatar"
+                        HorizontalOptions="Center"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        FontSize="18"/>
+
+                    <Frame
+                        BackgroundColor="#7d3a31"
+                        BorderColor="#42313a"
+                        CornerRadius="16"
+                        Padding="8"
+                        HasShadow="False">
+                        <Image
+                            Source="courier.png"
+                            Aspect="AspectFit"
+                            HorizontalOptions="Center"
+                            HeightRequest="300"/>
+                    </Frame>
 
                     <!-- Красный бар -->
+                        <Label Text="Physical goals" TextColor="White"/>
                         <ProgressBar 
                         Progress="{Binding PhysicalValue}"
                         ScaleY="4"
@@ -49,6 +125,7 @@
                         ProgressColor="#e03c31"/>
 
                         <!-- Синий бар -->
+                        <Label Text="Intellectual goals" TextColor="White"/>
                         <ProgressBar
                         Progress="{Binding IntellectualValue}"
                         ScaleY="4"
@@ -56,6 +133,7 @@
                         ProgressColor="#3c6fe0"/>
 
                         <!-- Фиолетовый бар -->
+                        <Label Text="Mental goals" TextColor="White"/>
                         <ProgressBar
                         Progress="{Binding MentalValue}"
                         ScaleY="4"

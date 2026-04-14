@@ -104,6 +104,55 @@ namespace Soulbound.ViewModels
             }
         }
 
+        private bool isSunday;
+        public bool IsSunday
+        {
+            get { return isSunday; }
+            set { isSunday = value; OnPropertyChanged(); }
+        }
+
+        private bool isMonday;
+        public bool IsMonday
+        {
+            get { return isMonday; }
+            set { isMonday = value; OnPropertyChanged(); }
+        }
+
+        private bool isTuesday;
+        public bool IsTuesday
+        {
+            get { return isTuesday; }
+            set { isTuesday = value; OnPropertyChanged(); }
+        }
+
+        private bool isWednesday;
+        public bool IsWednesday
+        {
+            get { return isWednesday; }
+            set { isWednesday = value; OnPropertyChanged(); }
+        }
+
+        private bool isThursday;
+        public bool IsThursday
+        {
+            get { return isThursday; }
+            set { isThursday = value; OnPropertyChanged(); }
+        }
+
+        private bool isFriday;
+        public bool IsFriday
+        {
+            get { return isFriday; }
+            set { isFriday = value; OnPropertyChanged(); }
+        }
+
+        private bool isSaturday;
+        public bool IsSaturday
+        {
+            get { return isSaturday; }
+            set { isSaturday = value; OnPropertyChanged(); }
+        }
+
 
         private ObservableCollection<Goal> goals;
         public ObservableCollection<Goal> Goals
@@ -143,6 +192,14 @@ namespace Soulbound.ViewModels
         {
             if (NewTitle != null && NewDescription != null && NewTitle != "" && NewDescription != "")
             {
+                bool hasAnyDaySelected = IsSunday || IsMonday || IsTuesday || IsWednesday || IsThursday || IsFriday || IsSaturday;
+                if (!hasAnyDaySelected)
+                {
+                    MessageForUser = "Select at least one training day";
+                    _ = ClearMessageAfterDelayAsync();
+                    return;
+                }
+
                 Random randomId = new Random();
                 Goal newGoal = new Goal()
                 {
@@ -154,6 +211,13 @@ namespace Soulbound.ViewModels
                     IsMental = newIsMental,
                     IsIntellectual = newIsIntellectual,
                     CreatedAt = DateTime.Now,
+                    IsSunday = IsSunday,
+                    IsMonday = IsMonday,
+                    IsTuesday = IsTuesday,
+                    IsWednesday = IsWednesday,
+                    IsThursday = IsThursday,
+                    IsFriday = IsFriday,
+                    IsSaturday = IsSaturday
                 };
                
                 // Lets try to update the DBs
@@ -177,6 +241,13 @@ namespace Soulbound.ViewModels
                 NewIsPhysical = false;
                 NewIsMental = false;
                 NewIsIntellectual = false;
+                IsSunday = false;
+                IsMonday = false;
+                IsTuesday = false;
+                IsWednesday = false;
+                IsThursday = false;
+                IsFriday = false;
+                IsSaturday = false;
                 SelectedDate = DateTime.Today.AddDays(1);
             }
         }

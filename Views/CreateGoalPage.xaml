@@ -70,7 +70,7 @@
 
                     <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                         <CheckBox
-                    IsChecked="{Binding IsPhysical}"
+                    IsChecked="{Binding NewIsPhysical}"
                     Color="Red" />
                         <Label
                     Text="Physical"
@@ -82,7 +82,7 @@
                     <!-- MENTAL -->
                     <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                         <CheckBox
-                    IsChecked="{Binding IsMental}"
+                    IsChecked="{Binding NewIsMental}"
                     Color="Purple" />
                         <Label
                     Text="Mental"
@@ -94,7 +94,7 @@
                     <!-- INTELLECTUAL -->
                     <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                         <CheckBox
-                    IsChecked="{Binding IsIntellectual}"
+                    IsChecked="{Binding NewIsIntellectual}"
                     Color="Blue" />
                         <Label
                     Text="Intellectual"
@@ -103,6 +103,44 @@
                     HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </HorizontalStackLayout>
+
+                <Label
+                Text="Training days"
+                TextColor="White"
+                FontAttributes="Bold"
+                Margin="0,8,0,0"/>
+
+                <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                    <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsMonday}" Color="White" />
+                        <Label Text="Mon" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsTuesday}" Color="White" />
+                        <Label Text="Tue" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsWednesday}" Color="White" />
+                        <Label Text="Wed" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="0" Grid.Column="3" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsThursday}" Color="White" />
+                        <Label Text="Thu" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsFriday}" Color="White" />
+                        <Label Text="Fri" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsSaturday}" Color="White" />
+                        <Label Text="Sat" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="4">
+                        <CheckBox IsChecked="{Binding IsSunday}" Color="White" />
+                        <Label Text="Sun" TextColor="White" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Grid>
 
                 <!-- Message -->
                 <Label

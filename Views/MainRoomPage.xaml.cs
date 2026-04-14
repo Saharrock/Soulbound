@@ -3,9 +3,18 @@ namespace Soulbound.Views;
 
 public partial class MainRoomPage : ContentPage
 {
+    private readonly MainRoomViewModel viewModel;
+
 	public MainRoomPage()
 	{
 		InitializeComponent();
-        BindingContext = new MainRoomViewModel();
+        viewModel = new MainRoomViewModel();
+        BindingContext = viewModel;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        viewModel.RefreshData();
     }
 }
