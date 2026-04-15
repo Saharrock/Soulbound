@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Soulbound.AppShellAuth"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Soulbound.Views"
+    Shell.FlyoutBehavior="Flyout"
+    Title="Soulbound">
+
+    <FlyoutItem Title="Game">
+        <ShellContent
+            Title="Main Room"
+            ContentTemplate="{DataTemplate local:MainRoomPage}"
+            Route="MainRoomPage" />
+        <ShellContent
+            Title="Create Goal"
+            ContentTemplate="{DataTemplate local:CreateGoalPage}"
+            Route="CreateGoalPage" />
+        <ShellContent
+            Title="Schedule"
+            ContentTemplate="{DataTemplate local:SchedulePage}"
+            Route="SchedulePage" />
+        <ShellContent
+            Title="Goal History"
+            ContentTemplate="{DataTemplate local:GoalHistoryPage}"
+            Route="GoalHistoryPage" />
+        <ShellContent
+            Title="Statistics"
+            ContentTemplate="{DataTemplate local:StatisticsPage}"
+            Route="StatisticsPage" />
+    </FlyoutItem>
+
+</Shell>

@@ -158,7 +158,7 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            await Shell.Current.GoToAsync("//MainRoomPage");
+            ((App)Application.Current).SetAuthenticatedShell();
         }
     }
 }

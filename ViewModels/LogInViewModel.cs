@@ -119,7 +119,7 @@ namespace Soulbound.ViewModels
             if (successed)
             {
                 MessageForUser = "";
-                await Shell.Current.GoToAsync("//MainRoomPage");
+                ((App)Application.Current).SetAuthenticatedShell();
             }
             else
             {

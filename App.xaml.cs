@@ -1,17 +1,21 @@
-﻿using Soulbound.Views;
-
-namespace Soulbound
+﻿namespace Soulbound
 {
     public partial class App : Application
     {
         public App()
         {
             InitializeComponent();
+            MainPage = new AppShellNotAuth();
         }
 
-        protected override Window CreateWindow(IActivationState? activationState)
+        public void SetAuthenticatedShell()
         {
-            return new Window(new AppShell() { FlowDirection = FlowDirection.LeftToRight});
+            MainPage = new AppShellAuth();
+        }
+
+        public void SetUnauthenticatedShell()
+        {
+            MainPage = new AppShellNotAuth();
         }
     }
 }

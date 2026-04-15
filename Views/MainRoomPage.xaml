@@ -110,7 +110,7 @@
                         Padding="8"
                         HasShadow="False">
                         <Image
-                            Source="courier.png"
+                            Source="donaldTrump.jpg"
                             Aspect="AspectFit"
                             HorizontalOptions="Center"
                             HeightRequest="300"/>
