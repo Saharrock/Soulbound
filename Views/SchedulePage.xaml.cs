@@ -4,9 +4,18 @@ namespace Soulbound.Views;
 
 public partial class SchedulePage : ContentPage
 {
+    private readonly ScheduleViewModel vm;
+
 	public SchedulePage()
 	{
 		InitializeComponent();
-        BindingContext = new ScheduleViewModel();
+        vm = new ScheduleViewModel();
+        BindingContext = vm;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        vm.Refresh();
     }
 }

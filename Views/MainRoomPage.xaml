@@ -109,12 +109,30 @@
                         CornerRadius="16"
                         Padding="8"
                         HasShadow="False">
-                        <Image
-                            Source="donaldTrump.jpg"
-                            Aspect="AspectFit"
-                            HorizontalOptions="Center"
-                            HeightRequest="300"/>
+                        <Image Source="{Binding PetImage}"
+                               Aspect="AspectFit"
+                               HorizontalOptions="Center"
+                               HeightRequest="220"/>
                     </Frame>
+
+                    <Label
+                        Text="{Binding PetName}"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center" />
+
+                    <Label
+                        Text="{Binding Level, StringFormat='Level: {0}'}"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="{Binding Rank, StringFormat='Rank: {0}'}"
+                        FontSize="16"
+                        TextColor="#f5d2b8"
+                        HorizontalOptions="Center" />
 
                     <!-- Красный бар -->
                         <Label Text="Physical goals" TextColor="White"/>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soulbound.Views.PetSelectionPage"
+             Title="Pet Selection"
+             BackgroundColor="#6c2d2c">
+
+    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+        <Label Text="Choose your pet"
+               FontSize="28"
+               FontAttributes="Bold"
+               HorizontalOptions="Center"
+               TextColor="White" />
+
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
+            <Button Text="◀"
+                    Command="{Binding LeftCommand}"
+                    WidthRequest="60"
+                    HeightRequest="48"
+                    BackgroundColor="#42313a"
+                    TextColor="White" />
+
+            <Frame Padding="8"
+                   WidthRequest="220"
+                   HeightRequest="220"
+                   BackgroundColor="#9f4636"
+                   BorderColor="#42313a"
+                   CornerRadius="16">
+                <Image Source="{Binding PetImage}" Aspect="AspectFit" />
+            </Frame>
+
+            <Button Text="▶"
+                    Command="{Binding RightCommand}"
+                    WidthRequest="60"
+                    HeightRequest="48"
+                    BackgroundColor="#42313a"
+                    TextColor="White" />
+        </HorizontalStackLayout>
+
+        <Entry Placeholder="Pet name"
+               Text="{Binding PetName}"
+               BackgroundColor="#f9dcc1"
+               TextColor="Black"
+               HorizontalOptions="Center"
+               WidthRequest="260" />
+
+        <Button Text="Confirm"
+                Command="{Binding ConfirmCommand}"
+                BackgroundColor="Green"
+                TextColor="White"
+                WidthRequest="180"
+                HeightRequest="48"
+                HorizontalOptions="Center" />
+    </VerticalStackLayout>
+</ContentPage>

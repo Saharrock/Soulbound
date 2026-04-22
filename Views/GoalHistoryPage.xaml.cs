@@ -15,7 +15,7 @@ public partial class GoalHistoryPage : ContentPage
     protected override void OnNavigatedTo(NavigatedToEventArgs e)
     {
         base.OnNavigatedTo(e);
-        vm.InitAsync();
+        vm.Init();
 
     }
 

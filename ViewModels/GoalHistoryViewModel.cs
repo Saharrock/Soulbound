@@ -1,125 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 using Soulbound.Models;
 using Soulbound.Services;
-using System.Windows.Input;
 
 namespace Soulbound.ViewModels
 {
     class GoalHistoryViewModel : ViewModelBase
     {
+        private readonly LocalDataService dataService;
 
-        public ObservableCollection<Goal> activeGoals;
-        public ObservableCollection<Goal> ActiveGoals
-        {
-            get { return activeGoals; }
-            set
-            {
-                activeGoals = value;
-                OnPropertyChanged();
-            }
+        public ObservableCollection<Goal> ActiveGoals { get; } = new();
+        public ObservableCollection<Goal> FinishedGoals { get; } = new();
 
-        }
-        public ObservableCollection<Goal> finishedGoals;
-        public ObservableCollection<Goal> FinishedGoals
-        {
-            get { return finishedGoals; }
-            set
-            {
-                finishedGoals = value;
-                OnPropertyChanged();
-            }
-        }
+        public ICommand CompleteGoalCommand { get; }
+        public ICommand DeleteItemCommand { get; }
+        public ICommand ToggleExpandCommand { get; }
 
-        private ObservableCollection<Goal> goals;
-        public ObservableCollection<Goal> Goals
-        {
-            get { return goals; }
-            set
-            {
-                goals = value;
-                OnPropertyChanged();
-            }
-        }
-
-        #region Commands
-        public ICommand CompleteGoalCommand { get; set; }
-        public ICommand DeleteItemCommand { get; set; }
-
-        #endregion
-
-
-        #region Constructor
         public GoalHistoryViewModel()
         {
-            InitAsync();
-            CompleteGoalCommand = new Command<object>(async (g) => await CompleteGoalAsync(g));
-            DeleteItemCommand = new Command((item) => DeleteItem(item)); // Currently this is a sync function , we will change it to async later
-
+            dataService = LocalDataService.GetInstance();
+            CompleteGoalCommand = new Command<Goal>(async goal => await CompleteGoalAsync(goal));
+            DeleteItemCommand = new Command<Goal>(async goal => await DeleteGoalAsync(goal));
+            ToggleExpandCommand = new Command<Goal>(ToggleExpand);
+            Init();
         }
-        public async Task InitAsync()
+
+        public void Init()
         {
-            Goals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetGoals());
-            ActiveGoals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetActiveGoals());
-            FinishedGoals = new ObservableCollection<Goal>(LocalDataService.GetInstance().GetFinishedGoals());
-        }
-        #endregion
+            ActiveGoals.Clear();
+            FinishedGoals.Clear();
 
-
-        #region Functions
-
-        public async Task CompleteGoalAsync(object objGoal)
-        {
-            if (objGoal is not Goal goalToComplete)
-                return;
-
-            bool succeed = await LocalDataService.GetInstance().MakeGoalComplete(goalToComplete);
-            // Устанавливаем цель как выполненную
-            if (succeed)
+            foreach (var goal in dataService.GetActiveGoals())
             {
-                goalToComplete.IsCompleted = true;
+                ActiveGoals.Add(goal);
             }
-            
-           
 
-            // Переносим из Active в Finished
-            if (ActiveGoals.Contains(goalToComplete))
+            foreach (var goal in dataService.GetFinishedGoals())
+            {
+                FinishedGoals.Add(goal);
+            }
+        }
+
+        private async Task CompleteGoalAsync(Goal? goalToComplete)
+        {
+            if (goalToComplete == null)
+            {
+                return;
+            }
+
+            var successed = await dataService.MarkGoalAsCompletedAsync(goalToComplete);
+            if (successed)
             {
                 ActiveGoals.Remove(goalToComplete);
-                FinishedGoals.Add(goalToComplete);
+                if (!FinishedGoals.Contains(goalToComplete))
+                {
+                    FinishedGoals.Add(goalToComplete);
+                }
             }
-
         }
 
-        public void DeleteItem(object obgGoal)
+        private async Task DeleteGoalAsync(Goal? goalToDelete)
         {
-            Goal goalToDelete = (Goal)obgGoal;
-            int elapsedDays = (DateTime.Today - goalToDelete.CreatedAt).Days;
-
-            if (elapsedDays * 24 < goalToDelete.GoalTime / 4)
+            if (goalToDelete == null)
             {
-                ActiveGoals.Remove(goalToDelete);
-                Goals.Remove(goalToDelete); // Remove the iem from the ObservableCollection on THIS PAGE only
-                
-                LocalDataService.GetInstance().RemoveActiveGoal(goalToDelete);
-                LocalDataService.GetInstance().RemoveGoal(goalToDelete);
-                OnPropertyChanged();
-            }
-            else
-            {
-                ActiveGoals.Remove(goalToDelete);
-                FinishedGoals.Add(goalToDelete);
+                return;
             }
 
-            // We must also update the servie
-            // Currently this is a sync function , we will change it to async later
+            var successed = await dataService.RemoveGoalAsync(goalToDelete);
+            if (successed)
+            {
+                ActiveGoals.Remove(goalToDelete);
+                FinishedGoals.Remove(goalToDelete);
+            }
         }
-        #endregion
 
+        private void ToggleExpand(Goal? goal)
+        {
+            if (goal == null)
+            {
+                return;
+            }
 
+            goal.IsExpanded = !goal.IsExpanded;
+            OnPropertyChanged(nameof(ActiveGoals));
+            OnPropertyChanged(nameof(FinishedGoals));
+        }
     }
 }

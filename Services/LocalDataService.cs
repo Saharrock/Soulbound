@@ -1,119 +1,274 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Soulbound.Models;
+﻿using Soulbound.Models;
 
 namespace Soulbound.Services
 {
-
     class LocalDataService
     {
+        private const int ProgressPerDay = 10;
 
-        #region instance
-        private static LocalDataService instance;
-        public LocalDataService()
-        {
-            CreateFakeData();
-        }
+        private static LocalDataService? instance;
         public static LocalDataService GetInstance()
         {
-            if (instance == null)
-            {
-                instance = new LocalDataService();
-            }
+            instance ??= new LocalDataService();
             return instance;
         }
-        #endregion
 
+        private readonly List<Goal> goals = new();
+        private readonly List<GoalPack> packs = new();
+        private readonly PetProgress petProgress = new();
+        private readonly List<PetOption> pets = new();
+        private int selectedPetIndex;
+        private int lastGoalId;
 
-        public async Task<bool> TryLoginAsync(string userNameString, string passwordString)
+        private LocalDataService()
         {
-            if (userNameString == null || passwordString == null)
-            {
+            CreatePets();
+            CreatePacks();
+            CreateFakeData();
+        }
 
+        public List<Goal> GetGoals() => goals;
+        public List<Goal> GetActiveGoals() => goals.Where(g => !g.IsCompleted).ToList();
+        public List<Goal> GetFinishedGoals() => goals.Where(g => g.IsCompleted).ToList();
+        public PetProgress GetPetProgress() => petProgress;
+        public int GetCurrentPetIndex() => selectedPetIndex;
+
+        public List<PetOption> GetPets() => pets;
+
+        public PetOption MovePetLeft()
+        {
+            selectedPetIndex = (selectedPetIndex - 1 + pets.Count) % pets.Count;
+            return pets[selectedPetIndex];
+        }
+
+        public PetOption MovePetRight()
+        {
+            selectedPetIndex = (selectedPetIndex + 1) % pets.Count;
+            return pets[selectedPetIndex];
+        }
+
+        public PetOption GetCurrentPet() => pets[selectedPetIndex];
+
+        public void ConfirmPetSelection(string petName)
+        {
+            var currentPet = pets[selectedPetIndex];
+            petProgress.PetImage = currentPet.Image;
+            petProgress.PetName = string.IsNullOrWhiteSpace(petName) ? currentPet.DefaultName : petName.Trim();
+        }
+
+        public List<GoalPack> GetGoalPacks() => packs;
+
+        public async Task<bool> AddPackGoalsAsync(string packTitle)
+        {
+            var selectedPack = packs.FirstOrDefault(p => p.Title == packTitle);
+            if (selectedPack == null)
+            {
                 return await Task.FromResult(false);
             }
-            else
+
+            foreach (var packGoal in selectedPack.Goals)
             {
-                if (userNameString == "eldan" && passwordString == "123")
+                var clonedGoal = new Goal
                 {
-                    return await Task.FromResult(true);
-                }
+                    Title = packGoal.Title,
+                    Description = packGoal.Description,
+                    Notes = packGoal.Notes,
+                    EndDate = DateTime.Today.AddDays(7),
+                    CreatedAt = DateTime.Now,
+                    GoalTime = (int)TimeSpan.FromDays(7).TotalHours,
+                    IsPhysical = packGoal.IsPhysical,
+                    IsIntellectual = packGoal.IsIntellectual,
+                    IsMental = packGoal.IsMental,
+                    IsMonday = true,
+                    IsTuesday = true,
+                    IsWednesday = true,
+                    IsThursday = true,
+                    IsFriday = true
+                };
+                clonedGoal.ProgressPoints = CalculateGoalProgressByDays(clonedGoal);
+                await AddGoalAsync(clonedGoal);
             }
-            return await Task.FromResult(false);
-        }
-        public List<Goal> goals = new List<Goal>();
 
-        private int lastGoalId = 0; // стартовое значен
-
-
-        private void CreateFakeData()
-        {
-            Goal goal1 = new Goal()
-            {
-                Id = "0",
-                Title = "Learn swimming",
-                Description = "I want to learn swimming before my traveling to America",
-                IsPhysical = true,
-
-            };
-            goals.Add(goal1);
+            return await Task.FromResult(true);
         }
-        public List<Goal> GetGoals()
-        {
-            return goals;
-        }
-
-        public List<Goal> GetActiveGoals()
-        {
-            List<Goal> activeGoals = new List<Goal>();
-            foreach (Goal g in goals)
-            {
-                if (!g.IsCompleted)
-                {
-                    activeGoals.Add(g);
-                }     
-            }
-            return activeGoals;
-        }
-
-        public List<Goal> GetFinishedGoals()
-        {
-            return FinishedGoals;
-        }
-        public void RemoveGoal(Goal goal)
-        {
-            goals.Remove(goal);
-        }
-
-        public void RemoveActiveGoal(Goal goal)
-        {
-            ActiveGoals.Remove(goal);
-        }
-        public List<Goal> ActiveGoals { get; set; } = new List<Goal>();
-        public List<Goal> FinishedGoals { get; set; } = new List<Goal>();
 
         public async Task<bool> AddGoalAsync(Goal goal)
         {
             lastGoalId++;
             goal.Id = lastGoalId.ToString();
-            goals.Add(goal); // общий список
             goal.IsCompleted = false;
-            ActiveGoals.Add(goal);
-            return true;
+            goal.ProgressPoints = CalculateGoalProgressByDays(goal);
+            goals.Add(goal);
+            return await Task.FromResult(true);
         }
 
-        public async Task<bool> MakeGoalComplete(Goal goalToComplete)
+        public async Task<bool> RemoveGoalAsync(Goal goalToDelete)
         {
-            ActiveGoals.Remove(goalToComplete);
-            FinishedGoals.Add(goalToComplete);
-            return true;
+            goals.Remove(goalToDelete);
+            return await Task.FromResult(true);
+        }
+
+        public async Task<bool> MarkGoalAsCompletedAsync(Goal goalToComplete)
+        {
+            if (goalToComplete.IsCompleted)
+            {
+                return await Task.FromResult(false);
+            }
+
+            goalToComplete.IsCompleted = true;
+
+            if (goalToComplete.IsPhysical)
+            {
+                petProgress.PhysicalPoints += goalToComplete.ProgressPoints;
+            }
+            if (goalToComplete.IsIntellectual)
+            {
+                petProgress.IntellectualPoints += goalToComplete.ProgressPoints;
+            }
+            if (goalToComplete.IsMental)
+            {
+                petProgress.MentalPoints += goalToComplete.ProgressPoints;
+            }
+
+            TryLevelUp();
+            return await Task.FromResult(true);
+        }
+
+        public List<Goal> GetTodayGoals()
+        {
+            var today = DateTime.Today.DayOfWeek;
+            return goals.Where(g => !g.IsCompleted && IsGoalScheduledForDay(g, today)).ToList();
+        }
+
+        public List<ScheduleDayGroup> GetScheduleGroups()
+        {
+            var activeGoals = GetActiveGoals();
+            return new List<ScheduleDayGroup>
+            {
+                new() { DayName = "Monday", Goals = activeGoals.Where(g => g.IsMonday).ToList() },
+                new() { DayName = "Tuesday", Goals = activeGoals.Where(g => g.IsTuesday).ToList() },
+                new() { DayName = "Wednesday", Goals = activeGoals.Where(g => g.IsWednesday).ToList() },
+                new() { DayName = "Thursday", Goals = activeGoals.Where(g => g.IsThursday).ToList() },
+                new() { DayName = "Friday", Goals = activeGoals.Where(g => g.IsFriday).ToList() },
+                new() { DayName = "Saturday", Goals = activeGoals.Where(g => g.IsSaturday).ToList() },
+                new() { DayName = "Sunday", Goals = activeGoals.Where(g => g.IsSunday).ToList() }
+            };
+        }
+
+        private int CalculateGoalProgressByDays(Goal goal)
+        {
+            var days = Math.Max(1, (goal.EndDate.Date - goal.CreatedAt.Date).Days);
+            return days * ProgressPerDay;
+        }
+
+        private void TryLevelUp()
+        {
+            var pointsForCurrentLevel = petProgress.PointsPerStatForCurrentLevel;
+            if (petProgress.PhysicalPoints >= pointsForCurrentLevel &&
+                petProgress.IntellectualPoints >= pointsForCurrentLevel &&
+                petProgress.MentalPoints >= pointsForCurrentLevel)
+            {
+                petProgress.Level++;
+                petProgress.PhysicalPoints = 0;
+                petProgress.IntellectualPoints = 0;
+                petProgress.MentalPoints = 0;
+            }
+        }
+
+        private static bool IsGoalScheduledForDay(Goal goal, DayOfWeek dayOfWeek)
+        {
+            return dayOfWeek switch
+            {
+                DayOfWeek.Sunday => goal.IsSunday,
+                DayOfWeek.Monday => goal.IsMonday,
+                DayOfWeek.Tuesday => goal.IsTuesday,
+                DayOfWeek.Wednesday => goal.IsWednesday,
+                DayOfWeek.Thursday => goal.IsThursday,
+                DayOfWeek.Friday => goal.IsFriday,
+                DayOfWeek.Saturday => goal.IsSaturday,
+                _ => false
+            };
+        }
+
+        private void CreatePets()
+        {
+            pets.Add(new PetOption { Image = "pet_fox.svg", DefaultName = "Fox" });
+            pets.Add(new PetOption { Image = "pet_wolf.svg", DefaultName = "Wolf" });
+            pets.Add(new PetOption { Image = "pet_rabbit.svg", DefaultName = "Rabbit" });
+            pets.Add(new PetOption { Image = "pet_cat.svg", DefaultName = "Cat" });
+            selectedPetIndex = 0;
+        }
+
+        private void CreatePacks()
+        {
+            packs.Add(new GoalPack
+            {
+                Title = "Physical",
+                Goals = new List<Goal>
+                {
+                    new() { Title = "Morning run", Description = "Run for 20 minutes", Notes = "Keep stable pace", IsPhysical = true },
+                    new() { Title = "Push-ups", Description = "Do 3 sets", Notes = "Track repetitions", IsPhysical = true }
+                }
+            });
+
+            packs.Add(new GoalPack
+            {
+                Title = "Intellectual",
+                Goals = new List<Goal>
+                {
+                    new() { Title = "Read a chapter", Description = "Read 20 pages", Notes = "Write 3 key ideas", IsIntellectual = true },
+                    new() { Title = "Practice coding", Description = "Solve 1 task", Notes = "Focus on clean code", IsIntellectual = true }
+                }
+            });
+
+            packs.Add(new GoalPack
+            {
+                Title = "Mental",
+                Goals = new List<Goal>
+                {
+                    new() { Title = "Meditation", Description = "Meditate 10 minutes", Notes = "No distractions", IsMental = true },
+                    new() { Title = "Journal", Description = "Write evening reflection", Notes = "Note main feeling", IsMental = true }
+                }
+            });
+        }
+
+        private void CreateFakeData()
+        {
+            goals.Add(new Goal
+            {
+                Id = "1",
+                Title = "Morning Run",
+                Description = "Run for 20 minutes",
+                Notes = "Stay hydrated",
+                IsPhysical = true,
+                EndDate = DateTime.Today.AddDays(7),
+                IsMonday = true,
+                IsWednesday = true,
+                IsFriday = true,
+                ProgressPoints = 70
+            });
+
+            goals.Add(new Goal
+            {
+                Id = "2",
+                Title = "Read a chapter",
+                Description = "Read 20 pages of a book",
+                Notes = "Write one takeaway",
+                IsIntellectual = true,
+                EndDate = DateTime.Today.AddDays(7),
+                IsTuesday = true,
+                IsThursday = true,
+                IsSaturday = true,
+                ProgressPoints = 70
+            });
+
+            lastGoalId = goals.Count;
         }
     }
 
-
-
+    class PetOption
+    {
+        public string Image { get; set; } = string.Empty;
+        public string DefaultName { get; set; } = string.Empty;
+    }
 }

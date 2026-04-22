@@ -159,6 +159,7 @@ namespace Soulbound.ViewModels
             }
 
             ((App)Application.Current).SetAuthenticatedShell();
+            await Shell.Current.GoToAsync("//PetSelectionPage");
         }
     }
 }

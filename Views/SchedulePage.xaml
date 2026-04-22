@@ -1,12 +1,49 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Soulbound.Models"
              x:Class="Soulbound.Views.SchedulePage"
-             Title="SchedulePage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Schedule"
+             BackgroundColor="#6c2d2c">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="12" Spacing="10">
+            <Label Text="Weekly schedule"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="White"/>
+
+            <CollectionView ItemsSource="{Binding DayGroups}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:ScheduleDayGroup">
+                        <Frame BackgroundColor="#9f4636"
+                               BorderColor="#42313a"
+                               CornerRadius="14"
+                               HasShadow="False"
+                               Padding="10">
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="{Binding DayName}"
+                                       FontAttributes="Bold"
+                                       FontSize="18"
+                                       TextColor="White"/>
+
+                                <CollectionView ItemsSource="{Binding Goals}">
+                                    <CollectionView.EmptyView>
+                                        <Label Text="No goals"
+                                               TextColor="#f5d2b8"/>
+                                    </CollectionView.EmptyView>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:Goal">
+                                            <Label Text="{Binding Title}"
+                                                   TextColor="#f5d2b8"/>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
