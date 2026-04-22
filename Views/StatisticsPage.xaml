@@ -1,12 +1,64 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:Soulbound.Models"
              x:Class="Soulbound.Views.StatisticsPage"
-             Title="StatisticsPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+             Title="Statistics"
+             BackgroundColor="#6c2d2c">
+    <VerticalStackLayout Padding="16" Spacing="12">
+        <Label Text="Activity log"
+               FontSize="24"
+               FontAttributes="Bold"
+               TextColor="White" />
+
+        <CollectionView ItemsSource="{Binding HistoryRecords}">
+            <CollectionView.EmptyView>
+                <Label Text="No history yet"
+                       TextColor="#f5d2b8"
+                       HorizontalOptions="Center"/>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:HistoryRecord">
+                    <Frame BackgroundColor="#9f4636"
+                           BorderColor="#42313a"
+                           CornerRadius="12"
+                           Padding="10"
+                           Margin="0,0,0,8"
+                           HasShadow="False">
+                        <Grid ColumnDefinitions="10,*,Auto"
+                              ColumnSpacing="12"
+                              RowDefinitions="Auto,Auto"
+                              VerticalOptions="Center">
+                            <BoxView Grid.RowSpan="2"
+                                     Grid.Column="0"
+                                     WidthRequest="8"
+                                     Color="{Binding CategoryBarColor}"
+                                     CornerRadius="4"
+                                     VerticalOptions="Fill" />
+                            <VerticalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding TaskName}"
+                                       TextColor="White"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding StatusText}"
+                                       TextColor="{Binding StatusColor}"
+                                       FontSize="13"
+                                       FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Grid.RowSpan="2" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding ResourcesLine}"
+                                       TextColor="#f5d2b8"
+                                       FontSize="12"
+                                       HorizontalTextAlignment="End" />
+                                <Label Text="{Binding DateFinished, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                       TextColor="#f5d2b8"
+                                       FontSize="11"
+                                       HorizontalTextAlignment="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
 </ContentPage>

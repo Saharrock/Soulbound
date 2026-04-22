@@ -1,12 +1,15 @@
 ﻿using System.Collections.ObjectModel;
+using Microsoft.Maui.Controls;
 using Soulbound.Models;
 using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
-    class MainRoomViewModel : ViewModelBase
+    internal class MainRoomViewModel : ViewModelBase
     {
-        private readonly LocalDataService dataService;
+        private readonly TaskService taskService;
+
+        private readonly CharacterService characterService;
 
         public ObservableCollection<Goal> TodayGoals { get; } = new();
 
@@ -31,11 +34,15 @@ namespace Soulbound.ViewModels
             set { petName = value; OnPropertyChanged(); }
         }
 
-        private string petImage = string.Empty;
-        public string PetImage
+        private ImageSource petAvatar = PetImageHelper.CreateSafeImageSource(null);
+
+        /// <summary>
+        /// Pet portrait with a safe fallback if the image file is missing.
+        /// </summary>
+        public ImageSource PetAvatar
         {
-            get => petImage;
-            set { petImage = value; OnPropertyChanged(); }
+            get => petAvatar;
+            set { petAvatar = value; OnPropertyChanged(); }
         }
 
         private double physicalValue;
@@ -73,32 +80,80 @@ namespace Soulbound.ViewModels
             set { nearestDeadlineText = value; OnPropertyChanged(); }
         }
 
+        private int stamina;
+        public int Stamina
+        {
+            get => stamina;
+            set
+            {
+                stamina = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(StaminaProgress));
+                OnPropertyChanged(nameof(StaminaText));
+            }
+        }
+
+        public double StaminaProgress => Math.Min(1.0, Math.Max(0.0, Stamina / 100.0));
+
+        public string StaminaText => $"{Stamina}/100";
+
         public MainRoomViewModel()
         {
-            dataService = LocalDataService.GetInstance();
+            taskService = TaskService.GetInstance();
+            characterService = CharacterService.GetInstance();
             RefreshData();
         }
 
+        /// <summary>
+        /// Reloads character stats, applies daily stamina and overdue rules, then today goals.
+        /// </summary>
         public void RefreshData()
         {
-            var progress = dataService.GetPetProgress();
-            var required = progress.PointsPerStatForCurrentLevel;
+            characterService.EnsureDailyStamina();
+            taskService.ApplyDeadlinePenalties();
+
+            PetProgress progress = characterService.GetProgress();
+            int required = progress.PointsPerStatForCurrentLevel;
 
             Level = progress.Level;
             Rank = progress.Rank;
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
-            PetImage = string.IsNullOrWhiteSpace(progress.PetImage) ? "pet_fox.svg" : progress.PetImage;
+            PetAvatar = PetImageHelper.CreateSafeImageSource(progress.PetImage);
             PhysicalValue = Math.Min(1.0, (double)progress.PhysicalPoints / required);
             IntellectualValue = Math.Min(1.0, (double)progress.IntellectualPoints / required);
             MentalValue = Math.Min(1.0, (double)progress.MentalPoints / required);
+            Stamina = progress.Stamina;
 
-            var activeGoals = dataService.GetActiveGoals();
+            List<Goal> activeGoals = taskService.GetActiveGoals();
             ActiveGoalsCount = activeGoals.Count;
-            var nearest = activeGoals.OrderBy(g => g.EndDate).FirstOrDefault();
-            NearestDeadlineText = nearest == null ? "No active goals" : nearest.EndDate.ToString("dd/MM/yyyy");
+
+            Goal? nearest = null;
+            foreach (Goal g in activeGoals)
+            {
+                if (nearest == null)
+                {
+                    nearest = g;
+                }
+                else
+                {
+                    if (g.EndDate < nearest.EndDate)
+                    {
+                        nearest = g;
+                    }
+                }
+            }
+
+            if (nearest == null)
+            {
+                NearestDeadlineText = "No active goals";
+            }
+            else
+            {
+                NearestDeadlineText = nearest.EndDate.ToString("dd/MM/yyyy");
+            }
 
             TodayGoals.Clear();
-            foreach (var goal in dataService.GetTodayGoals())
+            foreach (Goal goal in taskService.GetTodayGoals())
             {
                 TodayGoals.Add(goal);
             }

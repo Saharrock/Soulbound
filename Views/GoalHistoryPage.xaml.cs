@@ -4,19 +4,18 @@ namespace Soulbound.Views;
 
 public partial class GoalHistoryPage : ContentPage
 {
-    GoalHistoryViewModel vm;
     public GoalHistoryPage()
     {
         InitializeComponent();
-        vm = new GoalHistoryViewModel();
-        BindingContext = vm;
-
+        BindingContext = new GoalHistoryViewModel();
     }
+
     protected override void OnNavigatedTo(NavigatedToEventArgs e)
     {
         base.OnNavigatedTo(e);
-        vm.Init();
-
+        if (BindingContext is GoalHistoryViewModel viewModel)
+        {
+            viewModel.Init();
+        }
     }
-
 }

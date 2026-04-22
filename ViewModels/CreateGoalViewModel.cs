@@ -6,7 +6,7 @@ namespace Soulbound.ViewModels
 {
     internal class CreateGoalViewModel : ViewModelBase
     {
-        private readonly LocalDataService dataService;
+        private readonly TaskService taskService;
 
         private string messageForUser = string.Empty;
         public string MessageForUser
@@ -70,17 +70,17 @@ namespace Soulbound.ViewModels
         public bool IsSaturday { get => isSaturday; set { isSaturday = value; OnPropertyChanged(); } }
 
         public ICommand AddGoalCommand { get; }
+
         public ICommand AddPhysicalPackCommand { get; }
-        public ICommand AddIntellectualPackCommand { get; }
-        public ICommand AddMentalPackCommand { get; }
+
+        public ICommand AddIntellectPackCommand { get; }
 
         public CreateGoalViewModel()
         {
-            dataService = LocalDataService.GetInstance();
+            taskService = TaskService.GetInstance();
             AddGoalCommand = new Command(async () => await AddGoalAsync());
-            AddPhysicalPackCommand = new Command(async () => await AddPackAsync("Physical"));
-            AddIntellectualPackCommand = new Command(async () => await AddPackAsync("Intellectual"));
-            AddMentalPackCommand = new Command(async () => await AddPackAsync("Mental"));
+            AddPhysicalPackCommand = new Command(async () => await AddPhysicalPackAsync());
+            AddIntellectPackCommand = new Command(async () => await AddIntellectPackAsync());
         }
 
         private async Task AddGoalAsync()
@@ -97,7 +97,7 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            var hasAnyDaySelected = IsSunday || IsMonday || IsTuesday || IsWednesday ||
+            bool hasAnyDaySelected = IsSunday || IsMonday || IsTuesday || IsWednesday ||
                                     IsThursday || IsFriday || IsSaturday;
             if (!hasAnyDaySelected)
             {
@@ -105,12 +105,13 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            var goal = new Goal
+            Goal goal = new Goal
             {
                 Title = NewTitle.Trim(),
                 Description = NewDescription.Trim(),
                 Notes = NewNotes.Trim(),
                 EndDate = SelectedDate,
+                Deadline = SelectedDate,
                 CreatedAt = DateTime.Now,
                 GoalTime = Math.Max(24, (SelectedDate - DateTime.Now).Days * 24),
                 IsPhysical = NewIsPhysical,
@@ -125,18 +126,30 @@ namespace Soulbound.ViewModels
                 IsSaturday = IsSaturday
             };
 
-            var successed = await dataService.AddGoalAsync(goal);
-            MessageForUser = successed ? "Goal created." : "Failed to create goal.";
-            if (successed)
+            bool succeeded = await taskService.AddGoalAsync(goal);
+            MessageForUser = succeeded ? "Goal created." : "Failed to create goal.";
+            if (succeeded)
             {
                 ResetForm();
             }
         }
 
-        private async Task AddPackAsync(string packTitle)
+        /// <summary>
+        /// Adds two preset intellectual goals with fixed XP and deadlines.
+        /// </summary>
+        private async Task AddIntellectPackAsync()
         {
-            var successed = await dataService.AddPackGoalsAsync(packTitle);
-            MessageForUser = successed ? $"{packTitle} pack added." : $"Failed to add {packTitle} pack.";
+            bool succeeded = await taskService.AddQuickIntellectPackAsync();
+            MessageForUser = succeeded ? "Intellect quick start added." : "Failed to add pack.";
+        }
+
+        /// <summary>
+        /// Adds two preset physical goals with fixed XP and deadlines.
+        /// </summary>
+        private async Task AddPhysicalPackAsync()
+        {
+            bool succeeded = await taskService.AddQuickPhysicalPackAsync();
+            MessageForUser = succeeded ? "Physical quick start added." : "Failed to add pack.";
         }
 
         private void ResetForm()

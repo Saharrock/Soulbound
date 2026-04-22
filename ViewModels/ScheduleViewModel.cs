@@ -4,22 +4,22 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
-    class ScheduleViewModel : ViewModelBase
+    internal class ScheduleViewModel : ViewModelBase
     {
-        private readonly LocalDataService dataService;
+        private readonly TaskService taskService;
 
         public ObservableCollection<ScheduleDayGroup> DayGroups { get; } = new();
 
         public ScheduleViewModel()
         {
-            dataService = LocalDataService.GetInstance();
+            taskService = TaskService.GetInstance();
             Refresh();
         }
 
         public void Refresh()
         {
             DayGroups.Clear();
-            foreach (var group in dataService.GetScheduleGroups())
+            foreach (ScheduleDayGroup group in taskService.GetScheduleGroups())
             {
                 DayGroups.Add(group);
             }

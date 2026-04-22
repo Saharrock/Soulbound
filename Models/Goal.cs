@@ -14,11 +14,16 @@ namespace Soulbound.Models
         public int GoalTime { get; set; } //Time of goal duration  in hours
         public string Notes { get; set; } = String.Empty;
         public int ProgressPoints { get; set; }
+        /// <summary>
+        /// When set, this XP value is used instead of calculating from days until deadline.
+        /// </summary>
+        public int? CustomProgressPoints { get; set; }
         public bool IsExpanded { get; set; }
 
         //Dates
         public DateTime CreatedAt { get; set; } = DateTime.Now; //Date of goal ending
         public DateTime EndDate { get; set; } = DateTime.Now;
+        public DateTime Deadline { get; set; } = DateTime.Now;
 
         // Categories
         public bool IsPhysical { get; set; } = false;
@@ -29,6 +34,7 @@ namespace Soulbound.Models
         public bool IsCompleted { get; set; } = false; // Completed/No
         public bool IsAbandoned { get; set; } = false;
         public bool IsDeleted { get; set; } = false;
+        public bool IsOverduePenaltyApplied { get; set; } = false;
 
         //WeekDays
         public bool IsSunday { get; set; } = false;

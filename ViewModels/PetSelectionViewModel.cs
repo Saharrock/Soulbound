@@ -1,17 +1,23 @@
 using System.Windows.Input;
+using Microsoft.Maui.Controls;
+using Soulbound.Models;
 using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
-    class PetSelectionViewModel : ViewModelBase
+    internal class PetSelectionViewModel : ViewModelBase
     {
-        private readonly LocalDataService dataService;
+        private readonly CharacterService characterService;
 
-        private string petImage = string.Empty;
-        public string PetImage
+        private ImageSource petAvatar = PetImageHelper.CreateSafeImageSource(null);
+
+        /// <summary>
+        /// Preview image with a safe fallback if the file name is wrong.
+        /// </summary>
+        public ImageSource PetAvatar
         {
-            get => petImage;
-            set { petImage = value; OnPropertyChanged(); }
+            get => petAvatar;
+            set { petAvatar = value; OnPropertyChanged(); }
         }
 
         private string petName = string.Empty;
@@ -22,12 +28,14 @@ namespace Soulbound.ViewModels
         }
 
         public ICommand LeftCommand { get; }
+
         public ICommand RightCommand { get; }
+
         public ICommand ConfirmCommand { get; }
 
         public PetSelectionViewModel()
         {
-            dataService = LocalDataService.GetInstance();
+            characterService = CharacterService.GetInstance();
             LeftCommand = new Command(MoveLeft);
             RightCommand = new Command(MoveRight);
             ConfirmCommand = new Command(async () => await ConfirmAsync());
@@ -36,8 +44,8 @@ namespace Soulbound.ViewModels
 
         private void LoadCurrentPet()
         {
-            var pet = dataService.GetCurrentPet();
-            PetImage = pet.Image;
+            PetOption pet = characterService.GetCurrentPetTemplate();
+            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
             if (string.IsNullOrWhiteSpace(PetName))
             {
                 PetName = pet.DefaultName;
@@ -46,21 +54,21 @@ namespace Soulbound.ViewModels
 
         private void MoveLeft()
         {
-            var pet = dataService.MovePetLeft();
-            PetImage = pet.Image;
+            PetOption pet = characterService.MovePetLeft();
+            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
             PetName = pet.DefaultName;
         }
 
         private void MoveRight()
         {
-            var pet = dataService.MovePetRight();
-            PetImage = pet.Image;
+            PetOption pet = characterService.MovePetRight();
+            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
             PetName = pet.DefaultName;
         }
 
         private async Task ConfirmAsync()
         {
-            dataService.ConfirmPetSelection(PetName);
+            characterService.ConfirmPetSelection(PetName);
             await Shell.Current.GoToAsync("//MainRoomPage");
         }
     }

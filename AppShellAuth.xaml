@@ -27,6 +27,11 @@
         Route="GoalHistoryPage" />
 
     <ShellContent
+    Title="Statistics"
+    ContentTemplate="{DataTemplate local:StatisticsPage}"
+    Route="StatisticsPage" />
+
+    <ShellContent
         Title="Schedule"
         ContentTemplate="{DataTemplate local:SchedulePage}"
         Route="SchedulePage" />

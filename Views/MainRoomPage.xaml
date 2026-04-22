@@ -3,12 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Soulbound.Models"
              x:Class="Soulbound.Views.MainRoomPage"
-             Title="MainRoomPage"
+             Title="Main room"
              BackgroundColor ="#6c2d2c">
 
     <Grid Padding="20" ColumnDefinitions="1.2*,1*" ColumnSpacing="20">
 
-        <!-- Большое название сверху слева -->
+        <!-- Large title top left -->
         <Label 
             Text="SOULBOUND" 
             FontSize="48" 
@@ -78,7 +78,7 @@
             </VerticalStackLayout>
         </Frame>
 
-        <!-- Блок справа с фото зверька и шкалами -->
+        <!-- Right column: pet portrait and stat bars -->
         <Grid
             Grid.Column="1"
             HorizontalOptions="End"
@@ -89,7 +89,7 @@
                 BackgroundColor="#9f4636"
                 CornerRadius="25"
                 WidthRequest="420"
-                HeightRequest="620"
+                HeightRequest="720"
                 HasShadow="False"
                 BorderColor="#42313a"
                 Padding="12">
@@ -109,7 +109,7 @@
                         CornerRadius="16"
                         Padding="8"
                         HasShadow="False">
-                        <Image Source="{Binding PetImage}"
+                        <Image Source="{Binding PetAvatar}"
                                Aspect="AspectFit"
                                HorizontalOptions="Center"
                                HeightRequest="220"/>
@@ -134,7 +134,15 @@
                         TextColor="#f5d2b8"
                         HorizontalOptions="Center" />
 
-                    <!-- Красный бар -->
+                    <Label Text="Stamina" TextColor="White" Margin="0,8,0,0"/>
+                    <ProgressBar
+                        Progress="{Binding StaminaProgress}"
+                        ScaleY="4"
+                        BackgroundColor="#3e3e3e"
+                        ProgressColor="#7ed957"/>
+                    <Label Text="{Binding StaminaText}" TextColor="#f5d2b8" HorizontalOptions="End"/>
+
+                    <!-- Physical progress bar -->
                         <Label Text="Physical goals" TextColor="White"/>
                         <ProgressBar 
                         Progress="{Binding PhysicalValue}"
@@ -142,7 +150,7 @@
                         BackgroundColor="#5a2a0c"
                         ProgressColor="#e03c31"/>
 
-                        <!-- Синий бар -->
+                        <!-- Intellectual progress bar -->
                         <Label Text="Intellectual goals" TextColor="White"/>
                         <ProgressBar
                         Progress="{Binding IntellectualValue}"
@@ -150,7 +158,7 @@
                         BackgroundColor="#2a2f5a"
                         ProgressColor="#3c6fe0"/>
 
-                        <!-- Фиолетовый бар -->
+                        <!-- Mental progress bar -->
                         <Label Text="Mental goals" TextColor="White"/>
                         <ProgressBar
                         Progress="{Binding MentalValue}"

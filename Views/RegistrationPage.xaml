@@ -6,7 +6,7 @@
              BackgroundColor="#d1743b">
 
     <Grid Padding="30" BackgroundColor="#d1743b">
-        <!-- Кнопка Log In в правом верхнем углу -->
+        <!-- Log In button top right -->
         <Button
         Text="Log In"
         Command="{Binding GoToLoginCommand}"
@@ -20,13 +20,13 @@
         VerticalOptions="Start"
         Margin="0,10,10,0" />
 
-        <!-- Основное содержимое по центру -->
+        <!-- Main content centered -->
         <VerticalStackLayout
         VerticalOptions="CenterAndExpand"
         HorizontalOptions="Center"
         Spacing="25">
 
-            <!-- Заголовок -->
+            <!-- Title -->
             <Label
             Text="REGISTRATION"
             FontSize="28"
@@ -35,7 +35,7 @@
             HorizontalOptions="Center"
             HorizontalTextAlignment="Center" />
 
-            <!-- Сообщение пользователю -->
+            <!-- User message -->
             <Label
             Text="{Binding MessageForUser}"
             HorizontalOptions="Center"
@@ -43,7 +43,7 @@
             FontSize="20"
             TextColor="#853c0f" />
 
-            <!-- ЕДИНЫЙ БЛОК ДЛЯ ВСЕХ ПОЛЕЙ -->
+            <!-- Single block for all fields -->
             <Frame
             BackgroundColor="#ad5621"
             CornerRadius="15"
@@ -187,7 +187,7 @@
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Кнопка регистрации -->
+            <!-- Register button -->
             <Button
             Text="Register"
             WidthRequest="150"

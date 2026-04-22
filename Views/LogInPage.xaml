@@ -5,13 +5,13 @@
              Title="LogInPage"
              BackgroundColor="#d1743b">
     <Grid Padding="30">
-        <!-- Основное содержимое по центру -->
+        <!-- Main content centered -->
         <VerticalStackLayout
         VerticalOptions="CenterAndExpand"
         HorizontalOptions="Center"
         Spacing="25">
 
-            <!-- Заголовок -->
+            <!-- Title -->
             <Label
             Text="WELCOME TO SOULBOUND"
             FontSize="28"
@@ -20,7 +20,7 @@
             HorizontalOptions="Center"
             HorizontalTextAlignment="Center" />
 
-            <!-- Сообщение пользователю -->
+            <!-- User message -->
             <Label
             Text="{Binding MessageForUser}"
             HorizontalOptions="Center"
@@ -28,7 +28,7 @@
             FontSize="20"
             TextColor="#853c0f" />
 
-            <!-- Поле Email -->
+            <!-- Email field -->
             <VerticalStackLayout Spacing="5">
                 <Label
                 Text="Email:"
@@ -45,7 +45,7 @@
                     WidthRequest="250"
                     HorizontalOptions="Center" />
 
-                    <!-- Маленькая кнопка сброса -->
+                    <!-- Small clear button -->
                     <Button
                     Text="✖"
                      Command="{Binding ResetUsernameCommand}"
@@ -59,7 +59,7 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Поле Password -->
+            <!-- Password field -->
             <VerticalStackLayout Spacing="5">
                 <Label
                 Text="Password:"
@@ -77,7 +77,7 @@
                     WidthRequest="250"
                     HorizontalOptions="Center" />
 
-                    <!-- Маленькая кнопка сброса -->
+                    <!-- Small clear button -->
                     <Button
                     Text="✖"
                     Command="{Binding ResetPasswordCommand}"
@@ -91,7 +91,7 @@
                 </HorizontalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Кнопки: Log In и Registration -->
+            <!-- Buttons: Log In and Registration -->
             <HorizontalStackLayout
             Spacing="20"
             HorizontalOptions="Center">
@@ -111,7 +111,7 @@
             </HorizontalStackLayout>
         </VerticalStackLayout>
 
-        <!-- Кнопка перехода на другую страницу (внизу справа) -->
+        <!-- Navigation button bottom right -->
         <Button
         Text="Go to Another Page"
         Command="{Binding GotoRegisterPageCommand}"

@@ -143,27 +143,26 @@
                 WidthRequest="180"/>
 
                 <Label
-                    Text="Ready packs"
+                    Text="Quick starts"
                     TextColor="White"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"/>
 
-                <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
-                    <Button Text="Physical"
-                            Command="{Binding AddPhysicalPackCommand}"
-                            BackgroundColor="#e03c31"
-                            TextColor="White"
-                            FontSize="12" />
-                    <Button Text="Intellectual"
-                            Command="{Binding AddIntellectualPackCommand}"
+                <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
+                    <Button Text="Intellect"
+                            Command="{Binding AddIntellectPackCommand}"
                             BackgroundColor="#3c6fe0"
                             TextColor="White"
-                            FontSize="12" />
-                    <Button Text="Mental"
-                            Command="{Binding AddMentalPackCommand}"
-                            BackgroundColor="#9b4de0"
+                            FontSize="13"
+                            CornerRadius="12"
+                            Padding="16,8" />
+                    <Button Text="Physical"
+                            Command="{Binding AddPhysicalPackCommand}"
+                            BackgroundColor="#ff8c00"
                             TextColor="White"
-                            FontSize="12" />
+                            FontSize="13"
+                            CornerRadius="12"
+                            Padding="16,8" />
                 </HorizontalStackLayout>
 
             </VerticalStackLayout>

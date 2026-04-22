@@ -51,20 +51,20 @@ namespace Soulbound.Services
                 var config = new FirebaseAuthConfig()
                 {
                     ApiKey = "AIzaSyCawxBWp5-fLxVmoluIXkvHZaYG4rMdgOA",
-                    AuthDomain = "soulbound-cf78d.firebaseapp.com", //כתובת התחברות
-                    Providers = new FirebaseAuthProvider[] //רשימת אפשריות להתחבר
+                    AuthDomain = "soulbound-cf78d.firebaseapp.com",
+                    Providers = new FirebaseAuthProvider[]
                   {
-          new EmailProvider() //אנחנו נשתמש בשירות חינמי של התחברות עם מייל
+          new EmailProvider()
                   },
-                    UserRepository = new FileUserRepository("appUserData") //לא חובה, שם של קובץ בטלפון הפרטי שאפשר לשמור בו את מזהה ההתחברות כדי לא הכניס כל פעם את הסיסמא 
+                    UserRepository = new FileUserRepository("appUserData")
                 };
-                auth = new FirebaseAuthClient(config); //ההתחברות
+                auth = new FirebaseAuthClient(config);
 
                 client =
-                  new FirebaseClient(@"https://soulbound-cf78d-default-rtdb.europe-west1.firebasedatabase.app/", //כתובת מסד הנתונים
+                  new FirebaseClient(@"https://soulbound-cf78d-default-rtdb.europe-west1.firebasedatabase.app/",
                   new FirebaseOptions
                   {
-                      AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)// מזהה ההתחברות של המשתמש עם השרת, הנתון נשמר במכשיר
+                      AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)
                   });
             }
 

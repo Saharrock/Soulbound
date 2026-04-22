@@ -6,13 +6,13 @@
              BackgroundColor="#d1743b">
     <Grid Padding="30">
 
-        <!-- Основное содержимое по центру -->
+        <!-- Main content centered -->
         <VerticalStackLayout
         VerticalOptions="CenterAndExpand"
         HorizontalOptions="Center"
         Spacing="40">
 
-            <!-- Заголовок -->
+            <!-- Title -->
             <Label
             Text="WELCOME TO SOULBOUND"
             FontSize="35"
@@ -21,12 +21,12 @@
             HorizontalOptions="Center"
             HorizontalTextAlignment="Center" />
 
-            <!-- Кнопки -->
+            <!-- Buttons -->
             <VerticalStackLayout
             Spacing="15"
             HorizontalOptions="Center">
 
-                <!-- Log In и Registration -->
+                <!-- Log In and Registration -->
                 <HorizontalStackLayout
                 Spacing="25"
                 HorizontalOptions="Center">
