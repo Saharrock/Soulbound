@@ -42,10 +42,10 @@ namespace Soulbound.Services
 
         private void FillPetTemplates()
         {
-            petTemplates.Add(new PetOption { Image = "pet_fox.svg", DefaultName = "Fox" });
-            petTemplates.Add(new PetOption { Image = "pet_wolf.svg", DefaultName = "Wolf" });
-            petTemplates.Add(new PetOption { Image = "pet_rabbit.svg", DefaultName = "Rabbit" });
-            petTemplates.Add(new PetOption { Image = "pet_cat.svg", DefaultName = "Cat" });
+            petTemplates.Add(new PetOption { Image = "fox.png", DefaultName = "Fox" });
+            petTemplates.Add(new PetOption { Image = "wolf.png", DefaultName = "Wolf" });
+            petTemplates.Add(new PetOption { Image = "rabbit.png", DefaultName = "Rabbit" });
+            petTemplates.Add(new PetOption { Image = "cat.png", DefaultName = "Cat" });
         }
 
         public List<PetOption> GetPetTemplates()

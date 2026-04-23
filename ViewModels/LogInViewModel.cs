@@ -108,6 +108,8 @@ namespace Soulbound.ViewModels
             TryLoginCommand = new Command(async () => await TryLoginAsync());
             AppService AppService = AppService.GetInstance();
             IsLoginEnable = false;
+            UserInput = "salnikovsergej76@gmail.com";
+            UserPassword = "Sahar1996@";
         }
         #endregion
 

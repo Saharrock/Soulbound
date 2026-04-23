@@ -7,7 +7,7 @@ namespace Soulbound.Models
     /// </summary>
     public static class PetImageHelper
     {
-        public const string DefaultPetImageFile = "pet_fox.svg";
+        public const string DefaultPetImageFile = "dotnet_bot.png";
 
         /// <summary>
         /// Trims and lowercases the file name (Android drawable names are usually lowercase).

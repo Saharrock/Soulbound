@@ -1,0 +1,56 @@
+{
+  "users": {
+    "09DrgtsQM6MCrmBgtPlY3xvEJH12": {
+      "Pet": "fox",
+      "PhysicalPoints": 20,
+      "IntellectualPoints": 10,
+      "MentalPoints": 15,
+      "ActiveGoals": 5,
+      "FinishedGoals": 20,
+      "MondayGoals": 5,
+      "TuesdayGoals": 4,
+      "WednesdayGoals": 3,
+      "ThursdayGoals": 2,
+      "FridayGoals": 1,
+      "SaturdayGoals ": 6,
+      "SundayGoals ": 6
+
+    },
+    "0lFVbECkHtcGRfEc9oBfm3OIT9p1": {
+      "Pet": "wolf",
+      "PhysicalPoints": 23,
+      "IntellectualPoints": 10,
+      "MentalPoints": 15
+    },
+    "8zNWiUjky5fUmBc07E0ywJBXhpC3": {
+      "Pet": "rabbit",
+      "PhysicalPoints": 23,
+      "IntellectualPoints": 10,
+      "MentalPoints": 15
+    },
+    "YLTdobODBCPXA5jT5Ff1t1yGuaJ2": {
+      "Pet": "cat",
+      "PhysicalPoints": 23,
+      "IntellectualPoints": 10,
+      "MentalPoints": 15
+    },
+    "gZq6fZ4ckuSoSH9o1hZyttWdOmv2": {
+      "Pet": "cat",
+      "PhysicalPoints": 23,
+      "IntellectualPoints": 5,
+      "MentalPoints": 15
+    },
+    "oXcRSMxUvaOpseWzwY1Xv5PyiQh1": {
+      "Pet": "wolf",
+      "PhysicalPoints": 23,
+      "IntellectualPoints": 10,
+      "MentalPoints": 15
+    },
+    "yqaIksBnKZeHQecCBxRX9DA67qy1": {
+      "Pet": "cat",
+      "PhysicalPoints": 55,
+      "IntellectualPoints": 0,
+      "MentalPoints": 4
+    }
+  }
+}

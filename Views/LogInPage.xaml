@@ -42,7 +42,7 @@
                     Text="{Binding UserInput}"
                     Placeholder="Enter your email..."
                     TextColor="Black"
-                    WidthRequest="250"
+                    WidthRequest="250"                           
                     HorizontalOptions="Center" />
 
                     <!-- Small clear button -->
