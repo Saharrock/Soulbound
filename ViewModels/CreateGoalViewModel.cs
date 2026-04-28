@@ -6,7 +6,7 @@ namespace Soulbound.ViewModels
 {
     internal class CreateGoalViewModel : ViewModelBase
     {
-        private readonly TaskService taskService;
+        private readonly AppService appService;
 
         private string messageForUser = string.Empty;
         public string MessageForUser
@@ -77,7 +77,7 @@ namespace Soulbound.ViewModels
 
         public CreateGoalViewModel()
         {
-            taskService = TaskService.GetInstance();
+            appService = AppService.GetInstance();
             AddGoalCommand = new Command(async () => await AddGoalAsync());
             AddPhysicalPackCommand = new Command(async () => await AddPhysicalPackAsync());
             AddIntellectPackCommand = new Command(async () => await AddIntellectPackAsync());
@@ -126,7 +126,8 @@ namespace Soulbound.ViewModels
                 IsSaturday = IsSaturday
             };
 
-            bool succeeded = await taskService.AddGoalAsync(goal);
+            await appService.EnsureGameDataLoadedAsync();
+            bool succeeded = await appService.AddGoalAsync(goal);
             MessageForUser = succeeded ? "Goal created." : "Failed to create goal.";
             if (succeeded)
             {
@@ -134,22 +135,18 @@ namespace Soulbound.ViewModels
             }
         }
 
-        /// <summary>
-        /// Adds two preset intellectual goals with fixed XP and deadlines.
-        /// </summary>
         private async Task AddIntellectPackAsync()
         {
-            bool succeeded = await taskService.AddQuickIntellectPackAsync();
-            MessageForUser = succeeded ? "Intellect quick start added." : "Failed to add pack.";
+            await appService.EnsureGameDataLoadedAsync();
+            await appService.AddQuickIntellectPackAsync();
+            MessageForUser = "Intellect quick start added.";
         }
 
-        /// <summary>
-        /// Adds two preset physical goals with fixed XP and deadlines.
-        /// </summary>
         private async Task AddPhysicalPackAsync()
         {
-            bool succeeded = await taskService.AddQuickPhysicalPackAsync();
-            MessageForUser = succeeded ? "Physical quick start added." : "Failed to add pack.";
+            await appService.EnsureGameDataLoadedAsync();
+            await appService.AddQuickPhysicalPackAsync();
+            MessageForUser = "Physical quick start added.";
         }
 
         private void ResetForm()

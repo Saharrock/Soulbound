@@ -13,7 +13,6 @@
                TextColor="White" />
 
         <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
-            <Image Source="{Binding PetAvatar}" Aspect="AspectFit" />
             <Button Text="◀"
                     Command="{Binding LeftCommand}"
                     WidthRequest="60"

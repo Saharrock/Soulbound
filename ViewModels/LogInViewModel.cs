@@ -106,10 +106,9 @@ namespace Soulbound.ViewModels
             // Defining the Command for an async Function
             GotoRegisterPageCommand = new Command(async () => await Shell.Current.GoToAsync("//RegistrationPage"));
             TryLoginCommand = new Command(async () => await TryLoginAsync());
-            AppService AppService = AppService.GetInstance();
             IsLoginEnable = false;
-            UserInput = "salnikovsergej76@gmail.com";
-            UserPassword = "Sahar1996@";
+            UserInput = string.Empty;
+            UserPassword = string.Empty;
         }
         #endregion
 

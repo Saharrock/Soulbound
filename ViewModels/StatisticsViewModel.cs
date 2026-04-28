@@ -6,24 +6,22 @@ namespace Soulbound.ViewModels
 {
     internal class StatisticsViewModel : ViewModelBase
     {
-        private readonly TaskService taskService;
+        private readonly AppService appService;
 
         public ObservableCollection<HistoryRecord> HistoryRecords { get; } = new();
 
         public StatisticsViewModel()
         {
-            taskService = TaskService.GetInstance();
-            Refresh();
+            appService = AppService.GetInstance();
+            _ = RefreshAsync();
         }
 
-        /// <summary>
-        /// Reloads history from persisted storage (newest entries first).
-        /// </summary>
-        public void Refresh()
+        public async Task RefreshAsync()
         {
+            await appService.EnsureGameDataLoadedAsync();
             HistoryRecords.Clear();
 
-            foreach (HistoryRecord item in taskService.GetHistoryRecords())
+            foreach (HistoryRecord item in appService.GetHistoryRecords())
             {
                 HistoryRecords.Add(item);
             }

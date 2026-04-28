@@ -13,32 +13,25 @@
                    FontAttributes="Bold"
                    TextColor="White"/>
 
-            <CollectionView ItemsSource="{Binding DayGroups}">
+            <CollectionView ItemsSource="{Binding Goals}">
+                <CollectionView.EmptyView>
+                    <Label Text="No active goals"
+                           TextColor="#f5d2b8"/>
+                </CollectionView.EmptyView>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:ScheduleDayGroup">
+                    <DataTemplate x:DataType="models:Goal">
                         <Frame BackgroundColor="#9f4636"
                                BorderColor="#42313a"
                                CornerRadius="14"
                                HasShadow="False"
                                Padding="10">
                             <VerticalStackLayout Spacing="6">
-                                <Label Text="{Binding DayName}"
+                                <Label Text="{Binding Title}"
                                        FontAttributes="Bold"
                                        FontSize="18"
                                        TextColor="White"/>
-
-                                <CollectionView ItemsSource="{Binding Goals}">
-                                    <CollectionView.EmptyView>
-                                        <Label Text="No goals"
-                                               TextColor="#f5d2b8"/>
-                                    </CollectionView.EmptyView>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:Goal">
-                                            <Label Text="{Binding Title}"
-                                                   TextColor="#f5d2b8"/>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                <Label Text="{Binding ScheduleText}"
+                                       TextColor="#f5d2b8"/>
                             </VerticalStackLayout>
                         </Frame>
                     </DataTemplate>

@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Microsoft.Maui.Graphics;
 
 namespace Soulbound.Models
@@ -12,7 +11,7 @@ namespace Soulbound.Models
 
         public string Category { get; set; } = string.Empty;
 
-        public TaskResultStatus ResultStatus { get; set; }
+        public string ResultStatus { get; set; } = string.Empty;
 
         public int XpChange { get; set; }
 
@@ -20,25 +19,15 @@ namespace Soulbound.Models
 
         public DateTime DateFinished { get; set; } = DateTime.Now;
 
-        [JsonIgnore]
-        public string StatusText => ResultStatus switch
-        {
-            TaskResultStatus.Completed => "Completed",
-            TaskResultStatus.Failed => "Failed",
-            TaskResultStatus.Penalty => "Penalty",
-            _ => string.Empty
-        };
-
-        [JsonIgnore]
+        public string StatusText => ResultStatus;
         public Color StatusColor => ResultStatus switch
         {
-            TaskResultStatus.Completed => Color.FromArgb("#7ed957"),
-            TaskResultStatus.Failed => Color.FromArgb("#ff4444"),
-            TaskResultStatus.Penalty => Color.FromArgb("#ff9f43"),
+            "Completed" => Color.FromArgb("#7ed957"),
+            "Failed" => Color.FromArgb("#ff4444"),
+            "Penalty" => Color.FromArgb("#ff9f43"),
             _ => Colors.Gray
         };
 
-        [JsonIgnore]
         public Color CategoryBarColor => Category switch
         {
             "Physical" => Color.FromArgb("#e03c31"),
@@ -50,7 +39,6 @@ namespace Soulbound.Models
         /// <summary>
         /// One line for the resources column: XP change and stamina spent.
         /// </summary>
-        [JsonIgnore]
         public string ResourcesLine
         {
             get

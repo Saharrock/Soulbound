@@ -44,6 +44,22 @@ namespace Soulbound.Models
         public bool IsThursday { get; set; } = false;
         public bool IsFriday { get; set; } = false;
         public bool IsSaturday { get; set; } = false;
+
+        public string ScheduleText
+        {
+            get
+            {
+                List<string> days = new();
+                if (IsMonday) days.Add("Mon");
+                if (IsTuesday) days.Add("Tue");
+                if (IsWednesday) days.Add("Wed");
+                if (IsThursday) days.Add("Thu");
+                if (IsFriday) days.Add("Fri");
+                if (IsSaturday) days.Add("Sat");
+                if (IsSunday) days.Add("Sun");
+                return days.Count == 0 ? "No days selected" : string.Join(", ", days);
+            }
+        }
     }
 
 }

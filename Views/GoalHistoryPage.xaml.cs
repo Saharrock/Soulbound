@@ -10,12 +10,12 @@ public partial class GoalHistoryPage : ContentPage
         BindingContext = new GoalHistoryViewModel();
     }
 
-    protected override void OnNavigatedTo(NavigatedToEventArgs e)
+    protected override async void OnNavigatedTo(NavigatedToEventArgs e)
     {
         base.OnNavigatedTo(e);
         if (BindingContext is GoalHistoryViewModel viewModel)
         {
-            viewModel.Init();
+            await viewModel.RefreshAsync();
         }
     }
 }

@@ -1,318 +1,496 @@
 ﻿using Firebase.Auth;
 using Firebase.Auth.Providers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Soulbound.Models;
 using Firebase.Auth.Repository;
 using Firebase.Database;
 using Firebase.Database.Query;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Maui.ApplicationModel.Communication;
-using Soulbound.ViewModels;
-using Microsoft.Maui.Storage;
-using System.Diagnostics;
-
-
+using Soulbound.Models;
 
 namespace Soulbound.Services
 {
+    internal sealed class AppService
+    {
+        private const int StaminaPerGoalCompletion = 15;
+        private const int OverduePenaltyPoints = 5;
+        private const int LateDeletePenaltyPoints = 3;
 
-        class AppService
+        private static AppService? instance;
+        private FirebaseAuthClient? auth;
+        private FirebaseClient? client;
+        private GameData gameData = new();
+
+        public AuthCredential? LoginAuthUser { get; private set; }
+        public AuthUser? FullDetailsLoggedInUser { get; private set; }
+
+        private readonly string[] petImages = new[]
         {
-            //public List<Category>? categories;
-            public List<Item>? items;
+            "dotnet_bot.png",
+            "pet_egg.png",
+            "pet_cat.png",
+            "pet_dog.png"
+        };
 
-            FirebaseAuthClient? auth;
-            FirebaseClient? client;
-            public AuthCredential? loginAuthUser; //This is to keep the logged in user credential, so we can logout later
-            public AuthUser fullDetaillsLoggedInUser;
+        public static AppService GetInstance()
+        {
+            instance ??= new AppService();
+            return instance;
+        }
 
-            // SingleTone Pattern
-            static private AppService instance;
-            static public AppService GetInstance()
+        private AppService()
+        {
+            Init();
+        }
+
+        public void Init()
+        {
+            var config = new FirebaseAuthConfig
             {
-                if (instance == null)
+                ApiKey = "AIzaSyCawxBWp5-fLxVmoluIXkvHZaYG4rMdgOA",
+                AuthDomain = "soulbound-cf78d.firebaseapp.com",
+                Providers = new FirebaseAuthProvider[] { new EmailProvider() },
+                UserRepository = new FileUserRepository("appUserData")
+            };
+
+            auth = new FirebaseAuthClient(config);
+            client = new FirebaseClient(
+                "https://soulbound-cf78d-default-rtdb.europe-west1.firebasedatabase.app/",
+                new FirebaseOptions
                 {
-                    instance = new AppService();
-                }
-                return instance;
-            }
-            public AppService()
+                    AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)
+                });
+        }
+
+        public async Task<bool> TryRegister(string userName, string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-            Debug.WriteLine("Start Firebase");
-            // We need a costructor because of :  _instance = new AppService();
-            StartFireBase();
+                return false;
             }
-            public void Init()
+
+            EnsureInitialized();
+
+            try
             {
-                var config = new FirebaseAuthConfig()
+                var response = await auth!.CreateUserWithEmailAndPasswordAsync(email, password);
+                LoginAuthUser = response.AuthCredential;
+
+                FullDetailsLoggedInUser = new AuthUser
                 {
-                    ApiKey = "AIzaSyCawxBWp5-fLxVmoluIXkvHZaYG4rMdgOA",
-                    AuthDomain = "soulbound-cf78d.firebaseapp.com",
-                    Providers = new FirebaseAuthProvider[]
-                  {
-          new EmailProvider()
-                  },
-                    UserRepository = new FileUserRepository("appUserData")
+                    Email = response.User.Info.Email,
+                    Id = response.User.Uid,
+                    UserName = userName.Trim()
                 };
-                auth = new FirebaseAuthClient(config);
 
-                client =
-                  new FirebaseClient(@"https://soulbound-cf78d-default-rtdb.europe-west1.firebasedatabase.app/",
-                  new FirebaseOptions
-                  {
-                      AuthTokenAsyncFactory = () => Task.FromResult(auth.User.Credential.IdToken)
-                  });
+                await client!
+                    .Child("users")
+                    .Child(FullDetailsLoggedInUser.Id)
+                    .Child("profile")
+                    .PutAsync(new { userName = FullDetailsLoggedInUser.UserName, email });
+
+                gameData = CreateDefaultGameData();
+                await SaveGameDataAsync();
+                return true;
             }
-
-            public async Task<bool> TryRegister(string userNameString, string emailString, string passwordString)
+            catch
             {
-                if (string.IsNullOrWhiteSpace(userNameString) ||
-                    string.IsNullOrWhiteSpace(emailString) ||
-                    string.IsNullOrWhiteSpace(passwordString))
-                {
-                    return false;
-                }
-
-                if (auth == null || client == null)
-                {
-                    Init();
-                }
-
-                try
-                {
-                    var response = await auth.CreateUserWithEmailAndPasswordAsync(emailString, passwordString);
-                    loginAuthUser = response.AuthCredential;
-
-                    fullDetaillsLoggedInUser = new AuthUser()
-                    {
-                        Email = response.User.Info.Email,
-                        Id = response.User.Uid,
-                        UserName = userNameString
-                    };
-
-                    await client
-                        .Child("users")
-                        .Child(fullDetaillsLoggedInUser.Id)
-                        .PutAsync(new
-                        {
-                            userName = userNameString,
-                            email = emailString
-                        });
-
-                    return true;
-                }
-                catch (FirebaseAuthException ex)
-                {
-                    Debug.WriteLine($"Registration failed: {ex.Message}");
-                    return false;
-                }
-            }
-
-            public async Task<bool> TryLogin(string userNameString, string passwordString)
-            {
-                if (string.IsNullOrWhiteSpace(userNameString) || string.IsNullOrWhiteSpace(passwordString))
-                {
-                    return false;
-                }
-
-                if (auth == null || client == null)
-                {
-                    Init();
-                }
-                try
-                {
-                    var authUser = await auth.SignInWithEmailAndPasswordAsync(userNameString, passwordString);
-                    loginAuthUser = authUser.AuthCredential;
-                    // We are logged in. Now go to DataBase and fetch data on user itself. Exampe 1 parameter: fullname
-                    string uid = auth.User.Uid;
-                    string fullName = await client
-                        .Child("users")
-                        .Child(uid)
-                        .Child("userName")
-                        .OnceSingleAsync<string>();
-                    fullDetaillsLoggedInUser = new AuthUser()
-                    {
-                        Email = auth.User.Info.Email,
-                        Id = uid,
-                        UserName = string.IsNullOrWhiteSpace(fullName) ? auth.User.Info.Email : fullName
-                    };
-                    // Authentication successful 
-                    // We keep the token or Credential in loginAuthUser, so we can erase it later in logout
-                    // You can access the authenticated user's details via authUser.User
-                    // you should create a new user or person
-                    // Person person = new Person(){Email=authUser.User.info.Email, ...
-                    // Don't put the password in the Person :)
-
-                    // ((App)Application.Current).SetAuthenticatedShell();
-
-                    return true;
-                }
-                catch (FirebaseAuthException ex)
-                {
-                    Debug.WriteLine($"Login failed: {ex.Message}");
-                    // Authentication failed
-                    return false;
-                }
-            }
-
-            public string GetUserFullName()
-            {
-                return fullDetaillsLoggedInUser.UserName;
-            }
-
-            public bool Logout()
-            {
-                try
-                {
-                    auth.SignOut();
-                    loginAuthUser = null;
-                    fullDetaillsLoggedInUser = null;
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-
-            async void StartFireBase()
-            {
-                Init();
-                await Task.CompletedTask;
-
-            }
-
-
-            //public async Task<List<Category>?> GetCategoriesAsync()
-            //{
-            //    //FB for firebase
-            //    try
-            //    {
-            //        var categoriesFromFB = await client.Child("categories").OnceAsync<Category>();
-            //        categories = categoriesFromFB.Select(fbItm => new Category() { Id = fbItm.Key, Name = fbItm.Object.Name, Description = fbItm.Object.Description, Order = fbItm.Object.Order }).ToList();
-            //        return categories;
-            //    }
-            //    catch (Exception)
-            //    {
-            //        throw;
-            //    }
-            //}
-
-            //public List<Category> GetCategoriesByOrder()
-            //{
-            //    List<Category> newList = categories.OrderBy(ctgry => ctgry.Order).ToList();
-            //    return newList;
-            //}
-
-            //public async Task<List<Item>> GetAllItemsAsync()
-            //{
-            //    //FB for firebase
-            //    try
-            //    {
-            //        // Create Empty List of Items
-            //        List<Item> newitems = new List<Item>();
-
-            //        // Fetch them from FireBase specific user (loggin user) and translate them (not to Item) to another class FBItem. (the Class is beneath)
-            //        // Why do add FBItem? FBItem is almost the same as Item, only FBItem has exactly the structure as in FireBase (List of Categories Ids)
-            //        // So we will populate a List of FBItem and in 2nd stage, change each of them to our Item
-            //        var itemsFromFB = await client.Child("users").Child(fullDetaillsLoggedInUser.Id).Child("items").OnceAsync<FBItem>();
-            //        // We are going over each of our new FBItem
-            //        // And creating an Item with the same data (only now instead of Category, we have Category ID)
-            //        foreach (var fbItem in itemsFromFB)
-            //        {
-            //            Item item = new Item() { Id = fbItem.Key, Name = fbItem.Object.Name, Description = fbItem.Object.Description };
-            //            List<Category> tCategories = new List<Category>();
-            //            foreach (var ctryID in fbItem.Object.Categories)
-            //            {
-            //                Category specificCategory = categories.FirstOrDefault(category => category.Id == ctryID);
-            //                tCategories.Add(specificCategory);
-            //                item.Categories = tCategories;
-            //            }
-            //            newitems.Add(item);
-            //        }
-            //        // only if the list is't the same, change it.
-            //        if (items != newitems)
-            //        {
-            //            items = newitems;
-            //        }
-            //        //items = itemsFromFB.Select(fbItm => new Item() { Id = fbItm.Key, Name = fbItm.Object.Name, Description = fbItm.Object.Description ,  }).ToList();
-            //        return items;
-            //    }
-            //    catch (Exception)
-            //    {
-            //        throw;
-            //    }
-            //}
-
-            //public List<Item> GetAllItemsAccordingACategory(string categoryName)
-            //{
-            //    // The following is an example of how to get filtered items from the ALREADY loaded data.
-            //    // The method does not have to be async, because we are not going to the server.
-            //    List<Item> filteredItems = items.Where(itm => itm.Categories.Any(ctgry => ctgry.Name == categoryName)).ToList();
-            //    return filteredItems;
-            //}
-
-            //public async Task<bool> AddItemAsync(Item theItemToAdd)
-            //{
-            //    try
-            //    {
-            //        // Look for all categories Id that are used by an Item
-            //        List<string> categoriesIds = theItemToAdd.Categories.Select(category => category.Id).ToList();
-            //        // Create a new FireBase Item
-            //        FBItem fbItem = new FBItem() { Name = theItemToAdd.Name, Description = theItemToAdd.Description, Categories = categoriesIds };
-            //        // Save the new Item
-            //        var result = await client
-            //          .Child("users")
-            //          .Child(fullDetaillsLoggedInUser.Id)
-            //          .Child("items")
-            //          .PostAsync(fbItem);
-
-            //        // Get back from the action, the Id that firebase created for the specific Item
-            //        // and assign it to our new local Item
-            //        theItemToAdd.Id = result.Key;
-            //        // Add the new Item to the list
-            //        items.Add(theItemToAdd);
-            //        return true;
-            //    }
-            //    catch (Exception)
-            //    {
-            //        throw;
-            //    }
-            //}
-
-            //public async Task<bool> DeleteItemAsync(Item theItemToDelete)
-            //{
-            //    if (items != null)
-            //    {
-            //        if (items.Contains(theItemToDelete))
-            //        {
-            //            //remove item by its FirebaseKey
-            //            string keyToDelete = theItemToDelete.Id;
-            //            try
-            //            {
-            //                await client.Child("users").Child(fullDetaillsLoggedInUser.Id).Child("items").Child(keyToDelete).DeleteAsync();
-            //                items.Remove(theItemToDelete);
-            //                return true;
-            //            }
-            //            catch
-            //            {
-            //                return false;
-            //            }
-            //        }
-            //    }
-            //    return false;
-            //}
-
-            class FBItem // Same as Item, only List<String>? Categories is a bit different. It uses a list of Id's
-            {
-                public string? Id { get; set; }
-                public string? Name { get; set; }
-                public string? Description { get; set; }
-                //public List<String>? Categories { get; set; }
+                return false;
             }
         }
+
+        public async Task<bool> TryLogin(string email, string password)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                return false;
+            }
+
+            EnsureInitialized();
+
+            try
+            {
+                var authUser = await auth!.SignInWithEmailAndPasswordAsync(email, password);
+                LoginAuthUser = authUser.AuthCredential;
+
+                string uid = auth.User.Uid;
+                string name = await client!
+                    .Child("users")
+                    .Child(uid)
+                    .Child("profile")
+                    .Child("userName")
+                    .OnceSingleAsync<string>() ?? email;
+
+                FullDetailsLoggedInUser = new AuthUser
+                {
+                    Email = auth.User.Info.Email,
+                    Id = uid,
+                    UserName = name
+                };
+
+                await LoadGameDataAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool Logout()
+        {
+            try
+            {
+                auth?.SignOut();
+                LoginAuthUser = null;
+                FullDetailsLoggedInUser = null;
+                gameData = new GameData();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string GetUserFullName()
+        {
+            return FullDetailsLoggedInUser?.UserName ?? string.Empty;
+        }
+
+        public string[] GetPetImages()
+        {
+            return petImages;
+        }
+
+        public async Task EnsureGameDataLoadedAsync()
+        {
+            if (FullDetailsLoggedInUser == null)
+            {
+                gameData = CreateDefaultGameData();
+                return;
+            }
+
+            if (gameData.Goals.Count == 0 && gameData.History.Count == 0 && gameData.LastGoalId == 0)
+            {
+                await LoadGameDataAsync();
+            }
+        }
+
+        public PetProgress GetProgress()
+        {
+            return gameData.Character;
+        }
+
+        public List<Goal> GetActiveGoals()
+        {
+            return gameData.Goals.Where(g => !g.IsCompleted).ToList();
+        }
+
+        public List<Goal> GetFinishedGoals()
+        {
+            return gameData.Goals.Where(g => g.IsCompleted).ToList();
+        }
+
+        public List<HistoryRecord> GetHistoryRecords()
+        {
+            return gameData.History;
+        }
+
+        public List<Goal> GetTodayGoals()
+        {
+            DayOfWeek today = DateTime.Today.DayOfWeek;
+            return GetActiveGoals().Where(goal => IsGoalScheduledForDay(goal, today)).ToList();
+        }
+
+        public async Task UpdatePetSelectionAsync(string petImage, string petName)
+        {
+            gameData.Character.SelectedPetImage = string.IsNullOrWhiteSpace(petImage) ? "dotnet_bot.png" : petImage;
+            gameData.Character.PetName = string.IsNullOrWhiteSpace(petName) ? "Pet" : petName.Trim();
+            await SaveGameDataAsync();
+        }
+
+        public async Task EnsureDailyStaminaAsync()
+        {
+            if (gameData.Character.LastLoginDate.Date != DateTime.Today)
+            {
+                gameData.Character.Stamina = 100;
+                gameData.Character.LastLoginDate = DateTime.Today;
+                await SaveGameDataAsync();
+            }
+        }
+
+        public async Task<bool> AddGoalAsync(Goal goal)
+        {
+            gameData.LastGoalId++;
+            goal.Id = gameData.LastGoalId.ToString();
+            goal.IsCompleted = false;
+            goal.Deadline = goal.EndDate;
+            if (goal.CustomProgressPoints.HasValue)
+            {
+                goal.ProgressPoints = goal.CustomProgressPoints.Value;
+            }
+            else
+            {
+                int days = Math.Max(1, (goal.Deadline.Date - goal.CreatedAt.Date).Days);
+                goal.ProgressPoints = days * 10;
+            }
+
+            gameData.Goals.Add(goal);
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task<bool> RemoveGoalAsync(Goal goalToDelete)
+        {
+            int penaltyPoints = TryApplyLateDeletePenalty(goalToDelete);
+            if (penaltyPoints > 0)
+            {
+                gameData.History.Insert(0, new HistoryRecord
+                {
+                    TaskName = goalToDelete.Title,
+                    Category = GetCategoryLabel(goalToDelete),
+                    ResultStatus = "Penalty",
+                    XpChange = -penaltyPoints,
+                    StaminaSpent = 0,
+                    DateFinished = DateTime.Now
+                });
+            }
+
+            gameData.Goals.Remove(goalToDelete);
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task<bool> MarkGoalAsCompletedAsync(Goal goalToComplete)
+        {
+            if (goalToComplete.IsCompleted || gameData.Character.Stamina < 10)
+            {
+                return false;
+            }
+
+            goalToComplete.IsCompleted = true;
+            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - StaminaPerGoalCompletion);
+            AddProgressFromGoal(goalToComplete);
+
+            gameData.History.Insert(0, new HistoryRecord
+            {
+                TaskName = goalToComplete.Title,
+                Category = GetCategoryLabel(goalToComplete),
+                ResultStatus = "Completed",
+                XpChange = goalToComplete.ProgressPoints,
+                StaminaSpent = StaminaPerGoalCompletion,
+                DateFinished = DateTime.Now
+            });
+
+            TryLevelUp();
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task ApplyDeadlinePenaltiesAsync()
+        {
+            foreach (Goal goal in gameData.Goals)
+            {
+                if (goal.IsCompleted || goal.IsOverduePenaltyApplied || DateTime.Now <= goal.Deadline)
+                {
+                    continue;
+                }
+
+                ApplyPenaltyByGoalCategories(goal, OverduePenaltyPoints);
+                goal.IsOverduePenaltyApplied = true;
+
+                gameData.History.Insert(0, new HistoryRecord
+                {
+                    TaskName = goal.Title,
+                    Category = GetCategoryLabel(goal),
+                    ResultStatus = "Failed",
+                    XpChange = -OverduePenaltyPoints,
+                    StaminaSpent = 0,
+                    DateFinished = DateTime.Now
+                });
+            }
+
+            await SaveGameDataAsync();
+        }
+
+        public async Task AddQuickIntellectPackAsync()
+        {
+            await AddGoalAsync(CreateQuickStartGoal("Reading (30 min)", false, true, false, 24, 20));
+            await AddGoalAsync(CreateQuickStartGoal("Learn something new (IT)", false, true, false, 48, 25));
+        }
+
+        public async Task AddQuickPhysicalPackAsync()
+        {
+            await AddGoalAsync(CreateQuickStartGoal("Morning workout", true, false, false, 12, 15));
+            await AddGoalAsync(CreateQuickStartGoal("Walk outdoors", true, false, false, 24, 10));
+        }
+
+        public async Task SaveGameDataAsync()
+        {
+            if (FullDetailsLoggedInUser == null)
+            {
+                return;
+            }
+
+            EnsureInitialized();
+
+            await client!
+                .Child("users")
+                .Child(FullDetailsLoggedInUser.Id)
+                .Child("gameData")
+                .PutAsync(gameData);
+        }
+
+        public async Task LoadGameDataAsync()
+        {
+            if (FullDetailsLoggedInUser == null)
+            {
+                gameData = CreateDefaultGameData();
+                return;
+            }
+
+            EnsureInitialized();
+
+            GameData? cloudData = await client!
+                .Child("users")
+                .Child(FullDetailsLoggedInUser.Id)
+                .Child("gameData")
+                .OnceSingleAsync<GameData>();
+
+            gameData = cloudData ?? CreateDefaultGameData();
+            gameData.Goals ??= new List<Goal>();
+            gameData.History ??= new List<HistoryRecord>();
+            gameData.Character ??= new PetProgress();
+            if (string.IsNullOrWhiteSpace(gameData.Character.SelectedPetImage))
+            {
+                gameData.Character.SelectedPetImage = "dotnet_bot.png";
+            }
+        }
+
+        private static GameData CreateDefaultGameData()
+        {
+            return new GameData
+            {
+                Goals = new List<Goal>(),
+                History = new List<HistoryRecord>(),
+                Character = new PetProgress(),
+                LastGoalId = 0
+            };
+        }
+
+        private void EnsureInitialized()
+        {
+            if (auth == null || client == null)
+            {
+                Init();
+            }
+        }
+
+        private static string GetCategoryLabel(Goal goal)
+        {
+            if (goal.IsPhysical) return "Physical";
+            if (goal.IsIntellectual) return "Intellectual";
+            if (goal.IsMental) return "Mental";
+            return "Other";
+        }
+
+        private static bool IsGoalScheduledForDay(Goal goal, DayOfWeek dayOfWeek)
+        {
+            return dayOfWeek switch
+            {
+                DayOfWeek.Sunday => goal.IsSunday,
+                DayOfWeek.Monday => goal.IsMonday,
+                DayOfWeek.Tuesday => goal.IsTuesday,
+                DayOfWeek.Wednesday => goal.IsWednesday,
+                DayOfWeek.Thursday => goal.IsThursday,
+                DayOfWeek.Friday => goal.IsFriday,
+                DayOfWeek.Saturday => goal.IsSaturday,
+                _ => false
+            };
+        }
+
+        private static Goal CreateQuickStartGoal(string title, bool isPhysical, bool isIntellectual, bool isMental, int hoursFromNow, int xp)
+        {
+            DateTime now = DateTime.Now;
+            DateTime deadline = now.AddHours(hoursFromNow);
+            return new Goal
+            {
+                Title = title,
+                Description = "Quick start",
+                Notes = string.Empty,
+                CreatedAt = now,
+                EndDate = deadline,
+                Deadline = deadline,
+                GoalTime = hoursFromNow,
+                CustomProgressPoints = xp,
+                IsPhysical = isPhysical,
+                IsIntellectual = isIntellectual,
+                IsMental = isMental,
+                IsSunday = true,
+                IsMonday = true,
+                IsTuesday = true,
+                IsWednesday = true,
+                IsThursday = true,
+                IsFriday = true,
+                IsSaturday = true
+            };
+        }
+
+        private int TryApplyLateDeletePenalty(Goal goalToDelete)
+        {
+            if (goalToDelete.IsCompleted)
+            {
+                return 0;
+            }
+
+            TimeSpan totalLifetime = goalToDelete.Deadline - goalToDelete.CreatedAt;
+            if (totalLifetime.TotalMinutes <= 0)
+            {
+                return 0;
+            }
+
+            TimeSpan passedLifetime = DateTime.Now - goalToDelete.CreatedAt;
+            if (passedLifetime <= TimeSpan.FromTicks(totalLifetime.Ticks / 2))
+            {
+                return 0;
+            }
+
+            ApplyPenaltyByGoalCategories(goalToDelete, LateDeletePenaltyPoints);
+            return LateDeletePenaltyPoints;
+        }
+
+        private void AddProgressFromGoal(Goal goal)
+        {
+            if (goal.IsPhysical) gameData.Character.PhysicalPoints += goal.ProgressPoints;
+            if (goal.IsIntellectual) gameData.Character.IntellectualPoints += goal.ProgressPoints;
+            if (goal.IsMental) gameData.Character.MentalPoints += goal.ProgressPoints;
+        }
+
+        private void ApplyPenaltyByGoalCategories(Goal goal, int penaltyPoints)
+        {
+            if (goal.IsPhysical) gameData.Character.PhysicalPoints = Math.Max(0, gameData.Character.PhysicalPoints - penaltyPoints);
+            if (goal.IsIntellectual) gameData.Character.IntellectualPoints = Math.Max(0, gameData.Character.IntellectualPoints - penaltyPoints);
+            if (goal.IsMental) gameData.Character.MentalPoints = Math.Max(0, gameData.Character.MentalPoints - penaltyPoints);
+        }
+
+        private void TryLevelUp()
+        {
+            int points = gameData.Character.PointsPerStatForCurrentLevel;
+            if (gameData.Character.PhysicalPoints >= points &&
+                gameData.Character.IntellectualPoints >= points &&
+                gameData.Character.MentalPoints >= points)
+            {
+                gameData.Character.Level++;
+                gameData.Character.PhysicalPoints = 0;
+                gameData.Character.IntellectualPoints = 0;
+                gameData.Character.MentalPoints = 0;
+            }
+        }
+
+        private class GameData
+        {
+            public List<Goal> Goals { get; set; } = new();
+            public List<HistoryRecord> History { get; set; } = new();
+            public PetProgress Character { get; set; } = new();
+            public int LastGoalId { get; set; }
+        }
+    }
 }

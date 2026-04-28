@@ -13,9 +13,9 @@ public partial class SchedulePage : ContentPage
         BindingContext = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        vm.Refresh();
+        await vm.RefreshAsync();
     }
 }

@@ -1,19 +1,16 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
-using Soulbound.Models;
 using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
     internal class PetSelectionViewModel : ViewModelBase
     {
-        private readonly CharacterService characterService;
+        private readonly AppService appService;
+        private readonly string[] petImages;
+        private int petIndex;
 
-        private ImageSource petAvatar = PetImageHelper.CreateSafeImageSource(null);
-
-        /// <summary>
-        /// Preview image with a safe fallback if the file name is wrong.
-        /// </summary>
+        private ImageSource petAvatar = ImageSource.FromFile("dotnet_bot.png");
         public ImageSource PetAvatar
         {
             get => petAvatar;
@@ -35,40 +32,52 @@ namespace Soulbound.ViewModels
 
         public PetSelectionViewModel()
         {
-            characterService = CharacterService.GetInstance();
+            appService = AppService.GetInstance();
+            petImages = appService.GetPetImages();
             LeftCommand = new Command(MoveLeft);
             RightCommand = new Command(MoveRight);
             ConfirmCommand = new Command(async () => await ConfirmAsync());
-            LoadCurrentPet();
+            _ = LoadCurrentPetAsync();
         }
 
-        private void LoadCurrentPet()
+        private async Task LoadCurrentPetAsync()
         {
-            PetOption pet = characterService.GetCurrentPetTemplate();
-            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
+            await appService.EnsureGameDataLoadedAsync();
+            string selected = appService.GetProgress().SelectedPetImage;
+            int found = Array.IndexOf(petImages, selected);
+            petIndex = found >= 0 ? found : 0;
+            PetAvatar = ImageSource.FromFile(petImages[petIndex]);
             if (string.IsNullOrWhiteSpace(PetName))
             {
-                PetName = pet.DefaultName;
+                PetName = appService.GetProgress().PetName;
             }
         }
 
         private void MoveLeft()
         {
-            PetOption pet = characterService.MovePetLeft();
-            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
-            PetName = pet.DefaultName;
+            petIndex--;
+            if (petIndex < 0)
+            {
+                petIndex = petImages.Length - 1;
+            }
+
+            PetAvatar = ImageSource.FromFile(petImages[petIndex]);
         }
 
         private void MoveRight()
         {
-            PetOption pet = characterService.MovePetRight();
-            PetAvatar = PetImageHelper.CreateSafeImageSource(pet.Image);
-            PetName = pet.DefaultName;
+            petIndex++;
+            if (petIndex >= petImages.Length)
+            {
+                petIndex = 0;
+            }
+
+            PetAvatar = ImageSource.FromFile(petImages[petIndex]);
         }
 
         private async Task ConfirmAsync()
         {
-            characterService.ConfirmPetSelection(PetName);
+            await appService.UpdatePetSelectionAsync(petImages[petIndex], PetName);
             await Shell.Current.GoToAsync("//MainRoomPage");
         }
     }

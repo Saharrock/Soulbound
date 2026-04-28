@@ -7,9 +7,7 @@ namespace Soulbound.ViewModels
 {
     internal class MainRoomViewModel : ViewModelBase
     {
-        private readonly TaskService taskService;
-
-        private readonly CharacterService characterService;
+        private readonly AppService appService;
 
         public ObservableCollection<Goal> TodayGoals { get; } = new();
 
@@ -34,11 +32,7 @@ namespace Soulbound.ViewModels
             set { petName = value; OnPropertyChanged(); }
         }
 
-        private ImageSource petAvatar = PetImageHelper.CreateSafeImageSource(null);
-
-        /// <summary>
-        /// Pet portrait with a safe fallback if the image file is missing.
-        /// </summary>
+        private ImageSource petAvatar = ImageSource.FromFile("dotnet_bot.png");
         public ImageSource PetAvatar
         {
             get => petAvatar;
@@ -99,32 +93,29 @@ namespace Soulbound.ViewModels
 
         public MainRoomViewModel()
         {
-            taskService = TaskService.GetInstance();
-            characterService = CharacterService.GetInstance();
-            RefreshData();
+            appService = AppService.GetInstance();
+            _ = RefreshDataAsync();
         }
 
-        /// <summary>
-        /// Reloads character stats, applies daily stamina and overdue rules, then today goals.
-        /// </summary>
-        public void RefreshData()
+        public async Task RefreshDataAsync()
         {
-            characterService.EnsureDailyStamina();
-            taskService.ApplyDeadlinePenalties();
+            await appService.EnsureGameDataLoadedAsync();
+            await appService.EnsureDailyStaminaAsync();
+            await appService.ApplyDeadlinePenaltiesAsync();
 
-            PetProgress progress = characterService.GetProgress();
+            PetProgress progress = appService.GetProgress();
             int required = progress.PointsPerStatForCurrentLevel;
 
             Level = progress.Level;
             Rank = progress.Rank;
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
-            PetAvatar = PetImageHelper.CreateSafeImageSource(progress.PetImage);
+            PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
             PhysicalValue = Math.Min(1.0, (double)progress.PhysicalPoints / required);
             IntellectualValue = Math.Min(1.0, (double)progress.IntellectualPoints / required);
             MentalValue = Math.Min(1.0, (double)progress.MentalPoints / required);
             Stamina = progress.Stamina;
 
-            List<Goal> activeGoals = taskService.GetActiveGoals();
+            List<Goal> activeGoals = appService.GetActiveGoals();
             ActiveGoalsCount = activeGoals.Count;
 
             Goal? nearest = null;
@@ -153,7 +144,7 @@ namespace Soulbound.ViewModels
             }
 
             TodayGoals.Clear();
-            foreach (Goal goal in taskService.GetTodayGoals())
+            foreach (Goal goal in appService.GetTodayGoals())
             {
                 TodayGoals.Add(goal);
             }

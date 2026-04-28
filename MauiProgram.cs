@@ -7,8 +7,6 @@ namespace Soulbound
     {
         public static MauiApp CreateMauiApp()
         {
-            DatabaseService.GetInstance().Initialize();
-
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()

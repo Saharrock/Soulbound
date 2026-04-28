@@ -6,22 +6,23 @@ namespace Soulbound.ViewModels
 {
     internal class ScheduleViewModel : ViewModelBase
     {
-        private readonly TaskService taskService;
+        private readonly AppService appService;
 
-        public ObservableCollection<ScheduleDayGroup> DayGroups { get; } = new();
+        public ObservableCollection<Goal> Goals { get; } = new();
 
         public ScheduleViewModel()
         {
-            taskService = TaskService.GetInstance();
-            Refresh();
+            appService = AppService.GetInstance();
+            _ = RefreshAsync();
         }
 
-        public void Refresh()
+        public async Task RefreshAsync()
         {
-            DayGroups.Clear();
-            foreach (ScheduleDayGroup group in taskService.GetScheduleGroups())
+            await appService.EnsureGameDataLoadedAsync();
+            Goals.Clear();
+            foreach (Goal goal in appService.GetActiveGoals())
             {
-                DayGroups.Add(group);
+                Goals.Add(goal);
             }
         }
     }

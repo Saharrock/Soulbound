@@ -7,9 +7,7 @@ namespace Soulbound.ViewModels
 {
     internal class GoalHistoryViewModel : ViewModelBase
     {
-        private readonly TaskService taskService;
-
-        private readonly CharacterService characterService;
+        private readonly AppService appService;
 
         public ObservableCollection<Goal> ActiveGoals { get; } = new();
 
@@ -23,28 +21,25 @@ namespace Soulbound.ViewModels
 
         public GoalHistoryViewModel()
         {
-            taskService = TaskService.GetInstance();
-            characterService = CharacterService.GetInstance();
+            appService = AppService.GetInstance();
             CompleteGoalCommand = new Command<Goal>(async goal => await CompleteGoalAsync(goal));
             DeleteItemCommand = new Command<Goal>(async goal => await DeleteGoalAsync(goal));
             ToggleExpandCommand = new Command<Goal>(ToggleExpand);
-            Init();
+            _ = RefreshAsync();
         }
 
-        /// <summary>
-        /// Refreshes the two lists from the database-backed task service.
-        /// </summary>
-        public void Init()
+        public async Task RefreshAsync()
         {
+            await appService.EnsureGameDataLoadedAsync();
             ActiveGoals.Clear();
             FinishedGoals.Clear();
 
-            foreach (Goal goal in taskService.GetActiveGoals())
+            foreach (Goal goal in appService.GetActiveGoals())
             {
                 ActiveGoals.Add(goal);
             }
 
-            foreach (Goal goal in taskService.GetFinishedGoals())
+            foreach (Goal goal in appService.GetFinishedGoals())
             {
                 FinishedGoals.Add(goal);
             }
@@ -57,9 +52,8 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            characterService.EnsureDailyStamina();
-
-            if (characterService.GetProgress().Stamina < 10)
+            await appService.EnsureDailyStaminaAsync();
+            if (appService.GetProgress().Stamina < 10)
             {
                 if (Application.Current?.MainPage != null)
                 {
@@ -72,7 +66,7 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            bool succeeded = await taskService.MarkGoalAsCompletedAsync(goalToComplete);
+            bool succeeded = await appService.MarkGoalAsCompletedAsync(goalToComplete);
             if (succeeded)
             {
                 ActiveGoals.Remove(goalToComplete);
@@ -90,7 +84,7 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            bool succeeded = await taskService.RemoveGoalAsync(goalToDelete);
+            bool succeeded = await appService.RemoveGoalAsync(goalToDelete);
             if (succeeded)
             {
                 ActiveGoals.Remove(goalToDelete);

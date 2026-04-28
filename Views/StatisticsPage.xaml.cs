@@ -13,9 +13,9 @@ public partial class StatisticsPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        viewModel.Refresh();
+        await viewModel.RefreshAsync();
     }
 }
