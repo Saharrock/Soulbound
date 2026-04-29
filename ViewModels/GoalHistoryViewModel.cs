@@ -17,14 +17,11 @@ namespace Soulbound.ViewModels
 
         public ICommand DeleteItemCommand { get; }
 
-        public ICommand ToggleExpandCommand { get; }
-
         public GoalHistoryViewModel()
         {
             appService = AppService.GetInstance();
             CompleteGoalCommand = new Command<Goal>(async goal => await CompleteGoalAsync(goal));
             DeleteItemCommand = new Command<Goal>(async goal => await DeleteGoalAsync(goal));
-            ToggleExpandCommand = new Command<Goal>(ToggleExpand);
             _ = RefreshAsync();
         }
 
@@ -84,24 +81,17 @@ namespace Soulbound.ViewModels
                 return;
             }
 
+            if (goalToDelete.IsCompleted)
+            {
+                return;
+            }
+
             bool succeeded = await appService.RemoveGoalAsync(goalToDelete);
             if (succeeded)
             {
                 ActiveGoals.Remove(goalToDelete);
                 FinishedGoals.Remove(goalToDelete);
             }
-        }
-
-        private void ToggleExpand(Goal? goal)
-        {
-            if (goal == null)
-            {
-                return;
-            }
-
-            goal.IsExpanded = !goal.IsExpanded;
-            OnPropertyChanged(nameof(ActiveGoals));
-            OnPropertyChanged(nameof(FinishedGoals));
         }
     }
 }

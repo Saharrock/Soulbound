@@ -3,62 +3,67 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Soulbound.Models"
              x:Class="Soulbound.Views.StatisticsPage"
-             Title="Statistics"
-             BackgroundColor="#6c2d2c">
-    <VerticalStackLayout Padding="16" Spacing="12">
-        <Label Text="Activity log"
-               FontSize="24"
-               FontAttributes="Bold"
-               TextColor="White" />
+             Title="Statistics">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#2A1A14" Offset="0.0" />
+                <GradientStop Color="#5A2A1D" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
 
-        <CollectionView ItemsSource="{Binding HistoryRecords}">
-            <CollectionView.EmptyView>
-                <Label Text="No history yet"
-                       TextColor="#f5d2b8"
-                       HorizontalOptions="Center"/>
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:HistoryRecord">
-                    <Frame BackgroundColor="#9f4636"
-                           BorderColor="#42313a"
-                           CornerRadius="12"
-                           Padding="10"
-                           Margin="0,0,0,8"
-                           HasShadow="False">
-                        <Grid ColumnDefinitions="10,*,Auto"
-                              ColumnSpacing="12"
-                              RowDefinitions="Auto,Auto"
-                              VerticalOptions="Center">
-                            <BoxView Grid.RowSpan="2"
-                                     Grid.Column="0"
-                                     WidthRequest="8"
-                                     Color="{Binding CategoryBarColor}"
-                                     CornerRadius="4"
-                                     VerticalOptions="Fill" />
-                            <VerticalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="4" VerticalOptions="Center">
-                                <Label Text="{Binding TaskName}"
-                                       TextColor="White"
-                                       FontAttributes="Bold"
-                                       LineBreakMode="TailTruncation" />
-                                <Label Text="{Binding StatusText}"
-                                       TextColor="{Binding StatusColor}"
-                                       FontSize="13"
-                                       FontAttributes="Bold" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="2" Grid.RowSpan="2" Spacing="4" VerticalOptions="Center">
-                                <Label Text="{Binding ResourcesLine}"
-                                       TextColor="#f5d2b8"
-                                       FontSize="12"
-                                       HorizontalTextAlignment="End" />
-                                <Label Text="{Binding DateFinished, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
-                                       TextColor="#f5d2b8"
-                                       FontSize="11"
-                                       HorizontalTextAlignment="End" />
-                            </VerticalStackLayout>
-                        </Grid>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="12">
+                <Label Text="Analytics board" FontSize="28" FontAttributes="Bold" />
+                <Label Text="Your progress footprint across all finished goals."
+                       TextColor="{StaticResource CardMutedText}" />
+
+                <Frame Padding="14" BackgroundColor="#6A3422">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Category distribution" FontAttributes="Bold" FontSize="18" />
+                        <CollectionView ItemsSource="{Binding CategorySummaries}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8" Padding="0,3">
+                                        <Label Grid.Column="0" Text="{Binding CategoryName}" FontAttributes="Bold" />
+                                        <Grid Grid.Column="1" HeightRequest="16" BackgroundColor="#3D2218" VerticalOptions="Center">
+                                            <BoxView Color="{Binding BarColorHex}" WidthRequest="{Binding BarWidth}" HorizontalOptions="Start" VerticalOptions="Fill" />
+                                        </Grid>
+                                        <Label Grid.Column="2" Text="{Binding Count}" FontAttributes="Bold" VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Activity timeline" FontAttributes="Bold" FontSize="20" />
+                <CollectionView ItemsSource="{Binding HistoryRecords}">
+                    <CollectionView.EmptyView>
+                        <Label Text="No history yet" TextColor="{StaticResource CardMutedText}" HorizontalOptions="Center"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:HistoryRecord">
+                            <Frame Padding="12" Margin="0,0,0,8" BackgroundColor="#7A3E28">
+                                <Grid ColumnDefinitions="12,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto">
+                                    <BoxView Grid.RowSpan="2" Grid.Column="0" WidthRequest="9" Color="{Binding CategoryBarColor}" CornerRadius="5" VerticalOptions="Fill" />
+                                    <VerticalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="2">
+                                        <Label Text="{Binding TaskName}" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding StatusText}" TextColor="{Binding StatusColor}" FontSize="13" FontAttributes="Bold" />
+                                        <Label Text="{Binding ResourcesLine}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2" Grid.RowSpan="2"
+                                           Text="{Binding DateFinished, StringFormat='{0:dd MMM yyyy HH:mm}'}"
+                                           TextColor="{StaticResource CardMutedText}"
+                                           FontSize="11"
+                                           HorizontalTextAlignment="End"
+                                           VerticalTextAlignment="Center" />
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

@@ -3,70 +3,66 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.GoalHistoryPage"
              xmlns:models="clr-namespace:Soulbound.Models"
-             xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
-             BackgroundColor="#6c2d2c"
+             x:Name="GoalHistoryRoot"
              Title="GoalHistoryPage">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource AppBackgroundTop}" Offset="0.0" />
+                <GradientStop Color="{StaticResource AppBackgroundBottom}" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        <ScrollView>
+            <VerticalStackLayout Spacing="16" Padding="12">
+                <Label Text="Active Goals" FontSize="24" FontAttributes="Bold"/>
+                <CollectionView ItemsSource="{Binding ActiveGoals}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Goal">
+                            <Frame Padding="10">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding EndDate, StringFormat='Due: {0:dd/MM}'}" TextColor="{StaticResource CardMutedText}"/>
+                                    </Grid>
+                                    <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
 
-    <ScrollView>
-        <VerticalStackLayout Spacing="20" Padding="10">
-            <Label Text="Active Goals" FontSize="20" TextColor="White"/>
-            <CollectionView ItemsSource="{Binding ActiveGoals}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Goal">
-                        <Border StrokeThickness="1" Stroke="#42313a">
-                            <VerticalStackLayout Padding="10" Spacing="8" BackgroundColor="#9f4636">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="White" />
-                                    <Label Grid.Column="1" Text="{Binding EndDate, StringFormat='Due: {0:dd/MM}'}" TextColor="#f5d2b8"/>
-                                </Grid>
-
-                                <Label Text="{Binding Description}" TextColor="#f5d2b8"/>
-
-                                <Button Text="{Binding IsExpanded, StringFormat='Details {0}'}"
-                                        Command="{Binding ToggleExpandCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}"
-                                        CommandParameter="{Binding .}"
-                                        BackgroundColor="#42313a"
-                                        TextColor="White"
-                                        FontSize="12"/>
-
-                                <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="4">
-                                    <Label Text="{Binding Description, StringFormat='Description: {0}'}" TextColor="White"/>
-                                    <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="White"/>
-                                    <Label Text="{Binding Notes, StringFormat='Notes: {0}'}" TextColor="White"/>
+                                    <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
+                                        <Button Text="Done"
+                                                BackgroundColor="{StaticResource SuccessAccent}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.CompleteGoalCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Remove"
+                                                BackgroundColor="{StaticResource DangerAccent}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.DeleteItemCommand}"
+                                                CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
 
-                                <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                                    <Button Text="Done"
-                                            BackgroundColor="Green"
-                                            TextColor="White"
-                                            Command="{Binding CompleteGoalCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}"
-                                            CommandParameter="{Binding .}" />
-                                    <Button Text="Remove"
-                                            BackgroundColor="#fc2121"
-                                            TextColor="White"
-                                            Command="{Binding DeleteItemCommand, Source={x:RelativeSource AncestorType={x:Type viewmodels:GoalHistoryViewModel}, Mode=FindAncestorBindingContext}}"
-                                            CommandParameter="{Binding .}" />
-                                </HorizontalStackLayout>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-            <Label Text="Finished Goals" FontSize="20" TextColor="White"/>
-            <CollectionView ItemsSource="{Binding FinishedGoals}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Goal">
-                        <Border StrokeThickness="1" Stroke="#42313a">
-                            <VerticalStackLayout Padding="10" Spacing="8" BackgroundColor="#9f4636">
-                                <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="White" />
-                                <Label Text="{Binding EndDate, StringFormat='Done: {0:dd/MM/yyyy}'}" TextColor="#f5d2b8"/>
-                                <Label Text="{Binding Notes, StringFormat='Notes: {0}'}" TextColor="White"/>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
-    </ScrollView>
+                <Label Text="Finished Goals" FontSize="24" FontAttributes="Bold"/>
+                <CollectionView ItemsSource="{Binding FinishedGoals}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Goal">
+                            <Frame Padding="10">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding EndDate, StringFormat='Done: {0:dd/MM}'}" TextColor="{StaticResource CardMutedText}"/>
+                                    </Grid>
+                                    <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding EndDate, StringFormat='Finished: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

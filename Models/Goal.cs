@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Soulbound.Models
 {
@@ -12,14 +8,11 @@ namespace Soulbound.Models
         public string Title { get; set; } = String.Empty;     // Goal Name
         public string Description { get; set; } = String.Empty; //Goal description
         public int GoalTime { get; set; } //Time of goal duration  in hours
-        public string Notes { get; set; } = String.Empty;
         public int ProgressPoints { get; set; }
         /// <summary>
         /// When set, this XP value is used instead of calculating from days until deadline.
         /// </summary>
         public int? CustomProgressPoints { get; set; }
-        public bool IsExpanded { get; set; }
-
         //Dates
         public DateTime CreatedAt { get; set; } = DateTime.Now; //Date of goal ending
         public DateTime EndDate { get; set; } = DateTime.Now;

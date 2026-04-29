@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Soulbound.Models;
 using Soulbound.Services;
@@ -91,9 +92,15 @@ namespace Soulbound.ViewModels
 
         public string StaminaText => $"{Stamina}/100";
 
+        public ICommand NavigateToStatisticsCommand { get; }
+
+        public ICommand NavigateToGoalHistoryCommand { get; }
+
         public MainRoomViewModel()
         {
             appService = AppService.GetInstance();
+            NavigateToStatisticsCommand = new Command(async () => await NavigateToStatisticsAsync());
+            NavigateToGoalHistoryCommand = new Command(async () => await NavigateToGoalHistoryAsync());
             _ = RefreshDataAsync();
         }
 
@@ -147,6 +154,22 @@ namespace Soulbound.ViewModels
             foreach (Goal goal in appService.GetTodayGoals())
             {
                 TodayGoals.Add(goal);
+            }
+        }
+
+        private static async Task NavigateToStatisticsAsync()
+        {
+            if (Shell.Current != null)
+            {
+                await Shell.Current.GoToAsync("//StatisticsPage");
+            }
+        }
+
+        private static async Task NavigateToGoalHistoryAsync()
+        {
+            if (Shell.Current != null)
+            {
+                await Shell.Current.GoToAsync("//GoalHistoryPage");
             }
         }
     }

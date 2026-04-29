@@ -2,41 +2,49 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Soulbound.Models"
+             xmlns:viewmodels="clr-namespace:Soulbound.ViewModels"
              x:Class="Soulbound.Views.SchedulePage"
-             Title="Schedule"
-             BackgroundColor="#6c2d2c">
-
-    <ScrollView>
-        <VerticalStackLayout Padding="12" Spacing="10">
-            <Label Text="Weekly schedule"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   TextColor="White"/>
-
-            <CollectionView ItemsSource="{Binding Goals}">
-                <CollectionView.EmptyView>
-                    <Label Text="No active goals"
-                           TextColor="#f5d2b8"/>
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Goal">
-                        <Frame BackgroundColor="#9f4636"
-                               BorderColor="#42313a"
-                               CornerRadius="14"
-                               HasShadow="False"
-                               Padding="10">
-                            <VerticalStackLayout Spacing="6">
-                                <Label Text="{Binding Title}"
-                                       FontAttributes="Bold"
-                                       FontSize="18"
-                                       TextColor="White"/>
-                                <Label Text="{Binding ScheduleText}"
-                                       TextColor="#f5d2b8"/>
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
-    </ScrollView>
+             Title="Schedule">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource AppBackgroundTop}" Offset="0.0" />
+                <GradientStop Color="{StaticResource AppBackgroundBottom}" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        <ScrollView>
+            <VerticalStackLayout Padding="14" Spacing="10">
+                <Label Text="Weekly schedule" FontSize="26" FontAttributes="Bold" />
+                <CollectionView ItemsSource="{Binding WeekSections}" SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Label Text="No active goals" TextColor="{StaticResource CardMutedText}" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewmodels:ScheduleDaySection">
+                            <Frame Padding="12">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding DayName}" FontAttributes="Bold" FontSize="18" />
+                                    <CollectionView ItemsSource="{Binding Goals}" SelectionMode="None">
+                                        <CollectionView.EmptyView>
+                                            <Label Text="No goals" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                        </CollectionView.EmptyView>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:Goal">
+                                                <Frame Padding="8" BackgroundColor="{StaticResource CardBackgroundDark}" Margin="0,0,0,6">
+                                                    <VerticalStackLayout Spacing="2">
+                                                        <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                                        <Label Text="{Binding Description}" FontSize="12" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation" />
+                                                    </VerticalStackLayout>
+                                                </Frame>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

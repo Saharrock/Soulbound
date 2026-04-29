@@ -2,54 +2,29 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.PetSelectionPage"
-             Title="Pet Selection"
-             BackgroundColor="#6c2d2c">
-
-    <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
-        <Label Text="Choose your pet"
-               FontSize="28"
-               FontAttributes="Bold"
-               HorizontalOptions="Center"
-               TextColor="White" />
-
-        <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
-            <Button Text="◀"
-                    Command="{Binding LeftCommand}"
-                    WidthRequest="60"
-                    HeightRequest="48"
-                    BackgroundColor="#42313a"
-                    TextColor="White" />
-
-            <Frame Padding="8"
-                   WidthRequest="220"
-                   HeightRequest="220"
-                   BackgroundColor="#9f4636"
-                   BorderColor="#42313a"
-                   CornerRadius="16">
-                <Image Source="{Binding PetAvatar}" Aspect="AspectFit" />
+             Title="Pet Selection">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource AppBackgroundTop}" Offset="0.0" />
+                <GradientStop Color="{StaticResource AppBackgroundBottom}" Offset="1.0" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
+            <Label Text="Choose your SoulMate" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Frame Padding="18" HorizontalOptions="Center" MaximumWidthRequest="600">
+                <VerticalStackLayout Spacing="14">
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
+                        <Button Text="◀" Command="{Binding LeftCommand}" WidthRequest="60" HeightRequest="48" />
+                        <Frame Padding="8" WidthRequest="220" HeightRequest="220" BackgroundColor="{StaticResource CardBackgroundDark}">
+                            <Image Source="{Binding PetAvatar}" Aspect="AspectFit" />
+                        </Frame>
+                        <Button Text="▶" Command="{Binding RightCommand}" WidthRequest="60" HeightRequest="48" />
+                    </HorizontalStackLayout>
+                    <Entry Placeholder="Pet name" Text="{Binding PetName}" HorizontalOptions="Fill" />
+                    <Button Text="Confirm" Command="{Binding ConfirmCommand}" BackgroundColor="{StaticResource SuccessAccent}" WidthRequest="180" HeightRequest="48" HorizontalOptions="Center" />
+                </VerticalStackLayout>
             </Frame>
-
-            <Button Text="▶"
-                    Command="{Binding RightCommand}"
-                    WidthRequest="60"
-                    HeightRequest="48"
-                    BackgroundColor="#42313a"
-                    TextColor="White" />
-        </HorizontalStackLayout>
-
-        <Entry Placeholder="Pet name"
-               Text="{Binding PetName}"
-               BackgroundColor="#f9dcc1"
-               TextColor="Black"
-               HorizontalOptions="Center"
-               WidthRequest="260" />
-
-        <Button Text="Confirm"
-                Command="{Binding ConfirmCommand}"
-                BackgroundColor="Green"
-                TextColor="White"
-                WidthRequest="180"
-                HeightRequest="48"
-                HorizontalOptions="Center" />
-    </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Grid>
 </ContentPage>

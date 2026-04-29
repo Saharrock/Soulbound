@@ -12,6 +12,37 @@ namespace Soulbound.Services
         private const int StaminaPerGoalCompletion = 15;
         private const int OverduePenaltyPoints = 5;
         private const int LateDeletePenaltyPoints = 3;
+        private static readonly IReadOnlyList<QuickStartPackDefinition> quickStartPacks = new List<QuickStartPackDefinition>
+        {
+            new QuickStartPackDefinition
+            {
+                Id = "intellect",
+                Title = "Intellect Pack",
+                Description = "Focused tasks for learning and knowledge growth.",
+                IsPhysical = false,
+                IsIntellectual = true,
+                IsMental = false,
+                Tasks = new List<QuickStartTaskDefinition>
+                {
+                    new QuickStartTaskDefinition { Title = "Reading (30 min)", HoursFromNow = 24, XpGain = 20 },
+                    new QuickStartTaskDefinition { Title = "Learn something new (IT)", HoursFromNow = 48, XpGain = 25 }
+                }
+            },
+            new QuickStartPackDefinition
+            {
+                Id = "physical",
+                Title = "Physical Pack",
+                Description = "Light physical activity to keep consistent momentum.",
+                IsPhysical = true,
+                IsIntellectual = false,
+                IsMental = false,
+                Tasks = new List<QuickStartTaskDefinition>
+                {
+                    new QuickStartTaskDefinition { Title = "Morning workout", HoursFromNow = 12, XpGain = 15 },
+                    new QuickStartTaskDefinition { Title = "Walk outdoors", HoursFromNow = 24, XpGain = 10 }
+                }
+            }
+        };
 
         private static AppService? instance;
         private FirebaseAuthClient? auth;
@@ -160,6 +191,13 @@ namespace Soulbound.Services
             return petImages;
         }
 
+        public int GoalCompletionStaminaCost => StaminaPerGoalCompletion;
+
+        public IReadOnlyList<QuickStartPackDefinition> GetQuickStartPacks()
+        {
+            return quickStartPacks;
+        }
+
         public async Task EnsureGameDataLoadedAsync()
         {
             if (FullDetailsLoggedInUser == null)
@@ -219,6 +257,11 @@ namespace Soulbound.Services
 
         public async Task<bool> AddGoalAsync(Goal goal)
         {
+            if (!goal.IsPhysical && !goal.IsIntellectual && !goal.IsMental)
+            {
+                return false;
+            }
+
             gameData.LastGoalId++;
             goal.Id = gameData.LastGoalId.ToString();
             goal.IsCompleted = false;
@@ -240,6 +283,11 @@ namespace Soulbound.Services
 
         public async Task<bool> RemoveGoalAsync(Goal goalToDelete)
         {
+            if (goalToDelete.IsCompleted)
+            {
+                return false;
+            }
+
             int penaltyPoints = TryApplyLateDeletePenalty(goalToDelete);
             if (penaltyPoints > 0)
             {
@@ -311,16 +359,19 @@ namespace Soulbound.Services
             await SaveGameDataAsync();
         }
 
-        public async Task AddQuickIntellectPackAsync()
+        public async Task AddQuickPackAsync(string packId)
         {
-            await AddGoalAsync(CreateQuickStartGoal("Reading (30 min)", false, true, false, 24, 20));
-            await AddGoalAsync(CreateQuickStartGoal("Learn something new (IT)", false, true, false, 48, 25));
-        }
+            QuickStartPackDefinition? pack = quickStartPacks.FirstOrDefault(item => item.Id == packId);
+            if (pack == null)
+            {
+                return;
+            }
 
-        public async Task AddQuickPhysicalPackAsync()
-        {
-            await AddGoalAsync(CreateQuickStartGoal("Morning workout", true, false, false, 12, 15));
-            await AddGoalAsync(CreateQuickStartGoal("Walk outdoors", true, false, false, 24, 10));
+            foreach (QuickStartTaskDefinition task in pack.Tasks)
+            {
+                Goal goal = CreateQuickStartGoal(task, pack.IsPhysical, pack.IsIntellectual, pack.IsMental);
+                await AddGoalAsync(goal);
+            }
         }
 
         public async Task SaveGameDataAsync()
@@ -407,20 +458,19 @@ namespace Soulbound.Services
             };
         }
 
-        private static Goal CreateQuickStartGoal(string title, bool isPhysical, bool isIntellectual, bool isMental, int hoursFromNow, int xp)
+        private static Goal CreateQuickStartGoal(QuickStartTaskDefinition task, bool isPhysical, bool isIntellectual, bool isMental)
         {
             DateTime now = DateTime.Now;
-            DateTime deadline = now.AddHours(hoursFromNow);
+            DateTime deadline = now.AddHours(task.HoursFromNow);
             return new Goal
             {
-                Title = title,
+                Title = task.Title,
                 Description = "Quick start",
-                Notes = string.Empty,
                 CreatedAt = now,
                 EndDate = deadline,
                 Deadline = deadline,
-                GoalTime = hoursFromNow,
-                CustomProgressPoints = xp,
+                GoalTime = task.HoursFromNow,
+                CustomProgressPoints = task.XpGain,
                 IsPhysical = isPhysical,
                 IsIntellectual = isIntellectual,
                 IsMental = isMental,
