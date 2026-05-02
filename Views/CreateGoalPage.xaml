@@ -22,7 +22,7 @@
 
                         <Label Text="{Binding NewStaminaCostLabel}" FontSize="13" TextColor="{StaticResource CardMutedText}" />
                         <Slider Minimum="1"
-                                Maximum="100"
+                                Maximum="15"
                                 Value="{Binding NewStaminaCostSlider, Mode=TwoWay}"
                                 ThumbColor="{StaticResource SuccessAccent}" />
 

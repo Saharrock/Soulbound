@@ -36,7 +36,7 @@
                         </Grid>
                         <CollectionView ItemsSource="{Binding TodayGoals}" HeightRequest="320">
                             <CollectionView.EmptyView>
-                                <Label Text="No goals planned for today" TextColor="{StaticResource CardMutedText}" />
+                                <Label Text="No scheduled workouts left to mark today · check All goals for your list" TextColor="{StaticResource CardMutedText}" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:Goal">
@@ -44,11 +44,11 @@
                                         <VerticalStackLayout Spacing="6">
                                             <Label Text="{Binding Title}" FontAttributes="Bold" />
                                             <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
-                                            <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
-                                            <Button Text="Done"
+                                            <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina per workout: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Button Text="Mark workout"
                                                     HorizontalOptions="Start"
                                                     BackgroundColor="{StaticResource SuccessAccent}"
-                                                    Command="{Binding Source={x:Reference MainRoomRoot}, Path=BindingContext.CompleteTodayGoalCommand}"
+                                                    Command="{Binding Source={x:Reference MainRoomRoot}, Path=BindingContext.MarkWorkoutCommand}"
                                                     CommandParameter="{Binding .}" />
                                         </VerticalStackLayout>
                                     </Frame>
@@ -70,10 +70,19 @@
                     </Frame>
                     <Label Text="{Binding PetName}" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" />
 
-                    <Label Text="Stamina (refreshes on new calendar days)" FontSize="11" TextColor="{StaticResource CardMutedText}" />
-                    <Label Text="Today" HorizontalOptions="Start" FontAttributes="Bold" Margin="0,4,0,0" />
+                    <Label Text="Weekly stamina · refills Mondays (ISO calendar week)"
+                           FontSize="11"
+                           TextColor="{StaticResource CardMutedText}" />
                     <ProgressBar Progress="{Binding StaminaProgress}" ScaleY="4" ProgressColor="{StaticResource SuccessAccent}" />
                     <Label Text="{Binding StaminaText}" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
+
+                    <Label Text="{Binding PrecisionSummary}"
+                           HorizontalOptions="Center"
+                           Margin="0,8,0,0"
+                           FontAttributes="Bold" />
+                    <Label Text="{Binding AchievementSummary}"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource CardMutedText}" />
 
                     <Label Text="This week · where your effort goes"
                            FontAttributes="Bold"
@@ -91,15 +100,6 @@
                     <ProgressBar Progress="{Binding IntellectualValue}" ScaleY="4" ProgressColor="{StaticResource IntellectualAccent}" />
                     <Label Text="Mental" />
                     <ProgressBar Progress="{Binding MentalValue}" ScaleY="4" ProgressColor="{StaticResource MentalAccent}" />
-
-                    <Label Text="Lifetime (total volume — separate from weekly balance)"
-                           FontAttributes="Italic"
-                           FontSize="11"
-                           TextColor="{StaticResource CardMutedText}"
-                           HorizontalOptions="Center"
-                           Margin="0,14,0,0" />
-                    <Label Text="{Binding Level, StringFormat='Level: {0}'}" HorizontalOptions="Center" />
-                    <Label Text="{Binding Rank, StringFormat='Rank: {0}'}" HorizontalOptions="Center" TextColor="{StaticResource CardMutedText}" />
                 </VerticalStackLayout>
             </Frame>
         </Grid>

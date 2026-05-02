@@ -72,7 +72,7 @@ namespace Soulbound.ViewModels
             get => newStaminaCost;
             set
             {
-                int v = Math.Clamp(value, 1, 100);
+                int v = Math.Clamp(value, 1, Goal.MaxStaminaCostPerGoal);
                 if (newStaminaCost == v)
                 {
                     return;
@@ -88,11 +88,11 @@ namespace Soulbound.ViewModels
         public double NewStaminaCostSlider
         {
             get => newStaminaCost;
-            set => NewStaminaCost = (int)Math.Round(Math.Clamp(value, 1.0, 100.0));
+            set => NewStaminaCost = (int)Math.Round(Math.Clamp(value, 1.0, Goal.MaxStaminaCostPerGoal));
         }
 
         public string NewStaminaCostLabel =>
-            $"Stamina cost when done: {NewStaminaCost} (how much effort this costs you today)";
+            $"Stamina cost when done: {NewStaminaCost} (from your weekly pool, max {Goal.MaxStaminaCostPerGoal} per goal)";
 
         public ICommand AddGoalCommand { get; }
 
@@ -235,7 +235,7 @@ namespace Soulbound.ViewModels
         public int TotalXpGain { get; }
         public int EstimatedStaminaCost { get; }
         public string TotalXpText => $"Total XP gain: {TotalXpGain}";
-        public string EstimatedStaminaText => $"Estimated stamina cost: {EstimatedStaminaCost}";
+        public string EstimatedStaminaText => $"Estimated stamina (this week): {EstimatedStaminaCost} (max {Goal.MaxStaminaCostPerGoal}/task)";
         public string PreviewButtonText => IsExpanded ? "Hide details" : "Preview details";
 
         public bool IsExpanded

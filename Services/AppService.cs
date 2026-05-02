@@ -11,8 +11,12 @@ namespace Soulbound.Services
     internal sealed class AppService
     {
         private const int StaminaPerGoalCompletion = 15;
+        public const int WeeklyStaminaCap = 100;
         private const int OverduePenaltyPoints = 5;
         private const int LateDeletePenaltyPoints = 3;
+        private const int PrecisionBonusOnTimelyCompletion = 2;
+        private const int PrecisionPenaltyOverdueFail = -5;
+        private const int PrecisionPenaltyLateGiveUp = -1;
         private static readonly IReadOnlyList<QuickStartPackDefinition> quickStartPacks = new List<QuickStartPackDefinition>
         {
             new QuickStartPackDefinition
@@ -194,6 +198,8 @@ namespace Soulbound.Services
 
         public int GoalCompletionStaminaCost => StaminaPerGoalCompletion;
 
+        public static int MaxStaminaCostPerGoalPublic => Goal.MaxStaminaCostPerGoal;
+
         public IReadOnlyList<QuickStartPackDefinition> GetQuickStartPacks()
         {
             return quickStartPacks;
@@ -233,10 +239,78 @@ namespace Soulbound.Services
             return gameData.History;
         }
 
+        /// <summary>Active goals scheduled for today (includes already-marked).</summary>
         public List<Goal> GetTodayGoals()
         {
             DayOfWeek today = DateTime.Today.DayOfWeek;
             return GetActiveGoals().Where(goal => IsGoalScheduledForDay(goal, today)).ToList();
+        }
+
+        /// <summary>
+        /// Active goals scheduled for today without a logged workout session for this calendar day.
+        /// </summary>
+        public List<Goal> GetTodayGoalsAwaitingWorkout()
+        {
+            string todayIso = LocalDateIso(DateTime.Today);
+            DayOfWeek dow = DateTime.Today.DayOfWeek;
+
+            List<Goal> list = GetActiveGoals()
+                .Where(goal => IsGoalScheduledForDay(goal, dow))
+                .Where(goal => !WorkoutRecordedOnDate(goal.Id, todayIso))
+                .ToList();
+
+            return list;
+        }
+
+        public async Task<bool> RecordWorkoutForTodayAsync(Goal goal)
+        {
+            await EnsureWeeklyPeriodAsync();
+
+            Goal? persisted = gameData.Goals.FirstOrDefault(g => g.Id == goal.Id);
+            if (goal.IsCompleted || persisted == null || persisted.IsCompleted)
+            {
+                return false;
+            }
+
+            if (!IsGoalScheduledForDay(goal, DateTime.Today.DayOfWeek))
+            {
+                return false;
+            }
+
+            string todayIso = LocalDateIso(DateTime.Today);
+
+            if (WorkoutRecordedOnDate(goal.Id, todayIso))
+            {
+                return false;
+            }
+
+            int staminaCost = goal.ResolvedStaminaCost;
+
+            if (gameData.Character.Stamina < staminaCost)
+            {
+                return false;
+            }
+
+            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - staminaCost);
+
+            gameData.WorkoutSessions.Add(new WorkoutSession
+            {
+                GoalId = goal.Id,
+                SessionDateIso = todayIso
+            });
+
+            gameData.History.Insert(0, new HistoryRecord
+            {
+                TaskName = goal.Title,
+                Category = GetCategoryLabel(goal),
+                ResultStatus = "Workout",
+                XpChange = 0,
+                StaminaSpent = staminaCost,
+                DateFinished = DateTime.Now
+            });
+
+            await SaveGameDataAsync();
+            return true;
         }
 
         public async Task UpdatePetSelectionAsync(string petImage, string petName)
@@ -248,13 +322,6 @@ namespace Soulbound.Services
 
         public async Task EnsureDailyStaminaAsync()
         {
-            if (gameData.Character.LastLoginDate.Date != DateTime.Today)
-            {
-                gameData.Character.Stamina = 100;
-                gameData.Character.LastLoginDate = DateTime.Today;
-                await SaveGameDataAsync();
-            }
-
             await EnsureWeeklyPeriodAsync();
         }
 
@@ -304,8 +371,10 @@ namespace Soulbound.Services
                     StaminaSpent = 0,
                     DateFinished = DateTime.Now
                 });
+                AdjustPrecision(PrecisionPenaltyLateGiveUp);
             }
 
+            RemoveWorkoutsForGoal(goalToDelete.Id);
             gameData.Goals.Remove(goalToDelete);
             await SaveGameDataAsync();
             return true;
@@ -336,6 +405,17 @@ namespace Soulbound.Services
             });
 
             TryLevelUp();
+
+            RemoveWorkoutsForGoal(goalToComplete.Id);
+
+            gameData.Character.CompletedGoalsLifetime = gameData.Goals.Count(static g => g.IsCompleted);
+
+            DateTime completionDate = DateTime.Now.Date;
+            if (completionDate <= goalToComplete.Deadline.Date)
+            {
+                AdjustPrecision(PrecisionBonusOnTimelyCompletion);
+            }
+
             await SaveGameDataAsync();
             return true;
         }
@@ -361,6 +441,8 @@ namespace Soulbound.Services
                     StaminaSpent = 0,
                     DateFinished = DateTime.Now
                 });
+
+                AdjustPrecision(PrecisionPenaltyOverdueFail);
             }
 
             await SaveGameDataAsync();
@@ -416,10 +498,40 @@ namespace Soulbound.Services
             gameData = cloudData ?? CreateDefaultGameData();
             gameData.Goals ??= new List<Goal>();
             gameData.History ??= new List<HistoryRecord>();
+            gameData.WorkoutSessions ??= new List<WorkoutSession>();
             gameData.Character ??= new PetProgress();
             if (string.IsNullOrWhiteSpace(gameData.Character.SelectedPetImage))
             {
                 gameData.Character.SelectedPetImage = "dotnet_bot.png";
+            }
+
+            ApplyCharacterMigration(gameData);
+        }
+
+        private static void ApplyCharacterMigration(GameData data)
+        {
+            PetProgress c = data.Character;
+
+            int completedGoals = data.Goals.Count(g => g.IsCompleted);
+            c.CompletedGoalsLifetime = completedGoals;
+
+            if (!c.PrecisionSeeded && c.CompletedGoalsLifetime == 0 && data.History.Count == 0)
+            {
+                c.PrecisionScore = 65;
+            }
+            else if (!c.PrecisionSeeded && c.PrecisionScore < 1)
+            {
+                c.PrecisionScore = 55;
+            }
+
+            if (!c.PrecisionSeeded)
+            {
+                c.PrecisionScore = Math.Clamp(c.PrecisionScore, 0, 100);
+                c.PrecisionSeeded = true;
+            }
+            else
+            {
+                c.PrecisionScore = Math.Clamp(c.PrecisionScore, 0, 100);
             }
         }
 
@@ -429,6 +541,7 @@ namespace Soulbound.Services
             {
                 Goals = new List<Goal>(),
                 History = new List<HistoryRecord>(),
+                WorkoutSessions = new List<WorkoutSession>(),
                 Character = new PetProgress(),
                 LastGoalId = 0
             };
@@ -448,6 +561,22 @@ namespace Soulbound.Services
             if (goal.IsIntellectual) return "Intellectual";
             if (goal.IsMental) return "Mental";
             return "Other";
+        }
+
+        private bool WorkoutRecordedOnDate(string goalId, string dateIso)
+        {
+            return gameData.WorkoutSessions.Exists(
+                session => session.GoalId == goalId && session.SessionDateIso == dateIso);
+        }
+
+        private void RemoveWorkoutsForGoal(string goalId)
+        {
+            gameData.WorkoutSessions.RemoveAll(session => session.GoalId == goalId);
+        }
+
+        private static string LocalDateIso(DateTime localDate)
+        {
+            return localDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
 
         private static bool IsGoalScheduledForDay(Goal goal, DayOfWeek dayOfWeek)
@@ -517,7 +646,13 @@ namespace Soulbound.Services
 
         private static int NormalizeStaminaCostForStorage(int raw)
         {
-            return raw < 1 ? StaminaPerGoalCompletion : Math.Clamp(raw, 1, 100);
+            return raw < 1 ? StaminaPerGoalCompletion : Math.Clamp(raw, 1, Goal.MaxStaminaCostPerGoal);
+        }
+
+        private void AdjustPrecision(int delta)
+        {
+            gameData.Character.PrecisionScore =
+                Math.Clamp(gameData.Character.PrecisionScore + delta, 0, 100);
         }
 
         private async Task EnsureWeeklyPeriodAsync()
@@ -528,6 +663,7 @@ namespace Soulbound.Services
             if (string.IsNullOrEmpty(character.WeeklyPeriodKey))
             {
                 character.WeeklyPeriodKey = key;
+                character.Stamina = WeeklyStaminaCap;
                 changed = true;
             }
             else if (character.WeeklyPeriodKey != key)
@@ -536,6 +672,7 @@ namespace Soulbound.Services
                 character.WeeklyPhysicalPoints = 0;
                 character.WeeklyIntellectualPoints = 0;
                 character.WeeklyMentalPoints = 0;
+                character.Stamina = WeeklyStaminaCap;
                 changed = true;
             }
 
@@ -591,6 +728,7 @@ namespace Soulbound.Services
         {
             public List<Goal> Goals { get; set; } = new();
             public List<HistoryRecord> History { get; set; } = new();
+            public List<WorkoutSession> WorkoutSessions { get; set; } = new();
             public PetProgress Character { get; set; } = new();
             public int LastGoalId { get; set; }
         }

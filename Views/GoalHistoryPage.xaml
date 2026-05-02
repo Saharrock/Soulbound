@@ -14,7 +14,7 @@
         </Grid.Background>
         <ScrollView>
             <VerticalStackLayout Spacing="16" Padding="12">
-                <Label Text="Active Goals" FontSize="24" FontAttributes="Bold"/>
+                <Label Text="Active Goals" TextColor="Green" FontSize="24" FontAttributes="Bold"/>
                 <CollectionView ItemsSource="{Binding ActiveGoals}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Goal">
@@ -27,14 +27,14 @@
                                     <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
-                                    <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost on Done: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+                                    <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost to achieve goal: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
 
                                     <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                                        <Button Text="Done"
+                                        <Button Text="Achieved"
                                                 BackgroundColor="{StaticResource SuccessAccent}"
                                                 Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.CompleteGoalCommand}"
                                                 CommandParameter="{Binding .}" />
-                                        <Button Text="Remove"
+                                        <Button Text="Give up"
                                                 BackgroundColor="{StaticResource DangerAccent}"
                                                 Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.DeleteItemCommand}"
                                                 CommandParameter="{Binding .}" />
@@ -45,7 +45,7 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <Label Text="Finished Goals" FontSize="24" FontAttributes="Bold"/>
+                <Label Text="Finished Goals" TextColor="Red" FontSize="24" FontAttributes="Bold"/>
                 <CollectionView ItemsSource="{Binding FinishedGoals}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:Goal">

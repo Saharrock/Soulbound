@@ -9,7 +9,17 @@ namespace Soulbound.Models
         public int IntellectualPoints { get; set; }
         public int MentalPoints { get; set; }
         public DateTime LastLoginDate { get; set; } = DateTime.Today;
+        /// <summary>Weekly energy pool — refilled when <see cref="WeeklyPeriodKey"/> changes.</summary>
         public int Stamina { get; set; } = 100;
+
+        /// <summary>0–100. Punctuality; raised on timely completions, lowered on overdue and late give-ups.</summary>
+        public int PrecisionScore { get; set; }
+
+        /// <summary>Lifetime successfully completed goals (for mastery tier).</summary>
+        public int CompletedGoalsLifetime { get; set; }
+
+        /// <summary>True once default precision has been applied for migrating saves.</summary>
+        public bool PrecisionSeeded { get; set; }
 
         /// <summary>ISO-style week key (<c>yyyy-'W'ww</c>) for resetting weekly mirrors.</summary>
         public string WeeklyPeriodKey { get; set; } = string.Empty;
@@ -34,6 +44,32 @@ namespace Soulbound.Models
 
                 return "Beginner";
             }
+        }
+
+        public static string PrecisionLabel(int score)
+        {
+            score = Math.Clamp(score, 0, 100);
+            return score switch
+            {
+                >= 95 => "Flawless",
+                >= 80 => "Sharp",
+                >= 60 => "Solid",
+                >= 40 => "Fair",
+                _ => "Loose"
+            };
+        }
+
+        public static string AchievementLabel(int goalsCompleted)
+        {
+            goalsCompleted = Math.Max(0, goalsCompleted);
+            return goalsCompleted switch
+            {
+                >= 100 => "Master",
+                >= 50 => "Veteran",
+                >= 20 => "Professional",
+                >= 5 => "Apprentice",
+                _ => "Novice"
+            };
         }
     }
 }

@@ -59,7 +59,38 @@ namespace Soulbound.Models
 
         public const int FallbackStaminaCost = 15;
 
-        public int ResolvedStaminaCost => StaminaCost < 1 ? FallbackStaminaCost : Math.Clamp(StaminaCost, 1, 100);
+        /// <summary>Weekly pool segment per goal (stored value may be legacy &gt; cap).</summary>
+        public const int MaxStaminaCostPerGoal = 15;
+
+        public int ResolvedStaminaCost => StaminaCost < 1 ? FallbackStaminaCost : Math.Clamp(StaminaCost, 1, MaxStaminaCostPerGoal);
+
+        /// <summary>
+        /// Whether "Done" is shown. Long goals (≥14d span): ≥7 days after creation, still before deadline.
+        /// Short goals: ≥12h after creation.
+        /// </summary>
+        public bool CanOfferComplete => CanEvaluateOfferComplete();
+
+        private bool CanEvaluateOfferComplete()
+        {
+            if (IsCompleted)
+            {
+                return false;
+            }
+
+            DateTime today = DateTime.Today;
+            if (today > Deadline.Date)
+            {
+                return false;
+            }
+
+            TimeSpan lifespan = Deadline.Date - CreatedAt.Date;
+            if (lifespan.TotalDays >= 14)
+            {
+                return (today - CreatedAt.Date).TotalDays >= 7;
+            }
+
+            return (DateTime.Now - CreatedAt).TotalHours >= 12;
+        }
     }
 
 }

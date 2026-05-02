@@ -12,20 +12,6 @@ namespace Soulbound.ViewModels
 
         public ObservableCollection<Goal> TodayGoals { get; } = new();
 
-        private int level;
-        public int Level
-        {
-            get => level;
-            set { level = value; OnPropertyChanged(); }
-        }
-
-        private string rank = "Beginner";
-        public string Rank
-        {
-            get => rank;
-            set { rank = value; OnPropertyChanged(); }
-        }
-
         private string petName = "Your Pet";
         public string PetName
         {
@@ -75,6 +61,20 @@ namespace Soulbound.ViewModels
             set { nearestDeadlineText = value; OnPropertyChanged(); }
         }
 
+        private string precisionSummary = string.Empty;
+        public string PrecisionSummary
+        {
+            get => precisionSummary;
+            set { precisionSummary = value; OnPropertyChanged(); }
+        }
+
+        private string achievementSummary = string.Empty;
+        public string AchievementSummary
+        {
+            get => achievementSummary;
+            set { achievementSummary = value; OnPropertyChanged(); }
+        }
+
         private int stamina;
         public int Stamina
         {
@@ -88,28 +88,28 @@ namespace Soulbound.ViewModels
             }
         }
 
-        public double StaminaProgress => Math.Min(1.0, Math.Max(0.0, Stamina / 100.0));
+        public double StaminaProgress => Math.Min(1.0, Math.Max(0.0, Stamina / (double)AppService.WeeklyStaminaCap));
 
-        public string StaminaText => $"{Stamina}/100";
+        public string StaminaText => $"{Stamina}/{AppService.WeeklyStaminaCap}";
 
         public ICommand NavigateToStatisticsCommand { get; }
 
         public ICommand NavigateToGoalHistoryCommand { get; }
 
-        public ICommand CompleteTodayGoalCommand { get; }
+        public ICommand MarkWorkoutCommand { get; }
 
         public MainRoomViewModel()
         {
             appService = AppService.GetInstance();
             NavigateToStatisticsCommand = new Command(async () => await NavigateToStatisticsAsync());
             NavigateToGoalHistoryCommand = new Command(async () => await NavigateToGoalHistoryAsync());
-            CompleteTodayGoalCommand = new Command<Goal>(async goal => await CompleteTodayGoalAsync(goal));
+            MarkWorkoutCommand = new Command<Goal>(async goal => await MarkWorkoutAsync(goal));
             _ = RefreshDataAsync();
         }
 
-        private async Task CompleteTodayGoalAsync(Goal? goalToComplete)
+        private async Task MarkWorkoutAsync(Goal? workoutGoal)
         {
-            if (goalToComplete == null)
+            if (workoutGoal == null)
             {
                 return;
             }
@@ -117,25 +117,39 @@ namespace Soulbound.ViewModels
             await appService.EnsureGameDataLoadedAsync();
             await appService.EnsureDailyStaminaAsync();
 
-            int cost = goalToComplete.ResolvedStaminaCost;
+            int cost = workoutGoal.ResolvedStaminaCost;
+
             if (appService.GetProgress().Stamina < cost)
             {
                 if (Application.Current?.MainPage != null)
                 {
                     await Application.Current.MainPage.DisplayAlert(
                         "Not enough stamina",
-                        $"Completing \"{goalToComplete.Title}\" costs {cost} stamina. Pace yourself or resume tomorrow.",
+                        $"Marking a workout costs {cost}. Your weekly stamina pool refreshes next Monday.",
                         "OK");
                 }
 
                 return;
             }
 
-            bool succeeded = await appService.MarkGoalAsCompletedAsync(goalToComplete);
-            if (succeeded)
+            bool succeeded = await appService.RecordWorkoutForTodayAsync(workoutGoal);
+
+            if (!succeeded)
             {
+                if (Application.Current?.MainPage != null)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Workout not saved",
+                        "Could not log this workout. It may already be marked for today, or the goal is no longer active.",
+                        "OK");
+                }
+
                 await RefreshDataAsync();
+
+                return;
             }
+
+            await RefreshDataAsync();
         }
 
         public async Task RefreshDataAsync()
@@ -146,10 +160,14 @@ namespace Soulbound.ViewModels
 
             PetProgress progress = appService.GetProgress();
 
-            Level = progress.Level;
-            Rank = progress.Rank;
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
             PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
+
+            PrecisionSummary =
+                $"Precision: {PetProgress.PrecisionLabel(progress.PrecisionScore)} ({progress.PrecisionScore})";
+
+            AchievementSummary =
+                $"Mastery: {PetProgress.AchievementLabel(progress.CompletedGoalsLifetime)} ({progress.CompletedGoalsLifetime} goals)";
 
             ApplyWeeklyEffortShares(progress);
 
@@ -184,7 +202,7 @@ namespace Soulbound.ViewModels
             }
 
             TodayGoals.Clear();
-            foreach (Goal goal in appService.GetTodayGoals())
+            foreach (Goal goal in appService.GetTodayGoalsAwaitingWorkout())
             {
                 TodayGoals.Add(goal);
             }

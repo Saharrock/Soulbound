@@ -25,6 +25,7 @@ namespace Soulbound.Models
             "Completed" => Color.FromArgb("#7ed957"),
             "Failed" => Color.FromArgb("#ff4444"),
             "Penalty" => Color.FromArgb("#ff9f43"),
+            "Workout" => Color.FromArgb("#54a8ff"),
             _ => Colors.Gray
         };
 

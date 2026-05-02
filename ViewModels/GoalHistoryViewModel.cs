@@ -50,6 +50,7 @@ namespace Soulbound.ViewModels
             }
 
             await appService.EnsureDailyStaminaAsync();
+
             int cost = goalToComplete.ResolvedStaminaCost;
             if (appService.GetProgress().Stamina < cost)
             {
@@ -57,7 +58,7 @@ namespace Soulbound.ViewModels
                 {
                     await Application.Current.MainPage.DisplayAlert(
                         "Not enough stamina",
-                        $"Completing \"{goalToComplete.Title}\" costs {cost} stamina. Pace yourself or resume tomorrow.",
+                        $"Achievement costs {cost} stamina. Completing closes the goal and grants XP.",
                         "OK");
                 }
 
