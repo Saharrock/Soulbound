@@ -10,6 +10,13 @@ namespace Soulbound.Models
         public int MentalPoints { get; set; }
         public DateTime LastLoginDate { get; set; } = DateTime.Today;
         public int Stamina { get; set; } = 100;
+
+        /// <summary>ISO-style week key (<c>yyyy-'W'ww</c>) for resetting weekly mirrors.</summary>
+        public string WeeklyPeriodKey { get; set; } = string.Empty;
+
+        public int WeeklyPhysicalPoints { get; set; }
+        public int WeeklyIntellectualPoints { get; set; }
+        public int WeeklyMentalPoints { get; set; }
         public int PointsPerStatForCurrentLevel => 100 + (Level - 1) * 50;
         public string Rank
         {

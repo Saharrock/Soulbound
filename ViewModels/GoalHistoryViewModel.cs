@@ -50,13 +50,14 @@ namespace Soulbound.ViewModels
             }
 
             await appService.EnsureDailyStaminaAsync();
-            if (appService.GetProgress().Stamina < 10)
+            int cost = goalToComplete.ResolvedStaminaCost;
+            if (appService.GetProgress().Stamina < cost)
             {
                 if (Application.Current?.MainPage != null)
                 {
                     await Application.Current.MainPage.DisplayAlert(
-                        "No stamina",
-                        "Restore your character stamina before completing goals.",
+                        "Not enough stamina",
+                        $"Completing \"{goalToComplete.Title}\" costs {cost} stamina. Pace yourself or resume tomorrow.",
                         "OK");
                 }
 

@@ -27,6 +27,7 @@
                                     <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost on Done: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
 
                                     <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
                                         <Button Text="Done"

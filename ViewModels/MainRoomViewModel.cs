@@ -96,12 +96,46 @@ namespace Soulbound.ViewModels
 
         public ICommand NavigateToGoalHistoryCommand { get; }
 
+        public ICommand CompleteTodayGoalCommand { get; }
+
         public MainRoomViewModel()
         {
             appService = AppService.GetInstance();
             NavigateToStatisticsCommand = new Command(async () => await NavigateToStatisticsAsync());
             NavigateToGoalHistoryCommand = new Command(async () => await NavigateToGoalHistoryAsync());
+            CompleteTodayGoalCommand = new Command<Goal>(async goal => await CompleteTodayGoalAsync(goal));
             _ = RefreshDataAsync();
+        }
+
+        private async Task CompleteTodayGoalAsync(Goal? goalToComplete)
+        {
+            if (goalToComplete == null)
+            {
+                return;
+            }
+
+            await appService.EnsureGameDataLoadedAsync();
+            await appService.EnsureDailyStaminaAsync();
+
+            int cost = goalToComplete.ResolvedStaminaCost;
+            if (appService.GetProgress().Stamina < cost)
+            {
+                if (Application.Current?.MainPage != null)
+                {
+                    await Application.Current.MainPage.DisplayAlert(
+                        "Not enough stamina",
+                        $"Completing \"{goalToComplete.Title}\" costs {cost} stamina. Pace yourself or resume tomorrow.",
+                        "OK");
+                }
+
+                return;
+            }
+
+            bool succeeded = await appService.MarkGoalAsCompletedAsync(goalToComplete);
+            if (succeeded)
+            {
+                await RefreshDataAsync();
+            }
         }
 
         public async Task RefreshDataAsync()
@@ -111,15 +145,14 @@ namespace Soulbound.ViewModels
             await appService.ApplyDeadlinePenaltiesAsync();
 
             PetProgress progress = appService.GetProgress();
-            int required = progress.PointsPerStatForCurrentLevel;
 
             Level = progress.Level;
             Rank = progress.Rank;
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
             PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
-            PhysicalValue = Math.Min(1.0, (double)progress.PhysicalPoints / required);
-            IntellectualValue = Math.Min(1.0, (double)progress.IntellectualPoints / required);
-            MentalValue = Math.Min(1.0, (double)progress.MentalPoints / required);
+
+            ApplyWeeklyEffortShares(progress);
+
             Stamina = progress.Stamina;
 
             List<Goal> activeGoals = appService.GetActiveGoals();
@@ -155,6 +188,17 @@ namespace Soulbound.ViewModels
             {
                 TodayGoals.Add(goal);
             }
+        }
+
+        private void ApplyWeeklyEffortShares(PetProgress progress)
+        {
+            int p = progress.WeeklyPhysicalPoints;
+            int i = progress.WeeklyIntellectualPoints;
+            int m = progress.WeeklyMentalPoints;
+            double denom = Math.Max(1.0, Math.Max(p, Math.Max(i, m)));
+            PhysicalValue = p / denom;
+            IntellectualValue = i / denom;
+            MentalValue = m / denom;
         }
 
         private static async Task NavigateToStatisticsAsync()

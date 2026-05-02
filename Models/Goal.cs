@@ -23,6 +23,9 @@ namespace Soulbound.Models
         public bool IsMental { get; set; } = false;
         public bool IsIntellectual { get; set; } = false;
 
+        /// <summary>Stamina spent when tapping Done. Legacy data may omit or use 0.</summary>
+        public int StaminaCost { get; set; } = 15;
+
         //Status 
         public bool IsCompleted { get; set; } = false; // Completed/No
         public bool IsAbandoned { get; set; } = false;
@@ -53,6 +56,10 @@ namespace Soulbound.Models
                 return days.Count == 0 ? "No days selected" : string.Join(", ", days);
             }
         }
+
+        public const int FallbackStaminaCost = 15;
+
+        public int ResolvedStaminaCost => StaminaCost < 1 ? FallbackStaminaCost : Math.Clamp(StaminaCost, 1, 100);
     }
 
 }

@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Soulbound.Models"
+             xmlns:vm="clr-namespace:Soulbound.ViewModels"
              x:Class="Soulbound.Views.StatisticsPage"
              Title="Statistics">
     <Grid>
@@ -14,22 +15,50 @@
 
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="12">
-                <Label Text="Analytics board" FontSize="28" FontAttributes="Bold" />
-                <Label Text="Your progress footprint across all finished goals."
+                <Label Text="Soulbound analytics" FontSize="28" FontAttributes="Bold" />
+                <Label Text="All-time stamina and timelines. Weekly effort lives on Main room."
                        TextColor="{StaticResource CardMutedText}" />
 
                 <Frame Padding="14" BackgroundColor="#6A3422">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="Category distribution" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="Active goals" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="Where you stand toward each deadline." FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                        <CollectionView ItemsSource="{Binding ActiveGoalStats}" SelectionMode="None" MaximumHeightRequest="280">
+                            <CollectionView.EmptyView>
+                                <Label Text="No active goals" TextColor="{StaticResource CardMutedText}" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ActiveGoalStatItem">
+                                    <Frame Padding="12" Margin="0,0,0,8" BackgroundColor="#5A3218">
+                                        <VerticalStackLayout Spacing="6">
+                                            <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                            <Label Text="{Binding DeadlineText, StringFormat='Deadline: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Label Text="{Binding CategoriesText, StringFormat='Categories: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <ProgressBar Progress="{Binding TimelineProgress}" ScaleY="3" ProgressColor="{StaticResource SuccessAccent}" />
+                                            <Label Text="{Binding ProgressPercentText}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
+                                            <Label Text="{Binding TimelineHint}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
+                                        </VerticalStackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Padding="14" BackgroundColor="#6A3422">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Stamina by zone (all time)" FontAttributes="Bold" FontSize="18" />
                         <CollectionView ItemsSource="{Binding CategorySummaries}" SelectionMode="None">
                             <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8" Padding="0,3">
-                                        <Label Grid.Column="0" Text="{Binding CategoryName}" FontAttributes="Bold" />
+                                <DataTemplate x:DataType="vm:CategorySummaryItem">
+                                    <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8" Padding="0,6">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding CategoryName}" FontAttributes="Bold" />
+                                            <Label Text="{Binding MetricsLine}" FontSize="10" TextColor="#D0C8C4" />
+                                        </VerticalStackLayout>
                                         <Grid Grid.Column="1" HeightRequest="16" BackgroundColor="#3D2218" VerticalOptions="Center">
                                             <BoxView Color="{Binding BarColorHex}" WidthRequest="{Binding BarWidth}" HorizontalOptions="Start" VerticalOptions="Fill" />
                                         </Grid>
-                                        <Label Grid.Column="2" Text="{Binding Count}" FontAttributes="Bold" VerticalOptions="Center" />
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>

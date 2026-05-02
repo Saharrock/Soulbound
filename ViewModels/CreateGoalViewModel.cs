@@ -64,6 +64,36 @@ namespace Soulbound.ViewModels
         private bool isSaturday;
         public bool IsSaturday { get => isSaturday; set { isSaturday = value; OnPropertyChanged(); } }
 
+        /// <summary>Stamina deducted when tapping Done (1–100).</summary>
+        private int newStaminaCost = Goal.FallbackStaminaCost;
+
+        public int NewStaminaCost
+        {
+            get => newStaminaCost;
+            set
+            {
+                int v = Math.Clamp(value, 1, 100);
+                if (newStaminaCost == v)
+                {
+                    return;
+                }
+
+                newStaminaCost = v;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(NewStaminaCostSlider));
+                OnPropertyChanged(nameof(NewStaminaCostLabel));
+            }
+        }
+
+        public double NewStaminaCostSlider
+        {
+            get => newStaminaCost;
+            set => NewStaminaCost = (int)Math.Round(Math.Clamp(value, 1.0, 100.0));
+        }
+
+        public string NewStaminaCostLabel =>
+            $"Stamina cost when done: {NewStaminaCost} (how much effort this costs you today)";
+
         public ICommand AddGoalCommand { get; }
 
         public ICommand AddQuickPackCommand { get; }
@@ -109,6 +139,7 @@ namespace Soulbound.ViewModels
                 Deadline = SelectedDate,
                 CreatedAt = DateTime.Now,
                 GoalTime = Math.Max(24, (SelectedDate - DateTime.Now).Days * 24),
+                StaminaCost = NewStaminaCost,
                 IsPhysical = NewIsPhysical,
                 IsIntellectual = NewIsIntellectual,
                 IsMental = NewIsMental,
@@ -151,6 +182,7 @@ namespace Soulbound.ViewModels
             NewIsIntellectual = false;
             NewIsMental = false;
             SelectedDate = DateTime.Today.AddDays(1);
+            NewStaminaCost = Goal.FallbackStaminaCost;
             IsSunday = false;
             IsMonday = false;
             IsTuesday = false;

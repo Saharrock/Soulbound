@@ -28,7 +28,12 @@
 
                 <Frame Padding="14">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Goals for today" FontAttributes="Bold" FontSize="18" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Goals for today" FontAttributes="Bold" FontSize="18" />
+                            <Button Grid.Column="1" Text="All goals"
+                                    Padding="12,6"
+                                    Command="{Binding NavigateToGoalHistoryCommand}" />
+                        </Grid>
                         <CollectionView ItemsSource="{Binding TodayGoals}" HeightRequest="320">
                             <CollectionView.EmptyView>
                                 <Label Text="No goals planned for today" TextColor="{StaticResource CardMutedText}" />
@@ -36,12 +41,15 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:Goal">
                                     <Frame Padding="10" Margin="0,0,0,8" BackgroundColor="{StaticResource CardBackgroundDark}">
-                                        <Frame.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding Source={x:Reference MainRoomRoot}, Path=BindingContext.NavigateToGoalHistoryCommand}" />
-                                        </Frame.GestureRecognizers>
-                                        <VerticalStackLayout Spacing="4">
+                                        <VerticalStackLayout Spacing="6">
                                             <Label Text="{Binding Title}" FontAttributes="Bold" />
                                             <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Button Text="Done"
+                                                    HorizontalOptions="Start"
+                                                    BackgroundColor="{StaticResource SuccessAccent}"
+                                                    Command="{Binding Source={x:Reference MainRoomRoot}, Path=BindingContext.CompleteTodayGoalCommand}"
+                                                    CommandParameter="{Binding .}" />
                                         </VerticalStackLayout>
                                     </Frame>
                                 </DataTemplate>
@@ -61,19 +69,37 @@
                         <Image Source="{Binding PetAvatar}" Aspect="AspectFit" HeightRequest="220" />
                     </Frame>
                     <Label Text="{Binding PetName}" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" />
-                    <Label Text="{Binding Level, StringFormat='Level: {0}'}" HorizontalOptions="Center" />
-                    <Label Text="{Binding Rank, StringFormat='Rank: {0}'}" HorizontalOptions="Center" TextColor="{StaticResource CardMutedText}" />
 
-                    <Label Text="Stamina" />
+                    <Label Text="Stamina (refreshes on new calendar days)" FontSize="11" TextColor="{StaticResource CardMutedText}" />
+                    <Label Text="Today" HorizontalOptions="Start" FontAttributes="Bold" Margin="0,4,0,0" />
                     <ProgressBar Progress="{Binding StaminaProgress}" ScaleY="4" ProgressColor="{StaticResource SuccessAccent}" />
                     <Label Text="{Binding StaminaText}" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
 
-                    <Label Text="Physical goals" />
+                    <Label Text="This week · where your effort goes"
+                           FontAttributes="Bold"
+                           FontSize="13"
+                           HorizontalOptions="Center"
+                           Margin="0,12,0,0" />
+                    <Label Text="Bars show the mix compared to your strongest area; not level progress. Resets every Monday."
+                           FontAttributes="Italic"
+                           FontSize="11"
+                           TextColor="{StaticResource CardMutedText}"
+                           HorizontalOptions="Center" />
+                    <Label Text="Physical" Margin="0,6,0,0" />
                     <ProgressBar Progress="{Binding PhysicalValue}" ScaleY="4" ProgressColor="{StaticResource PhysicalAccent}" />
-                    <Label Text="Intellectual goals" />
+                    <Label Text="Intellectual" />
                     <ProgressBar Progress="{Binding IntellectualValue}" ScaleY="4" ProgressColor="{StaticResource IntellectualAccent}" />
-                    <Label Text="Mental goals" />
+                    <Label Text="Mental" />
                     <ProgressBar Progress="{Binding MentalValue}" ScaleY="4" ProgressColor="{StaticResource MentalAccent}" />
+
+                    <Label Text="Lifetime (total volume — separate from weekly balance)"
+                           FontAttributes="Italic"
+                           FontSize="11"
+                           TextColor="{StaticResource CardMutedText}"
+                           HorizontalOptions="Center"
+                           Margin="0,14,0,0" />
+                    <Label Text="{Binding Level, StringFormat='Level: {0}'}" HorizontalOptions="Center" />
+                    <Label Text="{Binding Rank, StringFormat='Rank: {0}'}" HorizontalOptions="Center" TextColor="{StaticResource CardMutedText}" />
                 </VerticalStackLayout>
             </Frame>
         </Grid>

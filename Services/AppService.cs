@@ -1,4 +1,5 @@
-﻿using Firebase.Auth;
+﻿using System.Globalization;
+using Firebase.Auth;
 using Firebase.Auth.Providers;
 using Firebase.Auth.Repository;
 using Firebase.Database;
@@ -253,6 +254,8 @@ namespace Soulbound.Services
                 gameData.Character.LastLoginDate = DateTime.Today;
                 await SaveGameDataAsync();
             }
+
+            await EnsureWeeklyPeriodAsync();
         }
 
         public async Task<bool> AddGoalAsync(Goal goal)
@@ -266,6 +269,7 @@ namespace Soulbound.Services
             goal.Id = gameData.LastGoalId.ToString();
             goal.IsCompleted = false;
             goal.Deadline = goal.EndDate;
+            goal.StaminaCost = NormalizeStaminaCostForStorage(goal.StaminaCost);
             if (goal.CustomProgressPoints.HasValue)
             {
                 goal.ProgressPoints = goal.CustomProgressPoints.Value;
@@ -309,14 +313,17 @@ namespace Soulbound.Services
 
         public async Task<bool> MarkGoalAsCompletedAsync(Goal goalToComplete)
         {
-            if (goalToComplete.IsCompleted || gameData.Character.Stamina < 10)
+            await EnsureWeeklyPeriodAsync();
+            int staminaCost = goalToComplete.ResolvedStaminaCost;
+            if (goalToComplete.IsCompleted || gameData.Character.Stamina < staminaCost)
             {
                 return false;
             }
 
             goalToComplete.IsCompleted = true;
-            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - StaminaPerGoalCompletion);
+            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - staminaCost);
             AddProgressFromGoal(goalToComplete);
+            AddWeeklyProgressFromGoal(goalToComplete);
 
             gameData.History.Insert(0, new HistoryRecord
             {
@@ -324,7 +331,7 @@ namespace Soulbound.Services
                 Category = GetCategoryLabel(goalToComplete),
                 ResultStatus = "Completed",
                 XpChange = goalToComplete.ProgressPoints,
-                StaminaSpent = StaminaPerGoalCompletion,
+                StaminaSpent = staminaCost,
                 DateFinished = DateTime.Now
             });
 
@@ -471,6 +478,7 @@ namespace Soulbound.Services
                 Deadline = deadline,
                 GoalTime = task.HoursFromNow,
                 CustomProgressPoints = task.XpGain,
+                StaminaCost = StaminaPerGoalCompletion,
                 IsPhysical = isPhysical,
                 IsIntellectual = isIntellectual,
                 IsMental = isMental,
@@ -507,11 +515,55 @@ namespace Soulbound.Services
             return LateDeletePenaltyPoints;
         }
 
+        private static int NormalizeStaminaCostForStorage(int raw)
+        {
+            return raw < 1 ? StaminaPerGoalCompletion : Math.Clamp(raw, 1, 100);
+        }
+
+        private async Task EnsureWeeklyPeriodAsync()
+        {
+            string key = GetWeeklyPeriodKey(DateTime.Today);
+            PetProgress character = gameData.Character;
+            bool changed = false;
+            if (string.IsNullOrEmpty(character.WeeklyPeriodKey))
+            {
+                character.WeeklyPeriodKey = key;
+                changed = true;
+            }
+            else if (character.WeeklyPeriodKey != key)
+            {
+                character.WeeklyPeriodKey = key;
+                character.WeeklyPhysicalPoints = 0;
+                character.WeeklyIntellectualPoints = 0;
+                character.WeeklyMentalPoints = 0;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                await SaveGameDataAsync();
+            }
+        }
+
+        private static string GetWeeklyPeriodKey(DateTime localDate)
+        {
+            int year = ISOWeek.GetYear(localDate);
+            int week = ISOWeek.GetWeekOfYear(localDate);
+            return $"{year}-W{week:D2}";
+        }
+
         private void AddProgressFromGoal(Goal goal)
         {
             if (goal.IsPhysical) gameData.Character.PhysicalPoints += goal.ProgressPoints;
             if (goal.IsIntellectual) gameData.Character.IntellectualPoints += goal.ProgressPoints;
             if (goal.IsMental) gameData.Character.MentalPoints += goal.ProgressPoints;
+        }
+
+        private void AddWeeklyProgressFromGoal(Goal goal)
+        {
+            if (goal.IsPhysical) gameData.Character.WeeklyPhysicalPoints += goal.ProgressPoints;
+            if (goal.IsIntellectual) gameData.Character.WeeklyIntellectualPoints += goal.ProgressPoints;
+            if (goal.IsMental) gameData.Character.WeeklyMentalPoints += goal.ProgressPoints;
         }
 
         private void ApplyPenaltyByGoalCategories(Goal goal, int penaltyPoints)

@@ -20,6 +20,12 @@
                         <Entry Placeholder="Description" Text="{Binding NewDescription}" />
                         <DatePicker Date="{Binding SelectedDate}" MinimumDate="{Binding TodayDate}" MaximumDate="2035-12-31"/>
 
+                        <Label Text="{Binding NewStaminaCostLabel}" FontSize="13" TextColor="{StaticResource CardMutedText}" />
+                        <Slider Minimum="1"
+                                Maximum="100"
+                                Value="{Binding NewStaminaCostSlider, Mode=TwoWay}"
+                                ThumbColor="{StaticResource SuccessAccent}" />
+
                         <Label Text="Goal type" FontAttributes="Bold" Margin="0,10,0,0"/>
                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="18">
                             <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
