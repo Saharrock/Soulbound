@@ -15,8 +15,10 @@ namespace Soulbound.Services
         private const int OverduePenaltyPoints = 5;
         private const int LateDeletePenaltyPoints = 3;
         private const int PrecisionBonusOnTimelyCompletion = 2;
+        private const int PrecisionBonusTimelyWorkout = 1;
         private const int PrecisionPenaltyOverdueFail = -5;
         private const int PrecisionPenaltyLateGiveUp = -1;
+        private const int PrecisionPenaltyAbandonedGoal = -5;
         private static readonly IReadOnlyList<QuickStartPackDefinition> quickStartPacks = new List<QuickStartPackDefinition>
         {
             new QuickStartPackDefinition
@@ -226,12 +228,24 @@ namespace Soulbound.Services
 
         public List<Goal> GetActiveGoals()
         {
-            return gameData.Goals.Where(g => !g.IsCompleted).ToList();
+            List<Goal> goals = gameData.Goals.Where(g => !g.IsCompleted).ToList();
+            foreach (Goal goal in goals)
+            {
+                UpdateWorkoutCounters(goal);
+            }
+
+            return goals;
         }
 
         public List<Goal> GetFinishedGoals()
         {
-            return gameData.Goals.Where(g => g.IsCompleted).ToList();
+            List<Goal> goals = gameData.Goals.Where(g => g.IsCompleted).ToList();
+            foreach (Goal goal in goals)
+            {
+                UpdateWorkoutCounters(goal);
+            }
+
+            return goals;
         }
 
         public List<HistoryRecord> GetHistoryRecords()
@@ -303,11 +317,15 @@ namespace Soulbound.Services
             {
                 TaskName = goal.Title,
                 Category = GetCategoryLabel(goal),
-                ResultStatus = "Workout",
+                ResultStatus = HistoryRecord.StatusWorkout,
                 XpChange = 0,
                 StaminaSpent = staminaCost,
                 DateFinished = DateTime.Now
             });
+
+            AddWeeklyEffortFromWorkout(persisted, staminaCost);
+            persisted.TotalStaminaSpentAcrossGoal += staminaCost;
+            AdjustPrecision(PrecisionBonusTimelyWorkout);
 
             await SaveGameDataAsync();
             return true;
@@ -337,6 +355,9 @@ namespace Soulbound.Services
             goal.IsCompleted = false;
             goal.Deadline = goal.EndDate;
             goal.StaminaCost = NormalizeStaminaCostForStorage(goal.StaminaCost);
+            goal.PlannedWorkouts = Math.Max(1, CountScheduledWorkoutDays(goal, goal.CreatedAt.Date, goal.Deadline.Date));
+            goal.CompletedWorkouts = 0;
+            goal.MissedWorkouts = 0;
             if (goal.CustomProgressPoints.HasValue)
             {
                 goal.ProgressPoints = goal.CustomProgressPoints.Value;
@@ -366,7 +387,7 @@ namespace Soulbound.Services
                 {
                     TaskName = goalToDelete.Title,
                     Category = GetCategoryLabel(goalToDelete),
-                    ResultStatus = "Penalty",
+                    ResultStatus = HistoryRecord.StatusPenalty,
                     XpChange = -penaltyPoints,
                     StaminaSpent = 0,
                     DateFinished = DateTime.Now
@@ -390,16 +411,21 @@ namespace Soulbound.Services
             }
 
             goalToComplete.IsCompleted = true;
+            DateTime completionDate = DateTime.Now.Date;
+            bool isOnTime = completionDate <= goalToComplete.Deadline.Date;
+            goalToComplete.IsCompletedLate = !isOnTime;
             gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - staminaCost);
-            AddProgressFromGoal(goalToComplete);
-            AddWeeklyProgressFromGoal(goalToComplete);
+            goalToComplete.TotalStaminaSpentAcrossGoal += staminaCost;
+            int growthCreditForThisGoal = goalToComplete.TotalStaminaSpentAcrossGoal;
+            ApplyGrowthPillarsFromStaminaBudget(growthCreditForThisGoal, goalToComplete);
+            AddWeeklyEffortFromWorkout(goalToComplete, staminaCost);
 
             gameData.History.Insert(0, new HistoryRecord
             {
                 TaskName = goalToComplete.Title,
                 Category = GetCategoryLabel(goalToComplete),
-                ResultStatus = "Completed",
-                XpChange = goalToComplete.ProgressPoints,
+                ResultStatus = isOnTime ? HistoryRecord.StatusCompleted : HistoryRecord.StatusCompletedLate,
+                XpChange = growthCreditForThisGoal,
                 StaminaSpent = staminaCost,
                 DateFinished = DateTime.Now
             });
@@ -408,10 +434,9 @@ namespace Soulbound.Services
 
             RemoveWorkoutsForGoal(goalToComplete.Id);
 
-            gameData.Character.CompletedGoalsLifetime = gameData.Goals.Count(static g => g.IsCompleted);
+            gameData.Character.CompletedGoalsLifetime = gameData.Goals.Count(static g => g.IsCompleted && !g.IsAbandoned);
 
-            DateTime completionDate = DateTime.Now.Date;
-            if (completionDate <= goalToComplete.Deadline.Date)
+            if (isOnTime)
             {
                 AdjustPrecision(PrecisionBonusOnTimelyCompletion);
             }
@@ -436,7 +461,7 @@ namespace Soulbound.Services
                 {
                     TaskName = goal.Title,
                     Category = GetCategoryLabel(goal),
-                    ResultStatus = "Failed",
+                    ResultStatus = HistoryRecord.StatusFailed,
                     XpChange = -OverduePenaltyPoints,
                     StaminaSpent = 0,
                     DateFinished = DateTime.Now
@@ -446,6 +471,146 @@ namespace Soulbound.Services
             }
 
             await SaveGameDataAsync();
+        }
+
+        public async Task ApplyAbandonedGoalRulesAsync()
+        {
+            bool changed = false;
+
+            foreach (Goal goal in gameData.Goals)
+            {
+                if (goal.IsCompleted)
+                {
+                    continue;
+                }
+
+                UpdateWorkoutCounters(goal);
+                int observedWorkouts = goal.CompletedWorkouts + goal.MissedWorkouts;
+                if (observedWorkouts < 2)
+                {
+                    continue;
+                }
+
+                if (goal.MissedWorkouts * 2 < observedWorkouts)
+                {
+                    continue;
+                }
+
+                goal.IsCompleted = true;
+                goal.IsAbandoned = true;
+                goal.IsCompletedLate = false;
+                changed = true;
+
+                gameData.History.Insert(0, new HistoryRecord
+                {
+                    TaskName = goal.Title,
+                    Category = GetCategoryLabel(goal),
+                    ResultStatus = HistoryRecord.StatusAbandoned,
+                    XpChange = 0,
+                    StaminaSpent = 0,
+                    DateFinished = DateTime.Now
+                });
+
+                AdjustPrecision(PrecisionPenaltyAbandonedGoal);
+                RemoveWorkoutsForGoal(goal.Id);
+            }
+
+            if (!changed)
+            {
+                return;
+            }
+
+            gameData.Character.CompletedGoalsLifetime = gameData.Goals.Count(static g => g.IsCompleted && !g.IsAbandoned);
+            await SaveGameDataAsync();
+        }
+
+        public async Task<bool> DeleteGoalWithoutTraceAsync(Goal goalToDelete)
+        {
+            if (goalToDelete.IsCompleted)
+            {
+                return false;
+            }
+
+            RemoveWorkoutsForGoal(goalToDelete.Id);
+            bool removed = gameData.Goals.Remove(goalToDelete);
+            if (!removed)
+            {
+                return false;
+            }
+
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateGoalWeekdaysAsync(
+            Goal goalToUpdate,
+            bool isMonday,
+            bool isTuesday,
+            bool isWednesday,
+            bool isThursday,
+            bool isFriday,
+            bool isSaturday,
+            bool isSunday)
+        {
+            if (goalToUpdate.IsCompleted)
+            {
+                return false;
+            }
+
+            bool hasAnyDay = isMonday || isTuesday || isWednesday || isThursday || isFriday || isSaturday || isSunday;
+            if (!hasAnyDay)
+            {
+                return false;
+            }
+
+            goalToUpdate.IsMonday = isMonday;
+            goalToUpdate.IsTuesday = isTuesday;
+            goalToUpdate.IsWednesday = isWednesday;
+            goalToUpdate.IsThursday = isThursday;
+            goalToUpdate.IsFriday = isFriday;
+            goalToUpdate.IsSaturday = isSaturday;
+            goalToUpdate.IsSunday = isSunday;
+            goalToUpdate.PlannedWorkouts = Math.Max(1, CountScheduledWorkoutDays(goalToUpdate, goalToUpdate.CreatedAt.Date, goalToUpdate.Deadline.Date));
+            UpdateWorkoutCounters(goalToUpdate);
+
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateGoalStaminaCostAsync(Goal goalToUpdate, int staminaCost)
+        {
+            if (goalToUpdate.IsCompleted)
+            {
+                return false;
+            }
+
+            goalToUpdate.StaminaCost = NormalizeStaminaCostForStorage(staminaCost);
+            await SaveGameDataAsync();
+            return true;
+        }
+
+        public async Task<bool> PostponeGoalAsync(Goal goalToUpdate, DateTime newDeadline)
+        {
+            if (goalToUpdate.IsCompleted)
+            {
+                return false;
+            }
+
+            DateTime oldDeadline = goalToUpdate.Deadline.Date;
+            DateTime candidate = newDeadline.Date;
+            if (candidate < oldDeadline)
+            {
+                return false;
+            }
+
+            goalToUpdate.Deadline = candidate;
+            goalToUpdate.EndDate = candidate;
+            goalToUpdate.GoalTime = Math.Max(24, (candidate - goalToUpdate.CreatedAt.Date).Days * 24);
+            goalToUpdate.PlannedWorkouts = Math.Max(1, CountScheduledWorkoutDays(goalToUpdate, goalToUpdate.CreatedAt.Date, goalToUpdate.Deadline.Date));
+            UpdateWorkoutCounters(goalToUpdate);
+
+            await SaveGameDataAsync();
+            return true;
         }
 
         public async Task AddQuickPackAsync(string packId)
@@ -506,14 +671,14 @@ namespace Soulbound.Services
             }
 
             ApplyCharacterMigration(gameData);
+            BackfillGoalStaminaTotalsFromSavedWorkouts();
         }
 
         private static void ApplyCharacterMigration(GameData data)
         {
             PetProgress c = data.Character;
 
-            int completedGoals = data.Goals.Count(g => g.IsCompleted);
-            c.CompletedGoalsLifetime = completedGoals;
+            c.CompletedGoalsLifetime = data.Goals.Count(g => g.IsCompleted && !g.IsAbandoned);
 
             if (!c.PrecisionSeeded && c.CompletedGoalsLifetime == 0 && data.History.Count == 0)
             {
@@ -569,6 +734,25 @@ namespace Soulbound.Services
                 session => session.GoalId == goalId && session.SessionDateIso == dateIso);
         }
 
+        private void UpdateWorkoutCounters(Goal goal)
+        {
+            if (goal.PlannedWorkouts < 1)
+            {
+                goal.PlannedWorkouts = Math.Max(1, CountScheduledWorkoutDays(goal, goal.CreatedAt.Date, goal.Deadline.Date));
+            }
+
+            goal.CompletedWorkouts = gameData.WorkoutSessions.Count(session => session.GoalId == goal.Id);
+
+            DateTime untilDate = DateTime.Today;
+            if (goal.Deadline.Date < untilDate)
+            {
+                untilDate = goal.Deadline.Date;
+            }
+
+            int expectedSoFar = CountScheduledWorkoutDays(goal, goal.CreatedAt.Date, untilDate);
+            goal.MissedWorkouts = Math.Max(0, expectedSoFar - goal.CompletedWorkouts);
+        }
+
         private void RemoveWorkoutsForGoal(string goalId)
         {
             gameData.WorkoutSessions.RemoveAll(session => session.GoalId == goalId);
@@ -592,6 +776,27 @@ namespace Soulbound.Services
                 DayOfWeek.Saturday => goal.IsSaturday,
                 _ => false
             };
+        }
+
+        private static int CountScheduledWorkoutDays(Goal goal, DateTime fromDate, DateTime toDate)
+        {
+            DateTime start = fromDate.Date;
+            DateTime end = toDate.Date;
+            if (end < start)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (DateTime date = start; date <= end; date = date.AddDays(1))
+            {
+                if (IsGoalScheduledForDay(goal, date.DayOfWeek))
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         private static Goal CreateQuickStartGoal(QuickStartTaskDefinition task, bool isPhysical, bool isIntellectual, bool isMental)
@@ -682,25 +887,92 @@ namespace Soulbound.Services
             }
         }
 
+        /// <summary>
+        /// Weekly stamina and weekly effort counters roll over together at each <b>Saturday 00:00 local</b>.
+        /// The stored key is the calendar date (yyyy-MM-dd) of that week's anchor Saturday (gameplay stretches into Sunday onward from the refreshed pool).
+        /// </summary>
         private static string GetWeeklyPeriodKey(DateTime localDate)
         {
-            int year = ISOWeek.GetYear(localDate);
-            int week = ISOWeek.GetWeekOfYear(localDate);
-            return $"{year}-W{week:D2}";
+            DateTime saturdayAnchoredWeekStart = AnchorSaturdayMidnight(localDate);
+            return saturdayAnchoredWeekStart.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         }
 
-        private void AddProgressFromGoal(Goal goal)
+        private static DateTime AnchorSaturdayMidnight(DateTime localDate)
         {
-            if (goal.IsPhysical) gameData.Character.PhysicalPoints += goal.ProgressPoints;
-            if (goal.IsIntellectual) gameData.Character.IntellectualPoints += goal.ProgressPoints;
-            if (goal.IsMental) gameData.Character.MentalPoints += goal.ProgressPoints;
+            DateTime date = localDate.Date;
+            int shift = ((int)date.DayOfWeek - (int)DayOfWeek.Saturday + 7) % 7;
+            return date.AddDays(-shift);
         }
 
-        private void AddWeeklyProgressFromGoal(Goal goal)
+        /// <summary>
+        /// Feeds the three growth pillars only when a goal is fully closed. Credit equals every stamina point
+        /// that was taken from the weekly pool for workouts plus the finishing tap.
+        /// </summary>
+        private void ApplyGrowthPillarsFromStaminaBudget(int staminaBudget, Goal goal)
         {
-            if (goal.IsPhysical) gameData.Character.WeeklyPhysicalPoints += goal.ProgressPoints;
-            if (goal.IsIntellectual) gameData.Character.WeeklyIntellectualPoints += goal.ProgressPoints;
-            if (goal.IsMental) gameData.Character.WeeklyMentalPoints += goal.ProgressPoints;
+            if (staminaBudget < 1)
+            {
+                return;
+            }
+
+            ApplyWeeklySlices(
+                staminaBudget,
+                amt => gameData.Character.PhysicalPoints += amt,
+                amt => gameData.Character.IntellectualPoints += amt,
+                amt => gameData.Character.MentalPoints += amt,
+                goal);
+        }
+
+        private void AddWeeklyEffortFromWorkout(Goal goal, int staminaCost)
+        {
+            if (staminaCost < 1)
+            {
+                return;
+            }
+
+            ApplyWeeklySlices(staminaCost,
+                amt => gameData.Character.WeeklyPhysicalPoints += amt,
+                amt => gameData.Character.WeeklyIntellectualPoints += amt,
+                amt => gameData.Character.WeeklyMentalPoints += amt,
+                goal);
+        }
+
+        private static void ApplyWeeklySlices(
+            int amount,
+            Action<int> addPhysical,
+            Action<int> addIntellectual,
+            Action<int> addMental,
+            Goal goal)
+        {
+            List<Action<int>> slots = new(3);
+            if (goal.IsPhysical)
+            {
+                slots.Add(addPhysical);
+            }
+
+            if (goal.IsIntellectual)
+            {
+                slots.Add(addIntellectual);
+            }
+
+            if (goal.IsMental)
+            {
+                slots.Add(addMental);
+            }
+
+            int sliceCount = slots.Count;
+            if (sliceCount == 0 || amount < 1)
+            {
+                return;
+            }
+
+            int baseShare = amount / sliceCount;
+            int remainder = amount % sliceCount;
+            for (int slotIndex = 0; slotIndex < sliceCount; slotIndex++)
+            {
+                int portion = baseShare + (slotIndex < remainder ? 1 : 0);
+                slots[slotIndex](portion);
+            }
         }
 
         private void ApplyPenaltyByGoalCategories(Goal goal, int penaltyPoints)
@@ -710,17 +982,50 @@ namespace Soulbound.Services
             if (goal.IsMental) gameData.Character.MentalPoints = Math.Max(0, gameData.Character.MentalPoints - penaltyPoints);
         }
 
+        /// <summary>
+        /// Each growth level needs every pillar to cross the same threshold. Extra points above the line stay
+        /// on the bar for the next level, so if you were far ahead in one lane you do not lose that effort.
+        /// </summary>
         private void TryLevelUp()
         {
-            int points = gameData.Character.PointsPerStatForCurrentLevel;
-            if (gameData.Character.PhysicalPoints >= points &&
-                gameData.Character.IntellectualPoints >= points &&
-                gameData.Character.MentalPoints >= points)
+            PetProgress character = gameData.Character;
+            while (true)
             {
-                gameData.Character.Level++;
-                gameData.Character.PhysicalPoints = 0;
-                gameData.Character.IntellectualPoints = 0;
-                gameData.Character.MentalPoints = 0;
+                int gate = character.PointsPerStatForCurrentLevel;
+                if (character.PhysicalPoints < gate ||
+                    character.IntellectualPoints < gate ||
+                    character.MentalPoints < gate)
+                {
+                    break;
+                }
+
+                character.Level++;
+                character.PhysicalPoints -= gate;
+                character.IntellectualPoints -= gate;
+                character.MentalPoints -= gate;
+            }
+        }
+
+        /// <summary>
+        /// Older saves never tracked per-goal stamina; estimate from stored workout rows so growth credit matches reality.
+        /// </summary>
+        private void BackfillGoalStaminaTotalsFromSavedWorkouts()
+        {
+            foreach (Goal goal in gameData.Goals)
+            {
+                if (goal.IsCompleted || goal.TotalStaminaSpentAcrossGoal > 0)
+                {
+                    continue;
+                }
+
+                int workoutCount = gameData.WorkoutSessions.Count(session => session.GoalId == goal.Id);
+                if (workoutCount < 1)
+                {
+                    continue;
+                }
+
+                int estimated = workoutCount * goal.ResolvedStaminaCost;
+                goal.TotalStaminaSpentAcrossGoal = estimated;
             }
         }
 

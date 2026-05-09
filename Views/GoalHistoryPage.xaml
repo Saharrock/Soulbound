@@ -27,18 +27,39 @@
                                     <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding ScheduleText}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding WorkoutStatsText}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+                                    <Label Text="{Binding MissedStatsText}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
                                     <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost to achieve goal: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
 
-                                    <HorizontalStackLayout HorizontalOptions="End" Spacing="10">
-                                        <Button Text="Achieved"
+                                    <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="End">
+                                        <Button Text="Delete"
+                                                IsVisible="{Binding IsTrialWindow}"
+                                                BackgroundColor="{StaticResource DangerAccent}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.TrialDeleteGoalCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Change weekdays"
+                                                IsVisible="{Binding IsTrialWindow}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeWeekdaysCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Change weekdays"
+                                                IsVisible="{Binding IsMiddleWindow}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeWeekdaysCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Change energy"
+                                                IsVisible="{Binding IsMiddleWindow}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeStaminaCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <Button Text="Done"
+                                                IsVisible="{Binding IsFinalWindow}"
                                                 BackgroundColor="{StaticResource SuccessAccent}"
                                                 Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.CompleteGoalCommand}"
                                                 CommandParameter="{Binding .}" />
-                                        <Button Text="Give up"
-                                                BackgroundColor="{StaticResource DangerAccent}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.DeleteItemCommand}"
+                                        <Button Text="Postpone"
+                                                IsVisible="{Binding IsFinalWindow}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.PostponeGoalCommand}"
                                                 CommandParameter="{Binding .}" />
-                                    </HorizontalStackLayout>
+                                    </FlexLayout>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>
@@ -58,6 +79,8 @@
                                     <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Finished: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding FinalStatusText, StringFormat='Status: {0}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding WorkoutStatsText}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>

@@ -70,7 +70,7 @@
                     </Frame>
                     <Label Text="{Binding PetName}" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" />
 
-                    <Label Text="Weekly stamina · refills Mondays (ISO calendar week)"
+                    <Label Text="Weekly stamina · restores Saturdays at midnight (same pool through Sunday onward until the next Saturday reset)."
                            FontSize="11"
                            TextColor="{StaticResource CardMutedText}" />
                     <ProgressBar Progress="{Binding StaminaProgress}" ScaleY="4" ProgressColor="{StaticResource SuccessAccent}" />
@@ -84,12 +84,12 @@
                            HorizontalOptions="Center"
                            TextColor="{StaticResource CardMutedText}" />
 
-                    <Label Text="This week · where your effort goes"
+                    <Label Text="This week · how stamina was spent across pillars"
                            FontAttributes="Bold"
                            FontSize="13"
                            HorizontalOptions="Center"
                            Margin="0,12,0,0" />
-                    <Label Text="Bars show the mix compared to your strongest area; not level progress. Resets every Monday."
+                    <Label Text="Bars normalize to your strongest pillar. Spread work evenly; resets with stamina (Saturdays at midnight)."
                            FontAttributes="Italic"
                            FontSize="11"
                            TextColor="{StaticResource CardMutedText}"

@@ -125,7 +125,7 @@ namespace Soulbound.ViewModels
                 {
                     await Application.Current.MainPage.DisplayAlert(
                         "Not enough stamina",
-                        $"Marking a workout costs {cost}. Your weekly stamina pool refreshes next Monday.",
+                        $"Marking a workout costs {cost}. Your stamina pool restores every Saturday at 00:00.",
                         "OK");
                 }
 
@@ -156,6 +156,7 @@ namespace Soulbound.ViewModels
         {
             await appService.EnsureGameDataLoadedAsync();
             await appService.EnsureDailyStaminaAsync();
+            await appService.ApplyAbandonedGoalRulesAsync();
             await appService.ApplyDeadlinePenaltiesAsync();
 
             PetProgress progress = appService.GetProgress();
@@ -164,10 +165,10 @@ namespace Soulbound.ViewModels
             PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
 
             PrecisionSummary =
-                $"Precision: {PetProgress.PrecisionLabel(progress.PrecisionScore)} ({progress.PrecisionScore})";
+                $"Discipline: {PetProgress.PrecisionLabel(progress.PrecisionScore)} ({progress.PrecisionScore})";
 
             AchievementSummary =
-                $"Mastery: {PetProgress.AchievementLabel(progress.CompletedGoalsLifetime)} ({progress.CompletedGoalsLifetime} goals)";
+                $"Growth level {progress.Level} · {progress.Rank} · Goals finished: {progress.CompletedGoalsLifetime}";
 
             ApplyWeeklyEffortShares(progress);
 
@@ -211,11 +212,21 @@ namespace Soulbound.ViewModels
         private void ApplyWeeklyEffortShares(PetProgress progress)
         {
             int p = progress.WeeklyPhysicalPoints;
-            int i = progress.WeeklyIntellectualPoints;
+            int intel = progress.WeeklyIntellectualPoints;
             int m = progress.WeeklyMentalPoints;
-            double denom = Math.Max(1.0, Math.Max(p, Math.Max(i, m)));
+
+            int totalWeekly = p + intel + m;
+            if (totalWeekly < 1)
+            {
+                PhysicalValue = 0;
+                IntellectualValue = 0;
+                MentalValue = 0;
+                return;
+            }
+
+            double denom = Math.Max(1.0, Math.Max(p, Math.Max(intel, m)));
             PhysicalValue = p / denom;
-            IntellectualValue = i / denom;
+            IntellectualValue = intel / denom;
             MentalValue = m / denom;
         }
 

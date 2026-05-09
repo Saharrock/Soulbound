@@ -4,6 +4,7 @@
              xmlns:models="clr-namespace:Soulbound.Models"
              xmlns:vm="clr-namespace:Soulbound.ViewModels"
              x:Class="Soulbound.Views.StatisticsPage"
+             x:Name="StatsRoot"
              Title="Statistics">
     <Grid>
         <Grid.Background>
@@ -16,13 +17,37 @@
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="12">
                 <Label Text="Soulbound analytics" FontSize="28" FontAttributes="Bold" />
-                <Label Text="All-time stamina and timelines. Weekly effort lives on Main room."
+                <Label Text="Growth level uses stamina-only credit unlocked when you finish a goal in full; weekly mixes stay on Main room."
                        TextColor="{StaticResource CardMutedText}" />
 
                 <Frame Padding="14" BackgroundColor="#6A3422">
                     <VerticalStackLayout Spacing="10">
+                        <Label Text="{Binding VolumeTierCaption}" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="{Binding VolumeCapacityCaption}"
+                               FontSize="12"
+                               TextColor="{StaticResource CardMutedText}"
+                               LineBreakMode="WordWrap" />
+                        <Label Text="Physical" Margin="0,6,0,0" />
+                        <ProgressBar Progress="{Binding PhysicalGrowthProgress}"
+                                     ScaleY="4"
+                                     ProgressColor="{StaticResource PhysicalAccent}" />
+                        <Label Text="{Binding PhysicalGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
+                        <Label Text="Intellectual" />
+                        <ProgressBar Progress="{Binding IntellectualGrowthProgress}"
+                                     ScaleY="4"
+                                     ProgressColor="{StaticResource IntellectualAccent}" />
+                        <Label Text="{Binding IntellectualGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
+                        <Label Text="Mental" />
+                        <ProgressBar Progress="{Binding MentalGrowthProgress}"
+                                     ScaleY="4"
+                                     ProgressColor="{StaticResource MentalAccent}" />
+                        <Label Text="{Binding MentalGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Padding="14" BackgroundColor="#6A3422">
+                    <VerticalStackLayout Spacing="10">
                         <Label Text="Active goals" FontAttributes="Bold" FontSize="18" />
-                        <Label Text="Where you stand toward each deadline." FontSize="12" TextColor="{StaticResource CardMutedText}" />
                         <CollectionView ItemsSource="{Binding ActiveGoalStats}" SelectionMode="None" MaximumHeightRequest="280">
                             <CollectionView.EmptyView>
                                 <Label Text="No active goals" TextColor="{StaticResource CardMutedText}" />
@@ -36,7 +61,6 @@
                                             <Label Text="{Binding CategoriesText, StringFormat='Categories: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
                                             <ProgressBar Progress="{Binding TimelineProgress}" ScaleY="3" ProgressColor="{StaticResource SuccessAccent}" />
                                             <Label Text="{Binding ProgressPercentText}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
-                                            <Label Text="{Binding TimelineHint}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
                                         </VerticalStackLayout>
                                     </Frame>
                                 </DataTemplate>
@@ -47,17 +71,33 @@
 
                 <Frame Padding="14" BackgroundColor="#6A3422">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="Stamina by zone (all time)" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="Lifetime workload map"
+                               FontAttributes="Bold"
+                               FontSize="18" />
+                        <Label Text="Counts every logged workout stamp and finishing tap across history. Bars share a gigantic ruler purely for readability."
+                               FontSize="12"
+                               TextColor="{StaticResource CardMutedText}"
+                               LineBreakMode="WordWrap" />
                         <CollectionView ItemsSource="{Binding CategorySummaries}" SelectionMode="None">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:CategorySummaryItem">
-                                    <Grid ColumnDefinitions="120,*,Auto" ColumnSpacing="8" Padding="0,6">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Grid ColumnDefinitions="120,*" ColumnSpacing="8" Padding="0,6">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="3">
                                             <Label Text="{Binding CategoryName}" FontAttributes="Bold" />
-                                            <Label Text="{Binding MetricsLine}" FontSize="10" TextColor="#D0C8C4" />
+                                            <Label Text="{Binding LifetimeMetricsLine}"
+                                                   FontSize="10"
+                                                   TextColor="#D0C8C4"
+                                                   LineBreakMode="WordWrap" />
+                                            <Label Text="{Binding LifetimeVisualizationCaption}"
+                                                   FontSize="9"
+                                                   TextColor="#BFADA3"
+                                                   LineBreakMode="WordWrap"/>
                                         </VerticalStackLayout>
                                         <Grid Grid.Column="1" HeightRequest="16" BackgroundColor="#3D2218" VerticalOptions="Center">
-                                            <BoxView Color="{Binding BarColorHex}" WidthRequest="{Binding BarWidth}" HorizontalOptions="Start" VerticalOptions="Fill" />
+                                            <BoxView Color="{Binding BarColorHex}"
+                                                     WidthRequest="{Binding BarWidth}"
+                                                     HorizontalOptions="Start"
+                                                     VerticalOptions="Fill" />
                                         </Grid>
                                     </Grid>
                                 </DataTemplate>
@@ -67,6 +107,9 @@
                 </Frame>
 
                 <Label Text="Activity timeline" FontAttributes="Bold" FontSize="20" />
+                <Label Text="Tap the colour strip beside a row for a fuller status story."
+                       TextColor="{StaticResource CardMutedText}"
+                       FontSize="13" />
                 <CollectionView ItemsSource="{Binding HistoryRecords}">
                     <CollectionView.EmptyView>
                         <Label Text="No history yet" TextColor="{StaticResource CardMutedText}" HorizontalOptions="Center"/>
@@ -74,8 +117,20 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:HistoryRecord">
                             <Frame Padding="12" Margin="0,0,0,8" BackgroundColor="#7A3E28">
-                                <Grid ColumnDefinitions="12,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto">
-                                    <BoxView Grid.RowSpan="2" Grid.Column="0" WidthRequest="9" Color="{Binding CategoryBarColor}" CornerRadius="5" VerticalOptions="Fill" />
+                                <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto">
+                                    <BoxView Grid.RowSpan="2"
+                                             Grid.Column="0"
+                                             WidthRequest="16"
+                                             MinimumHeightRequest="44"
+                                             Color="{Binding StatusColor}"
+                                             CornerRadius="6"
+                                             VerticalOptions="Fill"
+                                             HorizontalOptions="Center">
+                                        <BoxView.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={x:Reference StatsRoot}, Path=BindingContext.ExplainHistoryStripCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </BoxView.GestureRecognizers>
+                                    </BoxView>
                                     <VerticalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="2">
                                         <Label Text="{Binding TaskName}" FontAttributes="Bold" LineBreakMode="TailTruncation" />
                                         <Label Text="{Binding StatusText}" TextColor="{Binding StatusColor}" FontSize="13" FontAttributes="Bold" />
