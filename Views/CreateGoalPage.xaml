@@ -57,46 +57,6 @@
                         <Button Text="Add Goal" Command="{Binding AddGoalCommand}" BackgroundColor="{StaticResource SuccessAccent}" WidthRequest="180" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Frame>
-
-                <Frame MaximumWidthRequest="460" Padding="24">
-                    <VerticalStackLayout Spacing="14">
-                        <Label Text="Quick starts" FontAttributes="Bold" HorizontalOptions="Center"/>
-                        <CollectionView ItemsSource="{Binding QuickPacks}" SelectionMode="None">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Frame BackgroundColor="{StaticResource CardBackgroundDark}" Padding="12" Margin="0,0,0,10">
-                                        <VerticalStackLayout Spacing="8">
-                                            <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="18" />
-                                            <Label Text="{Binding Description}" TextColor="{StaticResource CardMutedText}" />
-                                            <Button Text="{Binding PreviewButtonText}"
-                                                    Command="{Binding Source={x:Reference CreateGoalRoot}, Path=BindingContext.TogglePackPreviewCommand}"
-                                                    CommandParameter="{Binding .}" />
-
-                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="6">
-                                                <Label Text="Tasks in this pack" FontAttributes="Bold" />
-                                                <CollectionView ItemsSource="{Binding Tasks}" SelectionMode="None">
-                                                    <CollectionView.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Grid ColumnDefinitions="*,Auto" Padding="0,2">
-                                                                <Label Text="{Binding Title}" />
-                                                                <Label Grid.Column="1" Text="{Binding XpText}" TextColor="{StaticResource CardMutedText}" />
-                                                            </Grid>
-                                                        </DataTemplate>
-                                                    </CollectionView.ItemTemplate>
-                                                </CollectionView>
-                                                <Label Text="{Binding TotalXpText}" FontAttributes="Bold" />
-                                                <Label Text="{Binding EstimatedStaminaText}" TextColor="{StaticResource CardMutedText}" />
-                                                <Button Text="Add pack"
-                                                        Command="{Binding Source={x:Reference CreateGoalRoot}, Path=BindingContext.AddQuickPackCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                            </VerticalStackLayout>
-                                        </VerticalStackLayout>
-                                    </Frame>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </VerticalStackLayout>
-                </Frame>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

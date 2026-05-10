@@ -1,40 +1,28 @@
-﻿using Soulbound.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
+using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
     internal class LogInViewModel : ViewModelBase
     {
-        #region get set
-        private string messageForUser;
+        private string messageForUser = string.Empty;
+        private bool isLoginEnable;
+        private string userInput = string.Empty;
+        private string userPassword = string.Empty;
+
         public string MessageForUser
         {
-            get { return messageForUser; }
+            get => messageForUser;
             set
             {
-                // Basic
-                //messageForEldan = value;
-                //PropertyChanged();
-
-                // Even Better
-                if (value != null)
-                {
-                    messageForUser = value;
-                    OnPropertyChanged();
-                }
+                messageForUser = value ?? string.Empty;
+                OnPropertyChanged();
             }
         }
 
-        // get and set for Button
-        private bool isLoginEnable;
         public bool IsLoginEnable
         {
-            get { return isLoginEnable; }
+            get => isLoginEnable;
             set
             {
                 isLoginEnable = value;
@@ -42,104 +30,81 @@ namespace Soulbound.ViewModels
             }
         }
 
-        // get and set for UserInput
-        private string userInput;
         public string UserInput
         {
-            get { return userInput; }
+            get => userInput;
             set
             {
-                userInput = value;
-                if (userInput != null && userInput.Length < 5)
+                userInput = value ?? string.Empty;
+                if (userInput.Length < 5)
                 {
-                    MessageForUser = "The field has less then 5 characters";
+                    MessageForUser = "The field has less than 5 characters";
                     IsLoginEnable = false;
-
                 }
                 else
                 {
-                    MessageForUser = "";
-                    IsLoginEnable = true;
+                    MessageForUser = string.Empty;
+                    UpdateLoginEnableForFields();
                 }
+
                 OnPropertyChanged();
             }
         }
 
-        private string userPassword;
         public string UserPassword
         {
-            get { return userPassword; }
+            get => userPassword;
             set
             {
-                userPassword = value;
-                if (string.IsNullOrWhiteSpace(userPassword))
-                {
-                    IsLoginEnable = false;
-                }
-                else if (string.IsNullOrWhiteSpace(UserInput) || UserInput.Length < 5)
-                {
-                    IsLoginEnable = false;
-                }
-                else
-                {
-                    IsLoginEnable = true;
-                }
+                userPassword = value ?? string.Empty;
+                UpdateLoginEnableForFields();
                 OnPropertyChanged();
             }
-            
         }
-        #endregion
 
-        #region Commands
-        public ICommand ResetUsernameCommand { get; set; }
-        public ICommand ResetPasswordCommand { get; set; }
-        public ICommand GotoRegisterPageCommand { get; set; }
-        public ICommand TryLoginCommand { get; set; }
-        #endregion
+        public ICommand ResetUsernameCommand { get; }
+        public ICommand ResetPasswordCommand { get; }
+        public ICommand GotoRegisterPageCommand { get; }
+        public ICommand TryLoginCommand { get; }
 
-        #region constructor
         public LogInViewModel()
         {
-            // Defining the Command for a non async Function
             ResetUsernameCommand = new Command(ResetUserField);
             ResetPasswordCommand = new Command(ResetPasswordField);
-            // Defining the Command for an async Function
             GotoRegisterPageCommand = new Command(async () => await Shell.Current.GoToAsync("//RegistrationPage"));
             TryLoginCommand = new Command(async () => await TryLoginAsync());
             IsLoginEnable = false;
-            UserInput = "salnikovsergej76@gmail.com";
-            UserPassword = "Sahar1996@";
         }
-        #endregion
 
-        #region  Methods
+        private void UpdateLoginEnableForFields()
+        {
+            IsLoginEnable = userInput.Length >= 5 && !string.IsNullOrWhiteSpace(userPassword);
+        }
 
         private async Task TryLoginAsync()
         {
-            bool successed = await AppService.GetInstance().TryLogin(UserInput?.Trim(), UserPassword);
-            if (successed)
+            bool succeeded = await AppService.GetInstance().TryLogin(UserInput.Trim(), UserPassword);
+            if (succeeded)
             {
-                MessageForUser = "";
-                ((App)Application.Current).SetAuthenticatedShell();
+                MessageForUser = string.Empty;
+                ((App)Application.Current!).SetAuthenticatedShell();
             }
             else
             {
                 MessageForUser = "Login failed. Check email and password.";
             }
         }
+
         private void ResetUserField()
         {
-            UserInput = "";
-            MessageForUser = "";
-
+            UserInput = string.Empty;
+            MessageForUser = string.Empty;
         }
 
         private void ResetPasswordField()
         {
-            UserPassword = "";
-            MessageForUser = "";
+            UserPassword = string.Empty;
+            MessageForUser = string.Empty;
         }
-
-        #endregion
     }
 }

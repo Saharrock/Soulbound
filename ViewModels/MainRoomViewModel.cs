@@ -12,6 +12,13 @@ namespace Soulbound.ViewModels
 
         public ObservableCollection<Goal> TodayGoals { get; } = new();
 
+        private string averageScheduleSummary = string.Empty;
+        public string AverageScheduleSummary
+        {
+            get => averageScheduleSummary;
+            set { averageScheduleSummary = value; OnPropertyChanged(); }
+        }
+
         private string petName = "Your Pet";
         public string PetName
         {
@@ -24,27 +31,6 @@ namespace Soulbound.ViewModels
         {
             get => petAvatar;
             set { petAvatar = value; OnPropertyChanged(); }
-        }
-
-        private double physicalValue;
-        public double PhysicalValue
-        {
-            get => physicalValue;
-            set { physicalValue = value; OnPropertyChanged(); }
-        }
-
-        private double intellectualValue;
-        public double IntellectualValue
-        {
-            get => intellectualValue;
-            set { intellectualValue = value; OnPropertyChanged(); }
-        }
-
-        private double mentalValue;
-        public double MentalValue
-        {
-            get => mentalValue;
-            set { mentalValue = value; OnPropertyChanged(); }
         }
 
         private int activeGoalsCount;
@@ -61,18 +47,11 @@ namespace Soulbound.ViewModels
             set { nearestDeadlineText = value; OnPropertyChanged(); }
         }
 
-        private string precisionSummary = string.Empty;
-        public string PrecisionSummary
+        private string petSummaryLine = string.Empty;
+        public string PetSummaryLine
         {
-            get => precisionSummary;
-            set { precisionSummary = value; OnPropertyChanged(); }
-        }
-
-        private string achievementSummary = string.Empty;
-        public string AchievementSummary
-        {
-            get => achievementSummary;
-            set { achievementSummary = value; OnPropertyChanged(); }
+            get => petSummaryLine;
+            set { petSummaryLine = value; OnPropertyChanged(); }
         }
 
         private int stamina;
@@ -98,13 +77,24 @@ namespace Soulbound.ViewModels
 
         public ICommand MarkWorkoutCommand { get; }
 
+        public ICommand OpenHandbookCommand { get; }
+
         public MainRoomViewModel()
         {
             appService = AppService.GetInstance();
             NavigateToStatisticsCommand = new Command(async () => await NavigateToStatisticsAsync());
             NavigateToGoalHistoryCommand = new Command(async () => await NavigateToGoalHistoryAsync());
             MarkWorkoutCommand = new Command<Goal>(async goal => await MarkWorkoutAsync(goal));
+            OpenHandbookCommand = new Command(async () => await NavigateToHandbookAsync());
             _ = RefreshDataAsync();
+        }
+
+        private static async Task NavigateToHandbookAsync()
+        {
+            if (Shell.Current != null)
+            {
+                await Shell.Current.GoToAsync("//HandbookPage");
+            }
         }
 
         private async Task MarkWorkoutAsync(Goal? workoutGoal)
@@ -125,7 +115,7 @@ namespace Soulbound.ViewModels
                 {
                     await Application.Current.MainPage.DisplayAlert(
                         "Not enough stamina",
-                        $"Marking a workout costs {cost}. Your stamina pool restores every Saturday at 00:00.",
+                        $"Marking a workout costs {cost}. Stamina refills Sundays at 00:00.",
                         "OK");
                 }
 
@@ -156,26 +146,19 @@ namespace Soulbound.ViewModels
         {
             await appService.EnsureGameDataLoadedAsync();
             await appService.EnsureDailyStaminaAsync();
-            await appService.ApplyAbandonedGoalRulesAsync();
-            await appService.ApplyDeadlinePenaltiesAsync();
 
             PetProgress progress = appService.GetProgress();
 
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
             PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
 
-            PrecisionSummary =
-                $"Discipline: {PetProgress.PrecisionLabel(progress.PrecisionScore)} ({progress.PrecisionScore})";
-
-            AchievementSummary =
-                $"Growth level {progress.Level} · {progress.Rank} · Goals finished: {progress.CompletedGoalsLifetime}";
-
-            ApplyWeeklyEffortShares(progress);
+            PetSummaryLine = $"Goals finished: {progress.CompletedGoalsLifetime}";
 
             Stamina = progress.Stamina;
 
             List<Goal> activeGoals = appService.GetActiveGoals();
             ActiveGoalsCount = activeGoals.Count;
+            AverageScheduleSummary = appService.SummarizeAverageScheduleAdherence(activeGoals);
 
             Goal? nearest = null;
             foreach (Goal g in activeGoals)
@@ -184,50 +167,19 @@ namespace Soulbound.ViewModels
                 {
                     nearest = g;
                 }
-                else
+                else if (g.EndDate < nearest.EndDate)
                 {
-                    if (g.EndDate < nearest.EndDate)
-                    {
-                        nearest = g;
-                    }
+                    nearest = g;
                 }
             }
 
-            if (nearest == null)
-            {
-                NearestDeadlineText = "No active goals";
-            }
-            else
-            {
-                NearestDeadlineText = nearest.EndDate.ToString("dd/MM/yyyy");
-            }
+            NearestDeadlineText = nearest == null ? "No active goals" : nearest.EndDate.ToString("dd/MM/yyyy");
 
             TodayGoals.Clear();
-            foreach (Goal goal in appService.GetTodayGoalsAwaitingWorkout())
+            foreach (Goal goal in appService.FilterGoalsAwaitingWorkoutToday(activeGoals))
             {
                 TodayGoals.Add(goal);
             }
-        }
-
-        private void ApplyWeeklyEffortShares(PetProgress progress)
-        {
-            int p = progress.WeeklyPhysicalPoints;
-            int intel = progress.WeeklyIntellectualPoints;
-            int m = progress.WeeklyMentalPoints;
-
-            int totalWeekly = p + intel + m;
-            if (totalWeekly < 1)
-            {
-                PhysicalValue = 0;
-                IntellectualValue = 0;
-                MentalValue = 0;
-                return;
-            }
-
-            double denom = Math.Max(1.0, Math.Max(p, Math.Max(intel, m)));
-            PhysicalValue = p / denom;
-            IntellectualValue = intel / denom;
-            MentalValue = m / denom;
         }
 
         private static async Task NavigateToStatisticsAsync()

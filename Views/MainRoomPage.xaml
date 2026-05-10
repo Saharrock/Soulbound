@@ -5,6 +5,9 @@
              x:Class="Soulbound.Views.MainRoomPage"
              x:Name="MainRoomRoot"
              Title="Main room">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="?" Command="{Binding OpenHandbookCommand}" Order="Primary" Priority="0" />
+    </ContentPage.ToolbarItems>
     <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -21,6 +24,7 @@
                         <Label Text="Main room" FontSize="24" FontAttributes="Bold" />
                         <Label Text="Active goals" TextColor="{StaticResource CardMutedText}" />
                         <Label Text="{Binding ActiveGoalsCount}" FontSize="38" FontAttributes="Bold" />
+                        <Label Text="{Binding AverageScheduleSummary}" FontSize="13" TextColor="{StaticResource CardMutedText}" />
                         <Label Text="Nearest deadline" TextColor="{StaticResource CardMutedText}" />
                         <Label Text="{Binding NearestDeadlineText}" />
                     </VerticalStackLayout>
@@ -36,15 +40,16 @@
                         </Grid>
                         <CollectionView ItemsSource="{Binding TodayGoals}" HeightRequest="320">
                             <CollectionView.EmptyView>
-                                <Label Text="No scheduled workouts left to mark today · check All goals for your list" TextColor="{StaticResource CardMutedText}" />
+                                <Label Text="No workouts queued for today" TextColor="{StaticResource CardMutedText}" />
                             </CollectionView.EmptyView>
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="models:Goal">
                                     <Frame Padding="10" Margin="0,0,0,8" BackgroundColor="{StaticResource CardBackgroundDark}">
                                         <VerticalStackLayout Spacing="6">
                                             <Label Text="{Binding Title}" FontAttributes="Bold" />
+                                            <Label Text="{Binding ScheduleAdherenceLine}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
                                             <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
-                                            <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina per workout: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina (workout + Done): {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
                                             <Button Text="Mark workout"
                                                     HorizontalOptions="Start"
                                                     BackgroundColor="{StaticResource SuccessAccent}"
@@ -70,36 +75,20 @@
                     </Frame>
                     <Label Text="{Binding PetName}" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" />
 
-                    <Label Text="Weekly stamina · restores Saturdays at midnight (same pool through Sunday onward until the next Saturday reset)."
+                    <Label Text="Weekly stamina · refresh Sundays 00:00"
                            FontSize="11"
                            TextColor="{StaticResource CardMutedText}" />
                     <ProgressBar Progress="{Binding StaminaProgress}" ScaleY="4" ProgressColor="{StaticResource SuccessAccent}" />
                     <Label Text="{Binding StaminaText}" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
 
-                    <Label Text="{Binding PrecisionSummary}"
+                    <Label Text="{Binding PetSummaryLine}"
                            HorizontalOptions="Center"
-                           Margin="0,8,0,0"
+                           Margin="0,12,0,0"
                            FontAttributes="Bold" />
-                    <Label Text="{Binding AchievementSummary}"
+                    <Label Text="Tap this card for Statistics"
                            HorizontalOptions="Center"
+                           FontSize="12"
                            TextColor="{StaticResource CardMutedText}" />
-
-                    <Label Text="This week · how stamina was spent across pillars"
-                           FontAttributes="Bold"
-                           FontSize="13"
-                           HorizontalOptions="Center"
-                           Margin="0,12,0,0" />
-                    <Label Text="Bars normalize to your strongest pillar. Spread work evenly; resets with stamina (Saturdays at midnight)."
-                           FontAttributes="Italic"
-                           FontSize="11"
-                           TextColor="{StaticResource CardMutedText}"
-                           HorizontalOptions="Center" />
-                    <Label Text="Physical" Margin="0,6,0,0" />
-                    <ProgressBar Progress="{Binding PhysicalValue}" ScaleY="4" ProgressColor="{StaticResource PhysicalAccent}" />
-                    <Label Text="Intellectual" />
-                    <ProgressBar Progress="{Binding IntellectualValue}" ScaleY="4" ProgressColor="{StaticResource IntellectualAccent}" />
-                    <Label Text="Mental" />
-                    <ProgressBar Progress="{Binding MentalValue}" ScaleY="4" ProgressColor="{StaticResource MentalAccent}" />
                 </VerticalStackLayout>
             </Frame>
         </Grid>

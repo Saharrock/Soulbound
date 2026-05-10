@@ -17,31 +17,40 @@
         <ScrollView>
             <VerticalStackLayout Padding="16" Spacing="12">
                 <Label Text="Soulbound analytics" FontSize="28" FontAttributes="Bold" />
-                <Label Text="Growth level uses stamina-only credit unlocked when you finish a goal in full; weekly mixes stay on Main room."
-                       TextColor="{StaticResource CardMutedText}" />
+                <Label Text="Schedule adherence is the same percentage shown on each goal: workouts logged versus expected slots through today or deadline."
+                       TextColor="{StaticResource CardMutedText}"
+                       LineBreakMode="WordWrap" />
 
                 <Frame Padding="14" BackgroundColor="#6A3422">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="{Binding VolumeTierCaption}" FontAttributes="Bold" FontSize="18" />
-                        <Label Text="{Binding VolumeCapacityCaption}"
-                               FontSize="12"
+                        <Label Text="Schedule overview" FontAttributes="Bold" FontSize="18" />
+                        <Label Text="{Binding LifetimeSummaryCaption}"
+                               FontSize="13"
                                TextColor="{StaticResource CardMutedText}"
                                LineBreakMode="WordWrap" />
-                        <Label Text="Physical" Margin="0,6,0,0" />
-                        <ProgressBar Progress="{Binding PhysicalGrowthProgress}"
-                                     ScaleY="4"
-                                     ProgressColor="{StaticResource PhysicalAccent}" />
-                        <Label Text="{Binding PhysicalGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
-                        <Label Text="Intellectual" />
-                        <ProgressBar Progress="{Binding IntellectualGrowthProgress}"
+                        <Label Text="Active goals — average schedule adherence"
+                               Margin="0,6,0,0"
+                               FontAttributes="Bold"
+                               FontSize="13" />
+                        <ProgressBar Progress="{Binding ActiveGoalsDisciplineProgress}"
                                      ScaleY="4"
                                      ProgressColor="{StaticResource IntellectualAccent}" />
-                        <Label Text="{Binding IntellectualGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
-                        <Label Text="Mental" />
-                        <ProgressBar Progress="{Binding MentalGrowthProgress}"
+                        <Label Text="{Binding ActiveGoalsDisciplineMeter}"
+                               FontSize="12"
+                               HorizontalOptions="End"
+                               TextColor="{StaticResource CardMutedText}"
+                               LineBreakMode="WordWrap" />
+                        <Label Text="Completed goals — average schedule adherence"
+                               FontAttributes="Bold"
+                               FontSize="13" />
+                        <ProgressBar Progress="{Binding FinishedGoalsDisciplineProgress}"
                                      ScaleY="4"
-                                     ProgressColor="{StaticResource MentalAccent}" />
-                        <Label Text="{Binding MentalGrowthMeter}" FontSize="12" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
+                                     ProgressColor="{StaticResource PhysicalAccent}" />
+                        <Label Text="{Binding FinishedGoalsDisciplineMeter}"
+                               FontSize="12"
+                               HorizontalOptions="End"
+                               TextColor="{StaticResource CardMutedText}"
+                               LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
                 </Frame>
 
@@ -59,6 +68,7 @@
                                             <Label Text="{Binding Title}" FontAttributes="Bold" />
                                             <Label Text="{Binding DeadlineText, StringFormat='Deadline: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
                                             <Label Text="{Binding CategoriesText, StringFormat='Categories: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
+                                            <Label Text="{Binding ScheduleAdherenceLine}" FontSize="12" TextColor="{StaticResource CardMutedText}" />
                                             <ProgressBar Progress="{Binding TimelineProgress}" ScaleY="3" ProgressColor="{StaticResource SuccessAccent}" />
                                             <Label Text="{Binding ProgressPercentText}" FontSize="11" TextColor="{StaticResource CardMutedText}" />
                                         </VerticalStackLayout>
@@ -74,7 +84,7 @@
                         <Label Text="Lifetime workload map"
                                FontAttributes="Bold"
                                FontSize="18" />
-                        <Label Text="Counts every logged workout stamp and finishing tap across history. Bars share a gigantic ruler purely for readability."
+                        <Label Text="Counts workouts and Done taps from history. Tap a category row for goals in that pillar."
                                FontSize="12"
                                TextColor="{StaticResource CardMutedText}"
                                LineBreakMode="WordWrap" />
@@ -82,16 +92,16 @@
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:CategorySummaryItem">
                                     <Grid ColumnDefinitions="120,*" ColumnSpacing="8" Padding="0,6">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={x:Reference StatsRoot}, Path=BindingContext.ExplainLifetimeWorkloadRowCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
                                         <VerticalStackLayout Grid.Column="0" Spacing="3">
                                             <Label Text="{Binding CategoryName}" FontAttributes="Bold" />
                                             <Label Text="{Binding LifetimeMetricsLine}"
                                                    FontSize="10"
                                                    TextColor="#D0C8C4"
                                                    LineBreakMode="WordWrap" />
-                                            <Label Text="{Binding LifetimeVisualizationCaption}"
-                                                   FontSize="9"
-                                                   TextColor="#BFADA3"
-                                                   LineBreakMode="WordWrap"/>
                                         </VerticalStackLayout>
                                         <Grid Grid.Column="1" HeightRequest="16" BackgroundColor="#3D2218" VerticalOptions="Center">
                                             <BoxView Color="{Binding BarColorHex}"
@@ -107,7 +117,7 @@
                 </Frame>
 
                 <Label Text="Activity timeline" FontAttributes="Bold" FontSize="20" />
-                <Label Text="Tap the colour strip beside a row for a fuller status story."
+                <Label Text="Tap a row for status, stamina, date."
                        TextColor="{StaticResource CardMutedText}"
                        FontSize="13" />
                 <CollectionView ItemsSource="{Binding HistoryRecords}">
@@ -117,6 +127,10 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:HistoryRecord">
                             <Frame Padding="12" Margin="0,0,0,8" BackgroundColor="#7A3E28">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference StatsRoot}, Path=BindingContext.ExplainHistoryStripCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
                                 <Grid ColumnDefinitions="20,*,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto">
                                     <BoxView Grid.RowSpan="2"
                                              Grid.Column="0"

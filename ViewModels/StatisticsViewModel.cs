@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Text;
 using Microsoft.Maui.Controls;
 using Soulbound.Models;
 using Soulbound.Services;
@@ -15,78 +17,191 @@ namespace Soulbound.ViewModels
         private readonly AppService appService;
         private const double MaxChartBarWidth = 220;
 
-        private string volumeTierCaption = string.Empty;
-        private string volumeCapacityCaption = string.Empty;
-        private double physicalGrowthProgress;
-        private double intellectualGrowthProgress;
-        private double mentalGrowthProgress;
-        private string physicalGrowthMeter = string.Empty;
-        private string intellectualGrowthMeter = string.Empty;
-        private string mentalGrowthMeter = string.Empty;
+        private string lifetimeSummaryCaption = string.Empty;
+        private double activeGoalsDisciplineProgress;
+        private string activeGoalsDisciplineMeter = string.Empty;
+        private double finishedGoalsDisciplineProgress;
+        private string finishedGoalsDisciplineMeter = string.Empty;
 
-        public string VolumeTierCaption
+        public string LifetimeSummaryCaption
         {
-            get => volumeTierCaption;
-            set { volumeTierCaption = value; OnPropertyChanged(); }
+            get => lifetimeSummaryCaption;
+            set { lifetimeSummaryCaption = value; OnPropertyChanged(); }
         }
 
-        public string VolumeCapacityCaption
+        public double ActiveGoalsDisciplineProgress
         {
-            get => volumeCapacityCaption;
-            set { volumeCapacityCaption = value; OnPropertyChanged(); }
+            get => activeGoalsDisciplineProgress;
+            set { activeGoalsDisciplineProgress = value; OnPropertyChanged(); }
         }
 
-        public double PhysicalGrowthProgress
+        public string ActiveGoalsDisciplineMeter
         {
-            get => physicalGrowthProgress;
-            set { physicalGrowthProgress = value; OnPropertyChanged(); }
+            get => activeGoalsDisciplineMeter;
+            set { activeGoalsDisciplineMeter = value; OnPropertyChanged(); }
         }
 
-        public double IntellectualGrowthProgress
+        public double FinishedGoalsDisciplineProgress
         {
-            get => intellectualGrowthProgress;
-            set { intellectualGrowthProgress = value; OnPropertyChanged(); }
+            get => finishedGoalsDisciplineProgress;
+            set { finishedGoalsDisciplineProgress = value; OnPropertyChanged(); }
         }
 
-        public double MentalGrowthProgress
+        public string FinishedGoalsDisciplineMeter
         {
-            get => mentalGrowthProgress;
-            set { mentalGrowthProgress = value; OnPropertyChanged(); }
-        }
-
-        public string PhysicalGrowthMeter
-        {
-            get => physicalGrowthMeter;
-            set { physicalGrowthMeter = value; OnPropertyChanged(); }
-        }
-
-        public string IntellectualGrowthMeter
-        {
-            get => intellectualGrowthMeter;
-            set { intellectualGrowthMeter = value; OnPropertyChanged(); }
-        }
-
-        public string MentalGrowthMeter
-        {
-            get => mentalGrowthMeter;
-            set { mentalGrowthMeter = value; OnPropertyChanged(); }
+            get => finishedGoalsDisciplineMeter;
+            set { finishedGoalsDisciplineMeter = value; OnPropertyChanged(); }
         }
 
         public ObservableCollection<HistoryRecord> HistoryRecords { get; } = new();
         public ObservableCollection<CategorySummaryItem> CategorySummaries { get; } = new();
         public ObservableCollection<ActiveGoalStatItem> ActiveGoalStats { get; } = new();
 
+        private const int MaxLifetimeWorkloadPopupChars = 4200;
+
         public StatisticsViewModel()
         {
             appService = AppService.GetInstance();
             ExplainHistoryStripCommand = new Command<HistoryRecord>(ExecuteExplainHistoryStrip);
-            _ = RefreshAsync();
+            ExplainLifetimeWorkloadRowCommand = new Command<CategorySummaryItem>(ExecuteExplainLifetimeWorkloadRow);
         }
 
         /// <summary>
         /// Wired to TapGestureRecognizer on the coloured strip beside each timeline row (simple DisplayAlert pattern for Android-safe UX).
         /// </summary>
         public Command<HistoryRecord> ExplainHistoryStripCommand { get; }
+
+        /// <summary>Tap a lifetime category row to list goals tagged with that pillar.</summary>
+        public Command<CategorySummaryItem> ExplainLifetimeWorkloadRowCommand { get; }
+
+        private static Page? TryGetPresenterPage()
+        {
+            return Shell.Current?.CurrentPage ?? Application.Current?.MainPage;
+        }
+
+        private async void ExecuteExplainLifetimeWorkloadRow(CategorySummaryItem? row)
+        {
+            if (row == null || string.IsNullOrWhiteSpace(row.CategoryName))
+            {
+                return;
+            }
+
+            Page? presenter = TryGetPresenterPage();
+            if (presenter == null)
+            {
+                return;
+            }
+
+            await appService.EnsureGameDataLoadedAsync();
+            List<Goal> goals = appService.GetGoalsForLifetimeCategory(row.CategoryName);
+            string body = BuildLifetimeWorkloadGoalsDetail(row, goals);
+            string title = $"{row.CategoryName} · your goals ({goals.Count})";
+            await presenter.DisplayAlert(title, body, "OK");
+        }
+
+        private static string BuildLifetimeWorkloadGoalsDetail(CategorySummaryItem summary, List<Goal> goals)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(summary.LifetimeMetricsLine);
+            sb.AppendLine("(History totals for this pillar; below is goal-by-goal snapshot.)");
+            sb.AppendLine();
+
+            if (goals.Count == 0)
+            {
+                sb.Append("No goals in this category yet.");
+                return sb.ToString();
+            }
+
+            for (int i = 0; i < goals.Count; i++)
+            {
+                string block = BuildSingleGoalLifetimeDetail(goals[i]);
+                int projected = sb.Length + (i > 0 ? Environment.NewLine.Length * 3 + 8 : 0) + block.Length;
+                if (projected > MaxLifetimeWorkloadPopupChars && i > 0)
+                {
+                    int remaining = goals.Count - i;
+                    sb.AppendLine();
+                    sb.AppendLine(new string('-', 16));
+                    sb.Append("(Scroll not available in this dialog.) ");
+                    sb.Append(remaining == 1
+                        ? "One more goal is omitted — open Goal history for everything."
+                        : $"{remaining} more goals omitted — open Goal history for everything.");
+                    break;
+                }
+
+                if (i > 0)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine(new string('-', 16));
+                }
+
+                sb.Append(block);
+            }
+
+            string result = sb.ToString().TrimEnd();
+            if (result.Length > MaxLifetimeWorkloadPopupChars)
+            {
+                ReadOnlySpan<char> span = result.AsSpan(0, MaxLifetimeWorkloadPopupChars - 80);
+                return $"{span.TrimEnd()}...{Environment.NewLine}(Truncated - open Goal history for the rest.)";
+            }
+
+            return result;
+        }
+
+        private static string BuildSingleGoalLifetimeDetail(Goal g)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(g.Title);
+            sb.Append("Status · ").AppendLine(FormatGoalLifetimeStatusHeading(g));
+
+            sb.Append("Categories · ").AppendLine(FormatGoalPillarLabels(g, "None set"));
+            sb.Append("Created ").Append(g.CreatedAt.ToString("dd MMM yyyy", CultureInfo.CurrentCulture));
+            sb.Append(" · deadline ").AppendLine(g.Deadline.ToString("dd MMM yyyy", CultureInfo.CurrentCulture));
+
+            sb.Append(g.WorkoutStatsText).Append(" · ").Append(g.MissedStatsText);
+            sb.Append(" · ").AppendLine(g.ScheduleAdherenceLine);
+            sb.Append("Stamina / workout · ").Append(g.ResolvedStaminaCost.ToString(CultureInfo.CurrentCulture));
+            sb.Append(" · total spent · ").AppendLine(g.TotalStaminaSpentAcrossGoal.ToString(CultureInfo.CurrentCulture));
+
+            if (!g.IsCompleted)
+            {
+                sb.AppendLine($"Schedule · {g.ScheduleText}");
+            }
+
+            sb.AppendLine();
+            sb.Append(string.IsNullOrWhiteSpace(g.Description) ? "(No description)" : g.Description.Trim());
+            return sb.ToString();
+        }
+
+        private static string FormatGoalLifetimeStatusHeading(Goal g)
+        {
+            if (g.IsCompleted)
+            {
+                return g.IsCompletedLate ? "Done (after deadline)" : "Done on time";
+            }
+
+            return "Active";
+        }
+
+        private static string FormatGoalPillarLabels(Goal g, string whenNone)
+        {
+            List<string> parts = new();
+            if (g.IsPhysical)
+            {
+                parts.Add("Physical");
+            }
+
+            if (g.IsIntellectual)
+            {
+                parts.Add("Intellectual");
+            }
+
+            if (g.IsMental)
+            {
+                parts.Add("Mental");
+            }
+
+            return parts.Count == 0 ? whenNone : string.Join(", ", parts);
+        }
 
         private async void ExecuteExplainHistoryStrip(HistoryRecord? record)
         {
@@ -95,13 +210,13 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            Page? presenter = Shell.Current?.CurrentPage ?? Application.Current?.MainPage;
+            Page? presenter = TryGetPresenterPage();
             if (presenter == null)
             {
                 return;
             }
 
-            await presenter.DisplayAlert("Timeline detail", record.BuildTeacherFriendlyStatusStory(), "OK");
+            await presenter.DisplayAlert("Timeline entry", record.BuildTimelineTapDetail(), "OK");
         }
 
         public async Task RefreshAsync()
@@ -124,26 +239,46 @@ namespace Soulbound.ViewModels
                 CategorySummaries.Add(summary);
             }
 
-            foreach (Goal goal in appService.GetActiveGoals())
+            List<Goal> activeGoals = appService.GetActiveGoals();
+            List<Goal> finishedGoals = appService.GetFinishedGoals();
+
+            foreach (Goal goal in activeGoals)
             {
                 ActiveGoalStats.Add(BuildActiveGoalStat(goal));
             }
 
-            ApplyVolumePresentation(appService.GetProgress());
+            ApplyDisciplinePresentation(appService.GetProgress(), activeGoals, finishedGoals);
         }
 
-        private void ApplyVolumePresentation(PetProgress progress)
+        private void ApplyDisciplinePresentation(PetProgress progress, List<Goal> activeGoals, List<Goal> finishedGoals)
         {
-            int gate = Math.Max(1, progress.PointsPerStatForCurrentLevel);
-            VolumeTierCaption = $"Growth level {progress.Level} — {progress.Rank}";
-            VolumeCapacityCaption =
-                $"Credit appears only after a goal fully closes (not during workouts alone). Credit equals stamina spent across that goal—including every workout stamp and your final Done—and each flagged pillar earns an equal slice. Every pillar needs {gate} simultaneously to bump you from growth level {progress.Level} toward {progress.Level + 1}. Overflow credit stays instead of wiping to zero.";
-            PhysicalGrowthMeter = $"{progress.PhysicalPoints}/{gate}";
-            IntellectualGrowthMeter = $"{progress.IntellectualPoints}/{gate}";
-            MentalGrowthMeter = $"{progress.MentalPoints}/{gate}";
-            PhysicalGrowthProgress = Math.Min(1.0, Math.Max(0.0, progress.PhysicalPoints / (double)gate));
-            IntellectualGrowthProgress = Math.Min(1.0, Math.Max(0.0, progress.IntellectualPoints / (double)gate));
-            MentalGrowthProgress = Math.Min(1.0, Math.Max(0.0, progress.MentalPoints / (double)gate));
+            LifetimeSummaryCaption = $"Goals finished (lifetime): {progress.CompletedGoalsLifetime}";
+
+            if (activeGoals.Count == 0)
+            {
+                ActiveGoalsDisciplineProgress = 0;
+                ActiveGoalsDisciplineMeter = "No active goals";
+            }
+            else
+            {
+                int avgActive = appService.GetAverageScheduleAdherencePercent(activeGoals);
+                ActiveGoalsDisciplineProgress = avgActive / 100.0;
+                ActiveGoalsDisciplineMeter =
+                    $"Avg schedule adherence {avgActive}% · {activeGoals.Count} active (same % as on goal cards)";
+            }
+
+            if (finishedGoals.Count == 0)
+            {
+                FinishedGoalsDisciplineProgress = 0;
+                FinishedGoalsDisciplineMeter = "No completed goals yet";
+            }
+            else
+            {
+                int avgDone = appService.GetAverageScheduleAdherencePercent(finishedGoals);
+                FinishedGoalsDisciplineProgress = avgDone / 100.0;
+                FinishedGoalsDisciplineMeter =
+                    $"Avg schedule adherence {avgDone}% · {finishedGoals.Count} completed";
+            }
         }
 
         private static ActiveGoalStatItem BuildActiveGoalStat(Goal goal)
@@ -152,19 +287,10 @@ namespace Soulbound.ViewModels
             {
                 Title = goal.Title,
                 DeadlineText = goal.Deadline.ToString("dd MMM yyyy"),
-                CategoriesText = FormatCategories(goal),
+                CategoriesText = FormatGoalPillarLabels(goal, "Mixed"),
+                ScheduleAdherenceLine = goal.ScheduleAdherenceLine,
                 TimelineProgress = ComputeTimelineProgress(goal)
             };
-        }
-
-        private static string FormatCategories(Goal goal)
-        {
-            List<string> parts = new();
-            if (goal.IsPhysical) parts.Add("Physical");
-            if (goal.IsIntellectual) parts.Add("Intellectual");
-            if (goal.IsMental) parts.Add("Mental");
-
-            return parts.Count == 0 ? "Mixed" : string.Join(", ", parts);
         }
 
         private static double ComputeTimelineProgress(Goal goal)
@@ -193,26 +319,11 @@ namespace Soulbound.ViewModels
 
         private static List<CategorySummaryItem> BuildCategorySummaries(List<HistoryRecord> records)
         {
-            Dictionary<string, int> staminaByCategory = new()
-            {
-                { "Physical", 0 },
-                { "Intellectual", 0 },
-                { "Mental", 0 }
-            };
+            string[] categories = { "Physical", "Intellectual", "Mental" };
 
-            Dictionary<string, int> completedCountByCategory = new()
-            {
-                { "Physical", 0 },
-                { "Intellectual", 0 },
-                { "Mental", 0 }
-            };
-
-            Dictionary<string, int> workoutMarksByCategory = new()
-            {
-                { "Physical", 0 },
-                { "Intellectual", 0 },
-                { "Mental", 0 }
-            };
+            Dictionary<string, int> staminaByCategory = categories.ToDictionary(c => c, _ => 0);
+            Dictionary<string, int> completedCountByCategory = categories.ToDictionary(c => c, _ => 0);
+            Dictionary<string, int> workoutMarksByCategory = categories.ToDictionary(c => c, _ => 0);
 
             foreach (HistoryRecord record in records)
             {
@@ -240,7 +351,7 @@ namespace Soulbound.ViewModels
             }
 
             List<CategorySummaryItem> result = new();
-            foreach (string key in staminaByCategory.Keys)
+            foreach (string key in categories)
             {
                 int stamina = staminaByCategory[key];
                 int finishedGoalsCount = completedCountByCategory[key];
@@ -306,9 +417,6 @@ namespace Soulbound.ViewModels
 
         public string LifetimeMetricsLine =>
             $"{CompletedGoalsFinished} goals closed · {WorkoutMarksLogged} workouts logged · {StaminaTotalSpent} stamina spent";
-
-        public string LifetimeVisualizationCaption =>
-            $"This bar only measures against a {StatisticsViewModel.LifetimeStaminaVisualizationCap:N0} stamina ruler so it stays roomy for years of play.";
     }
 
     internal class ActiveGoalStatItem
@@ -316,6 +424,7 @@ namespace Soulbound.ViewModels
         public string Title { get; set; } = string.Empty;
         public string DeadlineText { get; set; } = string.Empty;
         public string CategoriesText { get; set; } = string.Empty;
+        public string ScheduleAdherenceLine { get; set; } = string.Empty;
         public double TimelineProgress { get; set; }
         public string ProgressPercentText => $"{(int)Math.Round(TimelineProgress * 100)}% along timeline";
     }

@@ -1,6 +1,4 @@
 ﻿using System.Windows.Input;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Soulbound.Models;
 using Soulbound.Services;
 
@@ -92,21 +90,14 @@ namespace Soulbound.ViewModels
         }
 
         public string NewStaminaCostLabel =>
-            $"Stamina cost when done: {NewStaminaCost} (from your weekly pool, max {Goal.MaxStaminaCostPerGoal} per goal)";
+            $"Stamina each workout + final Done: {NewStaminaCost} (weekly pool, max {Goal.MaxStaminaCostPerGoal} per goal)";
 
         public ICommand AddGoalCommand { get; }
-
-        public ICommand AddQuickPackCommand { get; }
-        public ICommand TogglePackPreviewCommand { get; }
-        public ObservableCollection<QuickPackCardViewModel> QuickPacks { get; } = new();
 
         public CreateGoalViewModel()
         {
             appService = AppService.GetInstance();
             AddGoalCommand = new Command(async () => await AddGoalAsync());
-            AddQuickPackCommand = new Command<QuickPackCardViewModel>(async pack => await AddQuickPackAsync(pack));
-            TogglePackPreviewCommand = new Command<QuickPackCardViewModel>(TogglePackPreview);
-            LoadQuickPacks();
         }
 
         private async Task AddGoalAsync()
@@ -138,7 +129,6 @@ namespace Soulbound.ViewModels
                 EndDate = SelectedDate,
                 Deadline = SelectedDate,
                 CreatedAt = DateTime.Now,
-                GoalTime = Math.Max(24, (SelectedDate - DateTime.Now).Days * 24),
                 StaminaCost = NewStaminaCost,
                 IsPhysical = NewIsPhysical,
                 IsIntellectual = NewIsIntellectual,
@@ -161,19 +151,6 @@ namespace Soulbound.ViewModels
             }
         }
 
-        private async Task AddQuickPackAsync(QuickPackCardViewModel? pack)
-        {
-            if (pack == null)
-            {
-                return;
-            }
-
-            await appService.EnsureGameDataLoadedAsync();
-            await appService.AddQuickPackAsync(pack.Id);
-            MessageForUser = $"{pack.Title} added.";
-            pack.IsExpanded = false;
-        }
-
         private void ResetForm()
         {
             NewTitle = string.Empty;
@@ -190,91 +167,6 @@ namespace Soulbound.ViewModels
             IsThursday = false;
             IsFriday = false;
             IsSaturday = false;
-        }
-
-        private void LoadQuickPacks()
-        {
-            QuickPacks.Clear();
-            int staminaCostPerGoal = appService.GoalCompletionStaminaCost;
-            foreach (QuickStartPackDefinition definition in appService.GetQuickStartPacks())
-            {
-                var tasks = definition.Tasks
-                    .Select(task => new QuickPackTaskViewModel(task.Title, task.XpGain))
-                    .ToList();
-
-                QuickPacks.Add(new QuickPackCardViewModel(
-                    definition.Id,
-                    definition.Title,
-                    definition.Description,
-                    tasks,
-                    staminaCostPerGoal));
-            }
-        }
-
-        private void TogglePackPreview(QuickPackCardViewModel? selectedPack)
-        {
-            if (selectedPack == null)
-            {
-                return;
-            }
-
-            foreach (QuickPackCardViewModel pack in QuickPacks)
-            {
-                pack.IsExpanded = pack == selectedPack ? !pack.IsExpanded : false;
-            }
-        }
-    }
-
-    internal sealed class QuickPackCardViewModel : ViewModelBase
-    {
-        private bool isExpanded;
-        public string Id { get; }
-        public string Title { get; }
-        public string Description { get; }
-        public IReadOnlyList<QuickPackTaskViewModel> Tasks { get; }
-        public int TotalXpGain { get; }
-        public int EstimatedStaminaCost { get; }
-        public string TotalXpText => $"Total XP gain: {TotalXpGain}";
-        public string EstimatedStaminaText => $"Estimated stamina (this week): {EstimatedStaminaCost} (max {Goal.MaxStaminaCostPerGoal}/task)";
-        public string PreviewButtonText => IsExpanded ? "Hide details" : "Preview details";
-
-        public bool IsExpanded
-        {
-            get => isExpanded;
-            set
-            {
-                isExpanded = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(PreviewButtonText));
-            }
-        }
-
-        public QuickPackCardViewModel(
-            string id,
-            string title,
-            string description,
-            IReadOnlyList<QuickPackTaskViewModel> tasks,
-            int staminaCostPerGoal)
-        {
-            Id = id;
-            Title = title;
-            Description = description;
-            Tasks = tasks;
-            TotalXpGain = tasks.Sum(task => task.XpGain);
-            EstimatedStaminaCost = tasks.Count * staminaCostPerGoal;
-        }
-    }
-
-    internal sealed class QuickPackTaskViewModel
-    {
-        public string Title { get; }
-        public int XpGain { get; }
-        public string XpText => $"+{XpGain} XP";
-
-        public QuickPackTaskViewModel(string title, int xpGain)
-        {
-            Title = title;
-            XpGain = xpGain;
         }
     }
 }

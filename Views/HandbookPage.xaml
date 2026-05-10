@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Soulbound.Views.HandbookPage"
+             Title="Handbook">
+    <Grid Padding="16" RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="14">
+                <Label Text="Soulbound handbook"
+                       FontSize="26"
+                       FontAttributes="Bold" />
+                <Label Text="Weekly stamina refills every Sunday at 00:00 (local time). Workouts and tapping Done spend stamina from that pool."
+                       FontSize="15"
+                       LineBreakMode="WordWrap" />
+                <Label Text="Create a goal with weekdays and a deadline. On scheduled days you can mark one workout per calendar day. Done closes the goal anytime (costs stamina). Remove deletes an active goal and clears its logged workouts — no penalties."
+                       FontSize="15"
+                       LineBreakMode="WordWrap" />
+                <Label Text="Schedule % on each goal shows how many planned slots you have hit so far versus how many should have happened by today (or by deadline if it already passed)."
+                       FontSize="15"
+                       LineBreakMode="WordWrap" />
+                <Label Text="Statistics: averages of that schedule % across active and finished goals, lifetime pillar workload bars, and the activity timeline."
+                       FontSize="15"
+                       LineBreakMode="WordWrap" />
+            </VerticalStackLayout>
+        </ScrollView>
+        <Button Grid.Row="1"
+                Text="Continue"
+                Margin="0,12,0,0"
+                Clicked="OnContinueClicked" />
+    </Grid>
+</ContentPage>

@@ -3,8 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Soulbound.Views.GoalHistoryPage"
              xmlns:models="clr-namespace:Soulbound.Models"
+             xmlns:converters="clr-namespace:Soulbound.Converters"
              x:Name="GoalHistoryRoot"
-             Title="GoalHistoryPage">
+             Title="Goal history">
+    <ContentPage.Resources>
+        <converters:GoalPhotoPathConverter x:Key="GoalPhotoPathConverter" />
+    </ContentPage.Resources>
     <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -28,36 +32,59 @@
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Deadline: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding ScheduleText}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding ScheduleAdherenceLine}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
                                     <Label Text="{Binding WorkoutStatsText}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
                                     <Label Text="{Binding MissedStatsText}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
-                                    <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina cost to achieve goal: {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+                                    <Label Text="{Binding ResolvedStaminaCost, StringFormat='Stamina (workout + Done): {0}'}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+
+                                    <Label Text="Photos" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+                                    <VerticalStackLayout Spacing="6">
+                                        <Button Text="Add photo"
+                                                Padding="8,4"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.AddGoalPhotoCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        <CollectionView ItemsSource="{Binding AttachedPhotos}"
+                                                        HeightRequest="72"
+                                                        HorizontalScrollBarVisibility="Never">
+                                            <CollectionView.ItemsLayout>
+                                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="models:GoalPhotoRef">
+                                                    <Grid WidthRequest="64" HeightRequest="64">
+                                                        <Image Aspect="AspectFill"
+                                                               HeightRequest="64"
+                                                               WidthRequest="64"
+                                                               Source="{Binding RelativePath, Converter={StaticResource GoalPhotoPathConverter}}" />
+                                                        <Button Text="×"
+                                                                FontSize="10"
+                                                                Padding="0"
+                                                                HeightRequest="18"
+                                                                WidthRequest="18"
+                                                                MinimumHeightRequest="18"
+                                                                MinimumWidthRequest="18"
+                                                                HorizontalOptions="End"
+                                                                VerticalOptions="Start"
+                                                                Margin="2"
+                                                                CornerRadius="9"
+                                                                BackgroundColor="#99000000"
+                                                                TextColor="White"
+                                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.RemoveGoalPhotoCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </VerticalStackLayout>
 
                                     <FlexLayout Direction="Row" Wrap="Wrap" JustifyContent="End">
-                                        <Button Text="Delete"
-                                                IsVisible="{Binding IsTrialWindow}"
+                                        <Button Text="Remove"
                                                 BackgroundColor="{StaticResource DangerAccent}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.TrialDeleteGoalCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        <Button Text="Change weekdays"
-                                                IsVisible="{Binding IsTrialWindow}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeWeekdaysCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        <Button Text="Change weekdays"
-                                                IsVisible="{Binding IsMiddleWindow}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeWeekdaysCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        <Button Text="Change energy"
-                                                IsVisible="{Binding IsMiddleWindow}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.ChangeStaminaCommand}"
+                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.DeleteGoalCommand}"
                                                 CommandParameter="{Binding .}" />
                                         <Button Text="Done"
-                                                IsVisible="{Binding IsFinalWindow}"
                                                 BackgroundColor="{StaticResource SuccessAccent}"
                                                 Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.CompleteGoalCommand}"
-                                                CommandParameter="{Binding .}" />
-                                        <Button Text="Postpone"
-                                                IsVisible="{Binding IsFinalWindow}"
-                                                Command="{Binding Source={x:Reference GoalHistoryRoot}, Path=BindingContext.PostponeGoalCommand}"
                                                 CommandParameter="{Binding .}" />
                                     </FlexLayout>
                                 </VerticalStackLayout>
@@ -80,7 +107,24 @@
                                     <Label Text="{Binding CreatedAt, StringFormat='Created: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding EndDate, StringFormat='Finished: {0:dd/MM/yyyy}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
                                     <Label Text="{Binding FinalStatusText, StringFormat='Status: {0}'}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="{Binding ScheduleAdherenceLine}" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
                                     <Label Text="{Binding WorkoutStatsText}" TextColor="{StaticResource CardMutedText}" FontSize="12"/>
+                                    <Label Text="Photos" FontSize="12" TextColor="{StaticResource CardMutedText}"/>
+                                    <CollectionView ItemsSource="{Binding AttachedPhotos}"
+                                                    HeightRequest="72"
+                                                    HorizontalScrollBarVisibility="Never">
+                                        <CollectionView.ItemsLayout>
+                                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="6" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:GoalPhotoRef">
+                                                <Image Aspect="AspectFill"
+                                                       HeightRequest="64"
+                                                       WidthRequest="64"
+                                                       Source="{Binding RelativePath, Converter={StaticResource GoalPhotoPathConverter}}" />
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>

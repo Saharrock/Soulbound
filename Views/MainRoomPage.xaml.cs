@@ -1,13 +1,15 @@
+using Microsoft.Maui.Storage;
 using Soulbound.ViewModels;
+
 namespace Soulbound.Views;
 
 public partial class MainRoomPage : ContentPage
 {
     private readonly MainRoomViewModel viewModel;
 
-	public MainRoomPage()
-	{
-		InitializeComponent();
+    public MainRoomPage()
+    {
+        InitializeComponent();
         viewModel = new MainRoomViewModel();
         BindingContext = viewModel;
     }
@@ -15,6 +17,14 @@ public partial class MainRoomPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        const string handbookKey = "soulbound_handbook_v1";
+        if (!Preferences.Get(handbookKey, false) && Shell.Current != null)
+        {
+            await Shell.Current.GoToAsync("//HandbookPage");
+            return;
+        }
+
         await viewModel.RefreshDataAsync();
     }
 }

@@ -37,5 +37,10 @@
         ContentTemplate="{DataTemplate local:SchedulePage}"
         Route="SchedulePage" />
 
+    <ShellContent
+        Title="Handbook"
+        ContentTemplate="{DataTemplate local:HandbookPage}"
+        Route="HandbookPage" />
+
     <MenuItem Clicked="MenuItem_Logout_Clicked" Text="Logout" />
 </Shell>

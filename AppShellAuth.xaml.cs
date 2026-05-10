@@ -11,8 +11,8 @@ namespace Soulbound
 
         private void MenuItem_Logout_Clicked(object sender, EventArgs e)
         {
-            var successed = AppService.GetInstance().Logout();
-            if (successed)
+            bool succeeded = AppService.GetInstance().Logout();
+            if (succeeded)
             {
                 ((App)Application.Current).SetUnauthenticatedShell();
             }

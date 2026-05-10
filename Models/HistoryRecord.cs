@@ -1,10 +1,9 @@
 using Microsoft.Maui.Graphics;
+using Newtonsoft.Json;
 
 namespace Soulbound.Models
 {
-    /// <summary>
-    /// One activity row showing how stamina and growth credits moved when something happened on a goal.
-    /// </summary>
+    /// <summary>One row in the activity timeline.</summary>
     public class HistoryRecord
     {
         public const string StatusCompleted = "Completed";
@@ -15,15 +14,17 @@ namespace Soulbound.Models
         public const string StatusWorkout = "Workout";
 
         public string TaskName { get; set; } = string.Empty;
-
         public string Category { get; set; } = string.Empty;
-
         public string ResultStatus { get; set; } = string.Empty;
 
-        public int XpChange { get; set; }
+        /// <summary>
+        /// On goal completion: total stamina spent on that goal (workouts + Done). Legacy rows may store old XP/penalty deltas.
+        /// Stored under Firebase key <c>xpChange</c>.
+        /// </summary>
+        [JsonProperty("xpChange")]
+        public int StaminaInvestedOrLegacyDelta { get; set; }
 
         public int StaminaSpent { get; set; }
-
         public DateTime DateFinished { get; set; } = DateTime.Now;
 
         public string StatusText => ResultStatus switch
@@ -56,75 +57,73 @@ namespace Soulbound.Models
             _ => Color.FromArgb("#888888")
         };
 
-        /// <summary>
-        /// One line for stamina spent and optional growth credits from finished goals.
-        /// </summary>
-        public string ResourcesLine
+        public string ResourcesLine => FormatTimelineResourcesSummary();
+
+        /// <summary>Single place for timeline subtitle text (used by <see cref="ResourcesLine"/>).</summary>
+        public string FormatTimelineResourcesSummary()
         {
-            get
+            string detail = ResultStatus switch
             {
-                string growthPart;
-                if (ResultStatus == StatusWorkout)
-                {
-                    growthPart = XpChange == 0 ? "Workout logged" : FormatGrowthPart(XpChange);
-                }
-                else
-                {
-                    growthPart = FormatGrowthPart(XpChange);
-                }
+                StatusWorkout => "Workout logged",
+                StatusCompleted or StatusCompletedLate => FormatStaminaInvestedLine(StaminaInvestedOrLegacyDelta),
+                _ => FormatLegacyDeltaLine(StaminaInvestedOrLegacyDelta)
+            };
 
-                string energyPart;
-                if (StaminaSpent > 0)
-                {
-                    energyPart = " / -" + StaminaSpent.ToString() + " stamina";
-                }
-                else
-                {
-                    energyPart = " / stamina: 0";
-                }
+            string energyPart = StaminaSpent > 0
+                ? " / -" + StaminaSpent + " stamina"
+                : " / stamina: 0";
 
-                return growthPart + energyPart;
-            }
+            return detail + energyPart;
         }
 
-        /// <summary>
-        /// Longer wording for tapping the colour strip inside Statistics so you can articulate what happened.
-        /// Kept deliberately plain for demonstrations.
-        /// </summary>
+        public string BuildTimelineTapDetail()
+        {
+            string when = DateFinished.ToString("dd MMM yyyy HH:mm", System.Globalization.CultureInfo.CurrentCulture);
+            return $"{StatusText}\nStamina on this row: {StaminaSpent}\n{when}\n\n{BuildTeacherFriendlyStatusStory()}";
+        }
+
         public string BuildTeacherFriendlyStatusStory()
         {
             return ResultStatus switch
             {
                 StatusCompleted =>
-                    $"{TaskName}: finished on schedule. The stamina you spent throughout this goal credited your growth gauges all at once when you closed it.",
+                    $"{TaskName}: finished on or before the deadline. Timeline rows show stamina spent on workouts and on Done.",
                 StatusCompletedLate =>
-                    $"{TaskName}: marked complete after its deadline date. Growth credit still counted from stamina spent overall, though your discipline score was treated as a late finish.",
+                    $"{TaskName}: finished after the deadline date (still counts as done).",
                 StatusAbandoned =>
-                    $"{TaskName}: marked abandoned automatically because workouts were missed badly enough against the planned cadence.",
-                StatusFailed =>
-                    $"{TaskName}: stayed overdue long enough after the deadline for the automatic penalty pulse to fire.",
-                StatusPenalty =>
-                    $"{TaskName}: you removed the goal midway through its second half, so a late-forfeit penalty was applied.",
+                    $"{TaskName}: legacy row from an older app version (auto-abandon).",
+                StatusFailed or StatusPenalty =>
+                    $"{TaskName}: legacy penalty row from an older app version.",
                 StatusWorkout =>
-                    $"{TaskName}: one scheduled workout was marked in the main room. This spends stamina and nudges your weekly balance, but only finishing the goal moves the big growth bars.",
+                    $"{TaskName}: one scheduled workout was marked; stamina was deducted from your weekly pool.",
                 _ =>
                     $"{TaskName}: recorded as {StatusText}."
             };
         }
 
-        private static string FormatGrowthPart(int change)
+        private static string FormatStaminaInvestedLine(int totalSpent)
+        {
+            if (totalSpent > 0)
+            {
+                return $"{totalSpent} stamina invested on this goal (total)";
+            }
+
+            return "No stamina total recorded";
+        }
+
+        private static string FormatLegacyDeltaLine(int change)
         {
             if (change > 0)
             {
-                return "+" + change.ToString() + " growth credit";
+                return "+" + change + " (legacy)";
             }
 
             if (change < 0)
             {
-                return change.ToString() + " growth credit";
+                return change + " (legacy)";
             }
 
-            return "No growth credit";
+            return "—";
         }
     }
 }
