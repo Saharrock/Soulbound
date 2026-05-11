@@ -15,7 +15,10 @@
             <Button Text="Back to Log In"
                     Command="{Binding GoToLoginCommand}"
                     HorizontalOptions="End" />
-            <Frame Padding="20" MaximumWidthRequest="560" HorizontalOptions="Center">
+            <Frame Padding="20"
+                   HorizontalOptions="Center"
+                   WidthRequest="{StaticResource FormCardWidthAuth}"
+                   MaximumWidthRequest="{StaticResource FormCardWidthAuth}">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="REGISTRATION" FontSize="30" FontAttributes="Bold" HorizontalTextAlignment="Center" />
                     <Label Text="{Binding MessageForUser}" HorizontalTextAlignment="Center" TextColor="{StaticResource CardMutedText}" />

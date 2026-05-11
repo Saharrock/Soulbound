@@ -90,6 +90,10 @@ namespace Soulbound.ViewModels
             {
                 MessageForUser = string.Empty;
                 ((App)Application.Current!).SetAuthenticatedShell();
+                string route = AppService.GetInstance().HasCompletedPetOnboarding()
+                    ? "//MainRoomPage"
+                    : "//PetSelectionPage";
+                await Shell.Current.GoToAsync(route);
             }
             else
             {

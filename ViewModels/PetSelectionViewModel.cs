@@ -78,7 +78,7 @@ namespace Soulbound.ViewModels
         private async Task ConfirmAsync()
         {
             await appService.UpdatePetSelectionAsync(petImages[petIndex], PetName);
-            await Shell.Current.GoToAsync("//MainRoomPage");
+            await Shell.Current.GoToAsync("//HandbookPage");
         }
     }
 }

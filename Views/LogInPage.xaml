@@ -12,7 +12,10 @@
         </Grid.Background>
 
         <VerticalStackLayout Padding="24" Spacing="14" VerticalOptions="Center" HorizontalOptions="Center">
-            <Frame Padding="24" MaximumWidthRequest="560" HorizontalOptions="Center">
+            <Frame Padding="24"
+                   HorizontalOptions="Center"
+                   WidthRequest="{StaticResource FormCardWidthAuth}"
+                   MaximumWidthRequest="{StaticResource FormCardWidthAuth}">
                 <VerticalStackLayout Spacing="12">
                     <Label Text="WELCOME BACK"
                            FontSize="30"

@@ -5,6 +5,9 @@ namespace Soulbound.Models
         public string PetName { get; set; } = string.Empty;
         public string SelectedPetImage { get; set; } = "dotnet_bot.png";
 
+        /// <summary>True after the user confirms pet name/avatar once; stored in Firebase under gameData.character.</summary>
+        public bool PetOnboardingComplete { get; set; }
+
         /// <summary>Start of the week used for the last Sunday 00:00 stamina refill (local time).</summary>
         public DateTime LastSundayStaminaReset { get; set; }
 

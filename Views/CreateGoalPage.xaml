@@ -13,7 +13,10 @@
         </Grid.Background>
         <ScrollView>
             <VerticalStackLayout HorizontalOptions="Center" Padding="20" Spacing="16">
-                <Frame MaximumWidthRequest="460" Padding="24">
+                <Frame Padding="24"
+                       HorizontalOptions="Center"
+                       WidthRequest="{StaticResource FormCardWidthCompact}"
+                       MaximumWidthRequest="{StaticResource FormCardWidthCompact}">
                     <VerticalStackLayout Spacing="12">
                         <Label Text="Create New Goal" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center"/>
                         <Entry Placeholder="Title" Text="{Binding NewTitle}" />

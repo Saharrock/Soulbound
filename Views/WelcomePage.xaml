@@ -12,7 +12,10 @@
         </Grid.Background>
 
         <VerticalStackLayout Padding="24" Spacing="24" VerticalOptions="Center" HorizontalOptions="Center">
-            <Frame Padding="24" MaximumWidthRequest="460">
+            <Frame Padding="24"
+                   HorizontalOptions="Center"
+                   WidthRequest="{StaticResource FormCardWidthCompact}"
+                   MaximumWidthRequest="{StaticResource FormCardWidthCompact}">
                 <VerticalStackLayout Spacing="16">
                     <Label Text="SOULBOUND"
                            FontSize="40"

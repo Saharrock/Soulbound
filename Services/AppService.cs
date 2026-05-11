@@ -39,10 +39,10 @@ namespace Soulbound.Services
 
         private readonly string[] petImages =
         {
-            "dotnet_bot.png",
-            "pet_egg.png",
-            "pet_cat.png",
-            "pet_dog.png"
+            "cat.png",
+            "fox.png",
+            "rabbit.png",
+            "wolf.png"
         };
 
         public static AppService GetInstance()
@@ -377,7 +377,13 @@ namespace Soulbound.Services
         {
             gameData.Character.SelectedPetImage = string.IsNullOrWhiteSpace(petImage) ? "dotnet_bot.png" : petImage;
             gameData.Character.PetName = string.IsNullOrWhiteSpace(petName) ? "Pet" : petName.Trim();
+            gameData.Character.PetOnboardingComplete = true;
             await SaveGameDataAsync();
+        }
+
+        public bool HasCompletedPetOnboarding()
+        {
+            return gameData.Character.PetOnboardingComplete;
         }
 
         public async Task EnsureDailyStaminaAsync()
@@ -576,11 +582,35 @@ namespace Soulbound.Services
                 gameData.Character.SelectedPetImage = "dotnet_bot.png";
             }
 
+            bool migrationSaved = MigratePetOnboardingFromLegacyData(gameData);
+
             NormalizeLoadedGoals();
             NormalizeAttachedPhotosOwners();
             ApplyCharacterMigration(gameData);
             MigrateStaminaResetFromLegacyWeeklyKey(gameData.Character);
             BackfillGoalStaminaTotalsFromSavedWorkouts();
+
+            if (migrationSaved)
+            {
+                await SaveGameDataAsync();
+            }
+        }
+
+        /// <summary>Accounts created before <see cref="PetProgress.PetOnboardingComplete"/> already finished pet pick if pet name was saved.</summary>
+        private static bool MigratePetOnboardingFromLegacyData(GameData data)
+        {
+            if (data.Character.PetOnboardingComplete)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(data.Character.PetName))
+            {
+                data.Character.PetOnboardingComplete = true;
+                return true;
+            }
+
+            return false;
         }
 
         private void NormalizeLoadedGoals()

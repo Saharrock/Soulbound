@@ -8,14 +8,14 @@
     Title="Soulbound">
 
     <ShellContent
-        Title="Pet Selection"
-        ContentTemplate="{DataTemplate local:PetSelectionPage}"
-        Route="PetSelectionPage" />
-
-    <ShellContent
         Title="Main Room"
         ContentTemplate="{DataTemplate local:MainRoomPage}"
         Route="MainRoomPage" />
+
+    <ShellContent
+        Title="Pet Selection"
+        ContentTemplate="{DataTemplate local:PetSelectionPage}"
+        Route="PetSelectionPage" />
 
     <ShellContent
         Title="Create Goal"

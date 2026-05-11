@@ -57,4 +57,9 @@
     <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}"/>
     <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource CardBackground}"/>
     <SolidColorBrush x:Key="ParchmentBrush" Color="{StaticResource Parchment}"/>
+
+    <!-- Fixed form widths: use WidthRequest + MaximumWidthRequest so Entry text cannot resize cards -->
+    <x:Double x:Key="FormCardWidthCompact">520</x:Double>
+    <x:Double x:Key="FormCardWidthAuth">620</x:Double>
+    <x:Double x:Key="FormCardWidthPet">640</x:Double>
 </ResourceDictionary>

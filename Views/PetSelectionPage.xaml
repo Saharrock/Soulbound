@@ -12,7 +12,10 @@
         </Grid.Background>
         <VerticalStackLayout Padding="24" Spacing="16" VerticalOptions="Center">
             <Label Text="Choose your SoulMate" FontSize="30" FontAttributes="Bold" HorizontalOptions="Center" />
-            <Frame Padding="18" HorizontalOptions="Center" MaximumWidthRequest="600">
+            <Frame Padding="18"
+                   HorizontalOptions="Center"
+                   WidthRequest="{StaticResource FormCardWidthPet}"
+                   MaximumWidthRequest="{StaticResource FormCardWidthPet}">
                 <VerticalStackLayout Spacing="14">
                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
                         <Button Text="◀" Command="{Binding LeftCommand}" WidthRequest="60" HeightRequest="48" />
