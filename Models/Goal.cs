@@ -19,7 +19,7 @@ namespace Soulbound.Models
         public bool IsIntellectual { get; set; }
 
         /// <summary>Stamina per workout mark and for the final Done tap.</summary>
-        public int StaminaCost { get; set; } = 15;
+        public int StaminaCost { get; set; } = 10;
 
         /// <summary>Running total of stamina spent on this goal while active (workouts + Done).</summary>
         public int TotalStaminaSpentAcrossGoal { get; set; }
@@ -48,19 +48,19 @@ namespace Soulbound.Models
             get
             {
                 List<string> days = new();
+                if (IsSunday) days.Add("Sun");
                 if (IsMonday) days.Add("Mon");
                 if (IsTuesday) days.Add("Tue");
                 if (IsWednesday) days.Add("Wed");
                 if (IsThursday) days.Add("Thu");
                 if (IsFriday) days.Add("Fri");
                 if (IsSaturday) days.Add("Sat");
-                if (IsSunday) days.Add("Sun");
                 return days.Count == 0 ? "No days selected" : string.Join(", ", days);
             }
         }
 
-        public const int FallbackStaminaCost = 15;
-        public const int MaxStaminaCostPerGoal = 15;
+        public const int FallbackStaminaCost = 10;
+        public const int MaxStaminaCostPerGoal = 10;
 
         public int ResolvedStaminaCost =>
             StaminaCost < 1 ? FallbackStaminaCost : Math.Clamp(StaminaCost, 1, MaxStaminaCostPerGoal);

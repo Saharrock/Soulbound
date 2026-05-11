@@ -74,6 +74,8 @@ namespace Soulbound.ViewModels
             GotoRegisterPageCommand = new Command(async () => await Shell.Current.GoToAsync("//RegistrationPage"));
             TryLoginCommand = new Command(async () => await TryLoginAsync());
             IsLoginEnable = false;
+            userInput = "salnikovsergej76@gmail.com";
+            userPassword = "Sahar1996@";
         }
 
         private void UpdateLoginEnableForFields()

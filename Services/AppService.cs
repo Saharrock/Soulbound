@@ -25,7 +25,7 @@ namespace Soulbound.Services
 {
     internal sealed class AppService
     {
-        private const int StaminaPerGoalCompletion = 15;
+        private const int StaminaPerGoalCompletion = 10;
         public const int WeeklyStaminaCap = 100;
         private const string GoalPhotosFolderName = "goal_photos";
 

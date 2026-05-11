@@ -22,7 +22,7 @@
 
                         <Label Text="{Binding NewStaminaCostLabel}" FontSize="13" TextColor="{StaticResource CardMutedText}" />
                         <Slider Minimum="1"
-                                Maximum="15"
+                                Maximum="10"
                                 Value="{Binding NewStaminaCostSlider, Mode=TwoWay}"
                                 ThumbColor="{StaticResource SuccessAccent}" />
 
@@ -44,13 +44,13 @@
 
                         <Label Text="Training days" FontAttributes="Bold" Margin="0,8,0,0"/>
                         <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4"><CheckBox IsChecked="{Binding IsMonday}" /><Label Text="Mon" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4"><CheckBox IsChecked="{Binding IsTuesday}" /><Label Text="Tue" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="4"><CheckBox IsChecked="{Binding IsWednesday}" /><Label Text="Wed" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="3" Spacing="4"><CheckBox IsChecked="{Binding IsThursday}" /><Label Text="Thu" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4"><CheckBox IsChecked="{Binding IsFriday}" /><Label Text="Fri" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4"><CheckBox IsChecked="{Binding IsSaturday}" /><Label Text="Sat" VerticalOptions="Center"/></HorizontalStackLayout>
-                            <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="4"><CheckBox IsChecked="{Binding IsSunday}" /><Label Text="Sun" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="4"><CheckBox IsChecked="{Binding IsSunday}" /><Label Text="Sun" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="4"><CheckBox IsChecked="{Binding IsMonday}" /><Label Text="Mon" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="4"><CheckBox IsChecked="{Binding IsTuesday}" /><Label Text="Tue" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="3" Spacing="4"><CheckBox IsChecked="{Binding IsWednesday}" /><Label Text="Wed" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="4"><CheckBox IsChecked="{Binding IsThursday}" /><Label Text="Thu" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4"><CheckBox IsChecked="{Binding IsFriday}" /><Label Text="Fri" VerticalOptions="Center"/></HorizontalStackLayout>
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="2" Spacing="4"><CheckBox IsChecked="{Binding IsSaturday}" /><Label Text="Sat" VerticalOptions="Center"/></HorizontalStackLayout>
                         </Grid>
 
                         <Label Text="{Binding MessageForUser}" FontSize="14" TextColor="#FFE3B4" HorizontalOptions="Center"/>

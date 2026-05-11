@@ -24,13 +24,13 @@ namespace Soulbound.ViewModels
             List<Goal> activeGoals = appService.GetActiveGoals();
             List<ScheduleDaySection> sections = new()
             {
+                BuildDaySection("Sunday", activeGoals, goal => goal.IsSunday),
                 BuildDaySection("Monday", activeGoals, goal => goal.IsMonday),
                 BuildDaySection("Tuesday", activeGoals, goal => goal.IsTuesday),
                 BuildDaySection("Wednesday", activeGoals, goal => goal.IsWednesday),
                 BuildDaySection("Thursday", activeGoals, goal => goal.IsThursday),
                 BuildDaySection("Friday", activeGoals, goal => goal.IsFriday),
-                BuildDaySection("Saturday", activeGoals, goal => goal.IsSaturday),
-                BuildDaySection("Sunday", activeGoals, goal => goal.IsSunday)
+                BuildDaySection("Saturday", activeGoals, goal => goal.IsSaturday)
             };
 
             foreach (ScheduleDaySection section in sections)

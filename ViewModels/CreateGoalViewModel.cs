@@ -62,7 +62,7 @@ namespace Soulbound.ViewModels
         private bool isSaturday;
         public bool IsSaturday { get => isSaturday; set { isSaturday = value; OnPropertyChanged(); } }
 
-        /// <summary>Stamina deducted when tapping Done (1–100).</summary>
+        /// <summary>Stamina per workout mark and final Done (1–max per goal).</summary>
         private int newStaminaCost = Goal.FallbackStaminaCost;
 
         public int NewStaminaCost
