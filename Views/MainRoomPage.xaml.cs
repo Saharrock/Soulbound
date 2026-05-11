@@ -26,5 +26,12 @@ public partial class MainRoomPage : ContentPage
         }
 
         await viewModel.RefreshDataAsync();
+        viewModel.StartDeadlineTickerIfNeeded();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        viewModel.StopDeadlineTicker();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Soulbound.Models;
 using Soulbound.Services;
@@ -9,6 +10,9 @@ namespace Soulbound.ViewModels
     internal class MainRoomViewModel : ViewModelBase
     {
         private readonly AppService appService;
+
+        private Goal? nearestDeadlineGoal;
+        private bool deadlineTickerRunning;
 
         public ObservableCollection<Goal> TodayGoals { get; } = new();
 
@@ -40,11 +44,18 @@ namespace Soulbound.ViewModels
             set { activeGoalsCount = value; OnPropertyChanged(); }
         }
 
-        private string nearestDeadlineText = "No active goals";
-        public string NearestDeadlineText
+        private string nearestDeadlineGoalTitle = "No active goals";
+        public string NearestDeadlineGoalTitle
         {
-            get => nearestDeadlineText;
-            set { nearestDeadlineText = value; OnPropertyChanged(); }
+            get => nearestDeadlineGoalTitle;
+            set { nearestDeadlineGoalTitle = value; OnPropertyChanged(); }
+        }
+
+        private string nearestDeadlineCountdownText = string.Empty;
+        public string NearestDeadlineCountdownText
+        {
+            get => nearestDeadlineCountdownText;
+            set { nearestDeadlineCountdownText = value; OnPropertyChanged(); }
         }
 
         private string petSummaryLine = string.Empty;
@@ -173,7 +184,8 @@ namespace Soulbound.ViewModels
                 }
             }
 
-            NearestDeadlineText = nearest == null ? "No active goals" : nearest.EndDate.ToString("dd/MM/yyyy");
+            nearestDeadlineGoal = nearest;
+            ApplyNearestDeadlineLabels();
 
             TodayGoals.Clear();
             foreach (Goal goal in appService.FilterGoalsAwaitingWorkoutToday(activeGoals))
@@ -196,6 +208,80 @@ namespace Soulbound.ViewModels
             {
                 await Shell.Current.GoToAsync("//GoalHistoryPage");
             }
+        }
+
+        /// <summary>Start 1s countdown refresh while Main Room is visible and a nearest deadline exists.</summary>
+        public void StartDeadlineTickerIfNeeded()
+        {
+            if (deadlineTickerRunning || nearestDeadlineGoal == null)
+            {
+                return;
+            }
+
+            IDispatcher? dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null)
+            {
+                return;
+            }
+
+            deadlineTickerRunning = true;
+            dispatcher.StartTimer(TimeSpan.FromSeconds(1), () =>
+            {
+                if (!deadlineTickerRunning)
+                {
+                    return false;
+                }
+
+                MainThread.BeginInvokeOnMainThread(TickNearestDeadlineCountdown);
+                return true;
+            });
+        }
+
+        public void StopDeadlineTicker()
+        {
+            deadlineTickerRunning = false;
+        }
+
+        private void TickNearestDeadlineCountdown()
+        {
+            if (nearestDeadlineGoal == null)
+            {
+                NearestDeadlineCountdownText = string.Empty;
+                return;
+            }
+
+            NearestDeadlineCountdownText = FormatDeadlineCountdown(nearestDeadlineGoal.EndDate);
+        }
+
+        private void ApplyNearestDeadlineLabels()
+        {
+            if (nearestDeadlineGoal == null)
+            {
+                NearestDeadlineGoalTitle = "No active goals";
+                NearestDeadlineCountdownText = string.Empty;
+                return;
+            }
+
+            NearestDeadlineGoalTitle = nearestDeadlineGoal.Title;
+            NearestDeadlineCountdownText = FormatDeadlineCountdown(nearestDeadlineGoal.EndDate);
+        }
+
+        private static DateTime EndOfLocalCalendarDay(DateTime date)
+        {
+            return date.Date.AddDays(1).AddTicks(-1);
+        }
+
+        private static string FormatDeadlineCountdown(DateTime endDate)
+        {
+            DateTime deadlineEnd = EndOfLocalCalendarDay(endDate);
+            DateTime now = DateTime.Now;
+            if (now > deadlineEnd)
+            {
+                return "Overdue";
+            }
+
+            TimeSpan remaining = deadlineEnd - now;
+            return $"Time left: {remaining.Days}d {remaining.Hours:D2}:{remaining.Minutes:D2}:{remaining.Seconds:D2}";
         }
     }
 }

@@ -26,7 +26,10 @@
                         <Label Text="{Binding ActiveGoalsCount}" FontSize="38" FontAttributes="Bold" />
                         <Label Text="{Binding AverageScheduleSummary}" FontSize="13" TextColor="{StaticResource CardMutedText}" />
                         <Label Text="Nearest deadline" TextColor="{StaticResource CardMutedText}" />
-                        <Label Text="{Binding NearestDeadlineText}" />
+                        <Label Text="{Binding NearestDeadlineGoalTitle}" FontAttributes="Bold" />
+                        <Label Text="{Binding NearestDeadlineCountdownText}"
+                               FontSize="13"
+                               TextColor="{StaticResource CardMutedText}" />
                     </VerticalStackLayout>
                 </Frame>
 
