@@ -1,56 +1,99 @@
 {
   "users": {
-    "09DrgtsQM6MCrmBgtPlY3xvEJH12": {
-      "Pet": "fox",
-      "PhysicalPoints": 20,
-      "IntellectualPoints": 10,
-      "MentalPoints": 15,
-      "ActiveGoals": 5,
-      "FinishedGoals": 20,
-      "MondayGoals": 5,
-      "TuesdayGoals": 4,
-      "WednesdayGoals": 3,
-      "ThursdayGoals": 2,
-      "FridayGoals": 1,
-      "SaturdayGoals ": 6,
-      "SundayGoals ": 6
-
-    },
-    "0lFVbECkHtcGRfEc9oBfm3OIT9p1": {
-      "Pet": "wolf",
-      "PhysicalPoints": 23,
-      "IntellectualPoints": 10,
-      "MentalPoints": 15
-    },
-    "8zNWiUjky5fUmBc07E0ywJBXhpC3": {
-      "Pet": "rabbit",
-      "PhysicalPoints": 23,
-      "IntellectualPoints": 10,
-      "MentalPoints": 15
-    },
-    "YLTdobODBCPXA5jT5Ff1t1yGuaJ2": {
-      "Pet": "cat",
-      "PhysicalPoints": 23,
-      "IntellectualPoints": 10,
-      "MentalPoints": 15
-    },
-    "gZq6fZ4ckuSoSH9o1hZyttWdOmv2": {
-      "Pet": "cat",
-      "PhysicalPoints": 23,
-      "IntellectualPoints": 5,
-      "MentalPoints": 15
-    },
-    "oXcRSMxUvaOpseWzwY1Xv5PyiQh1": {
-      "Pet": "wolf",
-      "PhysicalPoints": 23,
-      "IntellectualPoints": 10,
-      "MentalPoints": 15
-    },
-    "yqaIksBnKZeHQecCBxRX9DA67qy1": {
-      "Pet": "cat",
-      "PhysicalPoints": 55,
-      "IntellectualPoints": 0,
-      "MentalPoints": 4
+    "ccEoriSFd0WiIasna82suA98IEk2": {
+      "gameData": {
+        "Character": {
+          "CompletedGoalsLifetime": 1,
+          "LastSundayStaminaReset": "2026-05-10T00:00:00+03:00",
+          "PetName": "Blunky",
+          "PetOnboardingComplete": true,
+          "SelectedPetImage": "rabbit.png",
+          "Stamina": 95
+        },
+        "Goals": [
+          {
+            "CompletedWorkouts": 0,
+            "CreatedAt": "2026-05-15T23:42:34.7525965+03:00",
+            "Deadline": "2026-07-06T00:00:00",
+            "Description": "without stopping till 1 minute",
+            "EndDate": "2026-07-06T00:00:00",
+            "FinalStatusText": "Done",
+            "Id": "2",
+            "IsCompleted": true,
+            "IsCompletedLate": false,
+            "IsFriday": false,
+            "IsIntellectual": false,
+            "IsMental": true,
+            "IsMonday": false,
+            "IsPhysical": true,
+            "IsSaturday": false,
+            "IsSunday": true,
+            "IsThursday": false,
+            "IsTuesday": false,
+            "IsWednesday": true,
+            "MissedStatsText": "Missed: 0",
+            "MissedWorkouts": 0,
+            "PlannedWorkouts": 15,
+            "ResolvedStaminaCost": 5,
+            "ScheduleText": "Sun, Wed",
+            "StaminaCost": 5,
+            "Title": "Learn swimming",
+            "TotalStaminaSpentAcrossGoal": 5,
+            "WorkoutStatsText": "Workouts: 0/15",
+            "disciplineUiLine": "Schedule —"
+          },
+          {
+            "CompletedWorkouts": 0,
+            "CreatedAt": "2026-05-15T23:44:23.3281491+03:00",
+            "Deadline": "2026-06-20T00:00:00",
+            "Description": "Friend recommended",
+            "EndDate": "2026-06-20T00:00:00",
+            "FinalStatusText": "Active",
+            "Id": "3",
+            "IsCompleted": false,
+            "IsCompletedLate": false,
+            "IsFriday": false,
+            "IsIntellectual": true,
+            "IsMental": false,
+            "IsMonday": false,
+            "IsPhysical": false,
+            "IsSaturday": true,
+            "IsSunday": false,
+            "IsThursday": false,
+            "IsTuesday": true,
+            "IsWednesday": false,
+            "MissedStatsText": "Missed: 0",
+            "MissedWorkouts": 0,
+            "PlannedWorkouts": 11,
+            "ResolvedStaminaCost": 1,
+            "ScheduleText": "Tue, Sat",
+            "StaminaCost": 1,
+            "Title": "Read book \"The Master and Margarita\"",
+            "TotalStaminaSpentAcrossGoal": 0,
+            "WorkoutStatsText": "Workouts: 0/11",
+            "disciplineUiLine": "Schedule —"
+          }
+        ],
+        "History": [
+          {
+            "Category": "Physical",
+            "CategoryBarColor": "#E03C31",
+            "DateFinished": "2026-05-15T23:42:45.6230094+03:00",
+            "ResourcesLine": "5 stamina invested on this goal (total) / -5 stamina",
+            "ResultStatus": "Completed",
+            "StaminaSpent": 5,
+            "StatusColor": "#7ED957",
+            "StatusText": "Completed",
+            "TaskName": "Learn swimming",
+            "xpChange": 5
+          }
+        ],
+        "LastGoalId": 3
+      },
+      "profile": {
+        "email": "salnikovsergej77@gmail.com",
+        "userName": "Serhio"
+      }
     }
   }
 }

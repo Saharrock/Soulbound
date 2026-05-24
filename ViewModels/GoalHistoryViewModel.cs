@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
@@ -8,6 +8,7 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // GoalHistoryPage: списки активных/завершённых целей, Done, Remove, фото.
     internal class GoalHistoryViewModel : ViewModelBase
     {
         private readonly AppService appService;
@@ -34,6 +35,7 @@ namespace Soulbound.ViewModels
             _ = RefreshAsync();
         }
 
+        // Перезагрузить ActiveGoals и FinishedGoals из AppService.
         public async Task RefreshAsync()
         {
             await appService.EnsureGameDataLoadedAsync();

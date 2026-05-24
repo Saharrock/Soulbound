@@ -6,8 +6,10 @@ using Soulbound.Models;
 
 namespace Soulbound.Converters
 {
+    
     public sealed class GoalPhotoPathConverter : IValueConverter
     {
+        
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             string? relative = value switch

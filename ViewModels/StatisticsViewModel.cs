@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using Microsoft.Maui.Controls;
@@ -7,12 +7,10 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // StatisticsPage: discipline meters, lifetime bars, timeline, active goal stats.
     internal class StatisticsViewModel : ViewModelBase
     {
-        /// <summary>
-        /// Only used to scale the colourful lifetime bars downward so they seldom look "finished".
-        /// </summary>
-        public const int LifetimeStaminaVisualizationCap = 75000;
+        public const int LifetimeStaminaVisualizationCap = 75000; // масштаб полосок
 
         private readonly AppService appService;
         private const double MaxChartBarWidth = 220;
@@ -66,13 +64,9 @@ namespace Soulbound.ViewModels
             ExplainLifetimeWorkloadRowCommand = new Command<CategorySummaryItem>(ExecuteExplainLifetimeWorkloadRow);
         }
 
-        /// <summary>
-        /// Wired to TapGestureRecognizer on the coloured strip beside each timeline row (simple DisplayAlert pattern for Android-safe UX).
-        /// </summary>
-        public Command<HistoryRecord> ExplainHistoryStripCommand { get; }
+        public Command<HistoryRecord> ExplainHistoryStripCommand { get; } // тап по полоске в истории
 
-        /// <summary>Tap a lifetime category row to list goals tagged with that pillar.</summary>
-        public Command<CategorySummaryItem> ExplainLifetimeWorkloadRowCommand { get; }
+        public Command<CategorySummaryItem> ExplainLifetimeWorkloadRowCommand { get; } // тап по категории
 
         private static Page? TryGetPresenterPage()
         {
@@ -219,6 +213,7 @@ namespace Soulbound.ViewModels
             await presenter.DisplayAlert("Timeline entry", record.BuildTimelineTapDetail(), "OK");
         }
 
+        // Загрузка History, CategorySummaries, ActiveGoalStats, discipline UI.
         public async Task RefreshAsync()
         {
             await appService.EnsureGameDataLoadedAsync();
@@ -317,6 +312,7 @@ namespace Soulbound.ViewModels
             return Math.Min(1.0, Math.Max(0.0, (today - start).TotalDays / span));
         }
 
+        // Агрегация History по Physical / Intellectual / Mental для полосок.
         private static List<CategorySummaryItem> BuildCategorySummaries(List<HistoryRecord> records)
         {
             string[] categories = { "Physical", "Intellectual", "Mental" };
@@ -406,6 +402,7 @@ namespace Soulbound.ViewModels
         }
     }
 
+    // Строка lifetime workload на Statistics (одна категория).
     internal class CategorySummaryItem
     {
         public string CategoryName { get; set; } = string.Empty;
@@ -419,6 +416,7 @@ namespace Soulbound.ViewModels
             $"{CompletedGoalsFinished} goals closed · {WorkoutMarksLogged} workouts logged · {StaminaTotalSpent} stamina spent";
     }
 
+    // Карточка активной цели на Statistics (deadline, schedule %, timeline).
     internal class ActiveGoalStatItem
     {
         public string Title { get; set; } = string.Empty;

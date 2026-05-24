@@ -1,9 +1,10 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Soulbound.Models;
 using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // SchedulePage: активные цели, сгруппированные по дням недели.
     internal class ScheduleViewModel : ViewModelBase
     {
         private readonly AppService appService;
@@ -51,6 +52,7 @@ namespace Soulbound.ViewModels
         }
     }
 
+    // Один день недели и список целей на этот день.
     internal class ScheduleDaySection
     {
         public string DayName { get; set; } = string.Empty;

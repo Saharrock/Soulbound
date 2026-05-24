@@ -4,13 +4,14 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // PetSelectionPage: карусель питомцев, имя, сохранение → HandbookPage.
     internal class PetSelectionViewModel : ViewModelBase
     {
         private readonly AppService appService;
         private readonly string[] petImages;
         private int petIndex;
 
-        private ImageSource petAvatar = ImageSource.FromFile("dotnet_bot.png");
+        private ImageSource petAvatar = ImageSource.FromFile(AppService.DefaultPetImage);
         public ImageSource PetAvatar
         {
             get => petAvatar;

@@ -1,13 +1,23 @@
 namespace Soulbound.Models
+
 {
-    /// <summary>
-    /// One logged workout ("Mark workout") for a goal on a calendar day.
-    /// </summary>
+
+    // Факт тренировки: цель + дата. Для Schedule % и счётчиков (не timeline).
+
     public sealed class WorkoutSession
+
     {
+
         public string GoalId { get; set; } = string.Empty;
 
-        /// <summary>Local calendar date, yyyy-MM-dd.</summary>
+
+
+        // yyyy-MM-dd — одна тренировка в день на цель
+
         public string SessionDateIso { get; set; } = string.Empty;
+
     }
+
 }
+
+

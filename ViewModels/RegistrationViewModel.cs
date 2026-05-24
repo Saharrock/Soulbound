@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,7 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // RegistrationPage: валидация полей, TryRegister, PetSelectionPage.
     internal class RegistrationViewModel : ViewModelBase
     {
         private readonly AppService appService;
@@ -98,6 +99,7 @@ namespace Soulbound.ViewModels
             ValidateAllFields();
         }
 
+        // Проверка username, email, password, confirm; обновляет FieldMessages.
         private bool ValidateAllFields()
         {
             FieldMessages["Username"] = string.IsNullOrWhiteSpace(Username) || Username.Length >= 5

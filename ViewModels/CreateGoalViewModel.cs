@@ -1,9 +1,10 @@
-﻿using System.Windows.Input;
+using System.Windows.Input;
 using Soulbound.Models;
 using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // CreateGoalPage: форма новой цели → AddGoalAsync.
     internal class CreateGoalViewModel : ViewModelBase
     {
         private readonly AppService appService;
@@ -62,7 +63,6 @@ namespace Soulbound.ViewModels
         private bool isSaturday;
         public bool IsSaturday { get => isSaturday; set { isSaturday = value; OnPropertyChanged(); } }
 
-        /// <summary>Stamina per workout mark and final Done (1–max per goal).</summary>
         private int newStaminaCost = Goal.FallbackStaminaCost;
 
         public int NewStaminaCost
@@ -100,6 +100,7 @@ namespace Soulbound.ViewModels
             AddGoalCommand = new Command(async () => await AddGoalAsync());
         }
 
+        // Валидация полей, сбор Goal, вызов AppService.AddGoalAsync.
         private async Task AddGoalAsync()
         {
             if (string.IsNullOrWhiteSpace(NewTitle) || string.IsNullOrWhiteSpace(NewDescription))

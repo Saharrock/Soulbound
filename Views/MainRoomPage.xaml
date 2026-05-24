@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:Soulbound.Models"
+             xmlns:controls="clr-namespace:Soulbound.Controls"
              x:Class="Soulbound.Views.MainRoomPage"
              x:Name="MainRoomRoot"
              Title="Main room">
@@ -81,7 +82,7 @@
                     <Label Text="Weekly stamina · refresh Sundays 00:00"
                            FontSize="11"
                            TextColor="{StaticResource CardMutedText}" />
-                    <ProgressBar Progress="{Binding StaminaProgress}" ScaleY="4" ProgressColor="{StaticResource SuccessAccent}" />
+                    <controls:StaminaProgressGraphicsView Progress="{Binding StaminaProgress}" />
                     <Label Text="{Binding StaminaText}" HorizontalOptions="End" TextColor="{StaticResource CardMutedText}" />
 
                     <Label Text="{Binding PetSummaryLine}"

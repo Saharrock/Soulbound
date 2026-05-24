@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
@@ -7,6 +7,7 @@ using Soulbound.Services;
 
 namespace Soulbound.ViewModels
 {
+    // MainRoomPage: питомец, stamina, сегодняшние workouts, ближайший deadline, навигация.
     internal class MainRoomViewModel : ViewModelBase
     {
         private readonly AppService appService;
@@ -30,7 +31,7 @@ namespace Soulbound.ViewModels
             set { petName = value; OnPropertyChanged(); }
         }
 
-        private ImageSource petAvatar = ImageSource.FromFile("dotnet_bot.png");
+        private ImageSource petAvatar = ImageSource.FromFile(AppService.DefaultPetImage);
         public ImageSource PetAvatar
         {
             get => petAvatar;
@@ -108,6 +109,7 @@ namespace Soulbound.ViewModels
             }
         }
 
+        // RecordWorkoutForTodayAsync + обновление UI или alert.
         private async Task MarkWorkoutAsync(Goal? workoutGoal)
         {
             if (workoutGoal == null)
@@ -115,8 +117,8 @@ namespace Soulbound.ViewModels
                 return;
             }
 
-            await appService.EnsureGameDataLoadedAsync();
-            await appService.EnsureDailyStaminaAsync();
+            await appService.EnsureGameDataLoadedAsync(); //подгружаем данные
+            await appService.EnsureDailyStaminaAsync(); //проверка наступило ли воскресенье
 
             int cost = workoutGoal.ResolvedStaminaCost;
 
@@ -153,6 +155,7 @@ namespace Soulbound.ViewModels
             await RefreshDataAsync();
         }
 
+        // Загрузка pet, stamina, active goals, today list, nearest deadline.
         public async Task RefreshDataAsync()
         {
             await appService.EnsureGameDataLoadedAsync();
@@ -161,7 +164,7 @@ namespace Soulbound.ViewModels
             PetProgress progress = appService.GetProgress();
 
             PetName = string.IsNullOrWhiteSpace(progress.PetName) ? "Your Pet" : progress.PetName;
-            PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? "dotnet_bot.png" : progress.SelectedPetImage);
+            PetAvatar = ImageSource.FromFile(string.IsNullOrWhiteSpace(progress.SelectedPetImage) ? AppService.DefaultPetImage : progress.SelectedPetImage);
 
             PetSummaryLine = $"Goals finished: {progress.CompletedGoalsLifetime}";
 
@@ -210,7 +213,7 @@ namespace Soulbound.ViewModels
             }
         }
 
-        /// <summary>Start 1s countdown refresh while Main Room is visible and a nearest deadline exists.</summary>
+        // Таймер 1 сек для обратного отсчёта до deadline (OnAppearing/OnDisappearing).
         public void StartDeadlineTickerIfNeeded()
         {
             if (deadlineTickerRunning || nearestDeadlineGoal == null)
