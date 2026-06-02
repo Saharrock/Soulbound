@@ -13,7 +13,7 @@ namespace Soulbound.Controls;
 public sealed class StaminaProgressGraphicsView : GraphicsView
 
 {
-
+    
     public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
 
         nameof(Progress),
@@ -24,7 +24,7 @@ public sealed class StaminaProgressGraphicsView : GraphicsView
 
         0.0,
 
-        propertyChanged: (bindable, _, _) => ((StaminaProgressGraphicsView)bindable).Invalidate());
+        propertyChanged: (bindable, _, _) => ((StaminaProgressGraphicsView)bindable).Invalidate()); //как только изменился, поменяй. Аналог OnPropertyChanged
 
 
 
@@ -44,9 +44,9 @@ public sealed class StaminaProgressGraphicsView : GraphicsView
 
     {
 
-        HeightRequest = 16;
+        HeightRequest = 16; // Фиксированная высота полоски — 16 пикселей
 
-        Drawable = new StaminaProgressDrawable(() => Progress);
+        Drawable = new StaminaProgressDrawable(() => Progress); //Нанимаем художника
 
     }
 
@@ -74,7 +74,7 @@ public sealed class StaminaProgressGraphicsView : GraphicsView
 
         {
 
-            double p = Math.Clamp(getProgress(), 0.0, 1.0);
+            double p = Math.Clamp(getProgress(), 0.0, 1.0); // Защита: если придет -0.5 или 1.5, код округлит до 0 или 1
 
             float x = dirtyRect.X;
 
@@ -84,33 +84,32 @@ public sealed class StaminaProgressGraphicsView : GraphicsView
 
             float h = dirtyRect.Height;
 
-            float corner = Math.Min(h * 0.35f, 8f);
+            float corner = Math.Min(h * 0.35f, 8f); // Вычисляем красивое скругление углов
 
 
 
-            canvas.Antialias = true;
+            canvas.Antialias = true; // Включаем сглаживание, чтобы края полоски не были "квадратными пикселями"
 
 
 
             // Тёмный фон — пустая часть пула
 
-            canvas.SetFillPaint(new SolidPaint(Color.FromArgb("#5D2F18")), dirtyRect);
+            canvas.SetFillPaint(new SolidPaint(Color.FromArgb("#5D2F18")), dirtyRect); // Берем темно-коричневую краску
 
-            canvas.FillRoundedRectangle(x, y, w, h, corner);
+            canvas.FillRoundedRectangle(x, y, w, h, corner); // Рисуем скругленный прямоугольник на всю длину
 
 
 
-            // Зелёная заливка — оставшаяся stamina
 
-            float fillW = (float)(w * p);
+            float fillW = (float)(w * p); // Считаем ширину зеленой полоски (общая ширина умноженная на процент прогресса)
 
-            if (fillW > 0.5f)
+            if (fillW > 0.5f) // Если полоска заполнена хотя бы чуть-чуть
 
             {
 
-                canvas.SetFillPaint(new SolidPaint(Color.FromArgb("#3B9E4E")), dirtyRect);
+                canvas.SetFillPaint(new SolidPaint(Color.FromArgb("#3B9E4E")), dirtyRect); // Берем зеленую краску
 
-                canvas.FillRoundedRectangle(x, y, fillW, h, corner);
+                canvas.FillRoundedRectangle(x, y, fillW, h, corner); // Рисуем зеленую полоску поверх коричневой
 
             }
 

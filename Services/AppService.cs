@@ -216,7 +216,7 @@ namespace Soulbound.Services
 
         // Lazy load gameData из Firebase + проверка недельного сброса stamina.
         // Вызывается при открытии экранов.
-        public async Task EnsureGameDataLoadedAsync()
+        public async Task EnsureGameDataLoadedAsync() //вызывается каждый раз при открытии экрана. "Скачались ли данные из инета?"
         {
             if (FullDetailsLoggedInUser == null)
             {
@@ -229,7 +229,7 @@ namespace Soulbound.Services
                 await LoadGameDataAsync();
             }
 
-            await EnsureDailyStaminaAsync();
+            await EnsureDailyStaminaAsync(); //не наступило ли воскресенье, чтобы обновить энергию
         }
 
         // PetProgress (питомец, stamina, onboarding).
@@ -251,7 +251,7 @@ namespace Soulbound.Services
         }
 
         // Текст для Main Room: средний Schedule % по активным целям.
-        public string SummarizeAverageScheduleAdherence(IReadOnlyList<Goal> activeGoals)
+        public string SummarizeAverageScheduleAdherence(IReadOnlyList<Goal> activeGoals) //Красивый текст для экрана 
         {
             if (activeGoals == null || activeGoals.Count == 0)
             {
@@ -263,7 +263,7 @@ namespace Soulbound.Services
         }
 
         // Средний Schedule % по списку целей (целое число).
-        public int GetAverageScheduleAdherencePercent(IReadOnlyList<Goal>? goals)
+        public int GetAverageScheduleAdherencePercent(IReadOnlyList<Goal>? goals) //Среднее арифметическое
         {
             if (goals == null || goals.Count == 0)
             {
@@ -280,7 +280,7 @@ namespace Soulbound.Services
         }
 
         // Schedule % одной цели: CompletedWorkouts / запланированных слотов до сегодня (или deadline).
-        private static int ComputeScheduleAdherencePercent(Goal goal)
+        private static int ComputeScheduleAdherencePercent(Goal goal) //Успеваемость по одной цели
         {
             // Горизонт — сегодня или deadline, если он уже прошёл
             DateTime horizon = DateTime.Today < goal.Deadline.Date ? DateTime.Today : goal.Deadline.Date;
@@ -312,10 +312,12 @@ namespace Soulbound.Services
             return gameData.History;
         }
 
+
+
         // === Workouts ===
 
         // Активные цели, у которых сегодня тренировочный день и workout ещё не отмечен.
-        public List<Goal> FilterGoalsAwaitingWorkoutToday(IReadOnlyList<Goal> activeGoals)
+        public List<Goal> FilterGoalsAwaitingWorkoutToday(IReadOnlyList<Goal> activeGoals) 
         {
             string todayIso = LocalDateIso(DateTime.Today);
             DayOfWeek dow = DateTime.Today.DayOfWeek;
@@ -337,44 +339,43 @@ namespace Soulbound.Services
             return FilterGoalsAwaitingWorkoutToday(GetActiveGoals());
         }
 
-        // Отметить тренировку на сегодня: −stamina, +WorkoutSession, +History, save.
-        // false — если уже отмечено, не тот день, нет stamina или цель Done.
-        public async Task<bool> RecordWorkoutForTodayAsync(Goal goal)
+        public async Task<bool> RecordWorkoutForTodayAsync(Goal goal) //Я сделал тренировку
         {
             await EnsureWeeklyPeriodAsync();
 
             Goal? persisted = gameData.Goals.FirstOrDefault(g => g.Id == goal.Id);
-            if (goal.IsCompleted || persisted == null || persisted.IsCompleted)
+            if (goal.IsCompleted || persisted == null || persisted.IsCompleted) //Жива ли цель
             {
                 return false;
             }
 
-            if (!IsGoalScheduledForDay(goal, DateTime.Today.DayOfWeek))
+            if (!IsGoalScheduledForDay(goal, DateTime.Today.DayOfWeek)) //Правильный ли день
             {
                 return false;
             }
 
             string todayIso = LocalDateIso(DateTime.Today);
 
-            if (WorkoutRecordedOnDate(goal.Id, todayIso))
-            {
-                return false; // одна тренировка в день на цель
-            }
-
-            int staminaCost = goal.ResolvedStaminaCost;
-
-            if (gameData.Character.Stamina < staminaCost)
+            if (WorkoutRecordedOnDate(goal.Id, todayIso)) //Защита от случайного дабл-клика
             {
                 return false;
             }
 
-            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - staminaCost);
+            int staminaCost = goal.ResolvedStaminaCost; 
+
+            if (gameData.Character.Stamina < staminaCost) //Хватает ли энергии
+            {
+                return false;
+            }
+
+            gameData.Character.Stamina = Math.Max(0, gameData.Character.Stamina - staminaCost); //отнятие стамины
 
             gameData.WorkoutSessions.Add(new WorkoutSession
             {
                 GoalId = goal.Id,
-                SessionDateIso = todayIso
-            });
+                SessionDateIso = todayIso 
+            }); //сохранение тренировки
+
 
             // Запись в журнал для Statistics
             gameData.History.Insert(0, new HistoryRecord
@@ -401,12 +402,11 @@ namespace Soulbound.Services
         {
             gameData.Character.SelectedPetImage = string.IsNullOrWhiteSpace(petImage) ? DefaultPetImage : petImage;
             gameData.Character.PetName = string.IsNullOrWhiteSpace(petName) ? "Pet" : petName.Trim();
-            gameData.Character.PetOnboardingComplete = true;
+            gameData.Character.PetOnboardingComplete = true; //выбрал питомца
             await SaveGameDataAsync();
         }
 
-        // Нужен LogInViewModel для выбора маршрута после входа.
-        public bool HasCompletedPetOnboarding()
+        public bool HasCompletedPetOnboarding() //выбирал ли пиомца (Проверка при входе в приложение)
         {
             return gameData.Character.PetOnboardingComplete;
         }
